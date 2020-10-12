@@ -1,3 +1,15 @@
+# git
+.gitignore
+
+# vscode
+.DS_Store
+
+#
+BookController.js
+constants.js
+mailer.js
+utility.js
+
 # Logs
 logs
 *.log
@@ -64,6 +76,7 @@ typings/
 
 # Output of 'npm pack'
 *.tgz
+package-lock.json
 
 # Yarn Integrity file
 .yarn-integrity
