@@ -1,5 +1,44 @@
 const axios = require("axios")
 const restructure = require("../helpers/jsonRestructure")
+const apiURL = require("./apiURL")
+const apiCall = require("./apiCall")
+
+exports.trending = function (data) {
+    try {
+        return apiCall.axios(apiURL.trendingURL(data))
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+exports.search = async function (data) {
+    try {
+        return apiCall.axios(apiURL.searchURL(data))
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+exports.filter = async function (data) {
+    try {
+        return apiCall.axios(apiURL.filterURL(data))
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+exports.externalID = async function (data) {
+    let result = null
+    await axios
+        .get(apiURL.externalIDURL(data))
+        .then((res) => {
+            result = res.data
+        })
+        .catch(function (error) {
+            result = error
+        })
+    return result
+}
 
 exports.tmdbGetDetails = async function (data) {
     try {
@@ -9,15 +48,9 @@ exports.tmdbGetDetails = async function (data) {
         let recommendations = null
         let combinedData = null
 
-        let detailsAPI = `${process.env.TMDB_URL}/${params.media_type}/${params.id}?api_key=${process.env.TMDB_API_KEY}&language=en-US`
-
-        let videosAPI = `${process.env.TMDB_URL}/${params.media_type}/${params.id}/videos?api_key=${process.env.TMDB_API_KEY}&language=en-US`
-
-        let recommendationsAPI = `${process.env.TMDB_URL}/${params.media_type}/${params.id}/recommendations?api_key=${process.env.TMDB_API_KEY}&language=en-US&page=1`
-
         // DETAILS
         await axios
-            .get(detailsAPI)
+            .get(apiURL.detailsURL(data))
             .then((res) => {
                 // logger.info("tmdb details api called.")
                 console.log("tmdb details api called.")
@@ -28,27 +61,29 @@ exports.tmdbGetDetails = async function (data) {
                 details = x
             })
             .catch(function (error) {
-                console.log(error)
+                details = error
             })
 
         // VIDEOS
         await axios
-            .get(videosAPI)
+            .get(apiURL.videosURL(data))
             .then((res) => {
+                console.log("tmdb videos api called.")
                 videos = res.data.results
             })
             .catch(function (error) {
-                console.log(error)
+                videos = error
             })
 
         // RECOMMENDATIONS
         await axios
-            .get(recommendationsAPI)
+            .get(apiURL.recommendationsURL(data))
             .then((res) => {
+                console.log("tmdb recommends api called.")
                 recommendations = res.data.results
             })
             .catch(function (error) {
-                console.log(error)
+                recommendations = error
             })
 
         combinedData = {
@@ -64,21 +99,20 @@ exports.ottStreams = async function (params) {
     try {
         let streamAvailablity = null
         await axios
-            .get(
-                `${process.env.RAPIDAPI_UTELLY_URL}?source_id=${params.id}&source=tmdb`,
-                {
-                    headers: {
-                        "x-rapidapi-key": process.env.RAPIDAPI_UTELLY_API_KEY,
-                    },
-                }
-            )
+            .get(apiURL.ottStreamURL(params), {
+                headers: {
+                    "x-rapidapi-key": process.env.RAPIDAPI_UTELLY_API_KEY,
+                },
+            })
             .then((res) => {
+                console.log("utelly api called.")
                 streamAvailablity = res.data
             })
             .catch((error) => {
-                console.log(error)
+                streamAvailablity = error
             })
         return streamAvailablity.collection.locations
         // return restructure.restruct_ott(streamAvailablity.)
     } catch (error) {}
 }
+
