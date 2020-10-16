@@ -1,4 +1,5 @@
 const axios = require("axios")
+
 exports.axios = async function (URL) {
     let result = null
     await axios
@@ -10,5 +11,6 @@ exports.axios = async function (URL) {
         .catch(function (error) {
             result = error
         })
+
     return result
 }

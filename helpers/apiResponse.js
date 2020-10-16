@@ -1,3 +1,7 @@
+exports.testSuccessResponse = function (res, message, data) {
+    return res.status(200).json(data)
+}
+
 exports.successResponse = function (res, message, data) {
     var resData = {
         status: 1,
