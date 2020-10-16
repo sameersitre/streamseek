@@ -26,8 +26,8 @@ app.use((err, req, res) => {
     }
 })
 
-app.listen(3300, "127.0.0.1", function () {
+app.listen(3000, "127.0.0.1", function () {
     console.log(
-        "nodejs listening at 3300 \n################################################################\n\n"
+        "nodejs listening at 3000 \n################################################################\n\n"
     )
 })
