@@ -82,7 +82,6 @@ class ChipsArray extends Component {
         this.props.filterMovieData(this.state.selectedGenres)
     }
 
-
     render() {
         const { classes } = this.props;
 

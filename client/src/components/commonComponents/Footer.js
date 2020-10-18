@@ -71,6 +71,10 @@ export class Footer extends Component {
         })
     };
 
+    handleAnalytics = (value) => {
+        event_GAnalytics("Icon", "Click", value)
+    }
+
     sendMail = async () => {
 
         let data = {
@@ -98,7 +102,7 @@ export class Footer extends Component {
 
     }
     ValidateEmail = (inputText) => {
-        var mailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+        var mailformat = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
         if (inputText.match(mailformat)) {
             return true;
         }
@@ -192,26 +196,27 @@ export class Footer extends Component {
                             </Typography>
                         <IconButton color="inherit" width={50} height={50}
                             href={`https://github.com/sameersitre/bingefeast`} target="_blank"
-                            onclick={()=>{}}
+                            onClick={() => this.handleAnalytics("github clicked")}
                         >
                             <GitHub />
                         </IconButton>
 
                         <IconButton color="inherit"
                             href={`https://www.linkedin.com/in/sameersitre/`} target="_blank"
+                            onClick={() => this.handleAnalytics("linkedin clicked")}
                         >
                             <LinkedIn />
                         </IconButton>
                     </div>
                     <div style={{ marginTop: 20 }}>
                         <Typography variant="body2"
-                            onclick={() => this.handleDialogOpen('Field(s) is Empty.', 'Please add email and message.')}
+
                         >
                             Also Available in App Store and Play Store
                             </Typography>
                         <IconButton color="inherit" width={50} height={50}
                             href={`https://play.google.com/store/apps/details?id=com.bingefeast`} target="_blank"
-                            // onClick={() => this.handleDialogOpen('Coming Soon!', 'Will be availabe soon on Play Store.')}
+                            onClick={() => this.handleAnalytics("Play store clicked")}
                         >
                             <AndroidIcon />
                         </IconButton>

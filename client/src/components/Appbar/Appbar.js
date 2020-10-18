@@ -11,31 +11,20 @@ import { Link } from "react-router-dom";
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
-import MenuIcon from '@material-ui/icons/Menu';
-import Typography from '@material-ui/core/Typography';
-import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
-import InputBase from '@material-ui/core/InputBase';
-import SearchIcon from '@material-ui/icons/Search';
-import Grid from '@material-ui/core/Grid';
 import Hidden from '@material-ui/core/Hidden';
-
 import Chip from '@material-ui/core/Chip';
 import Paper from '@material-ui/core/Paper';
-import FilterListIcon from '@material-ui/icons/FilterList';
-import Drawer from '@material-ui/core/Drawer';
+import Typography from '@material-ui/core/Typography';
+import InputBase from '@material-ui/core/InputBase';
 import SwipeableDrawer from '@material-ui/core/SwipeableDrawer';
 import Dialog from '@material-ui/core/Dialog';
-
-import Button from '@material-ui/core/Button';
-import List from '@material-ui/core/List';
-import Divider from '@material-ui/core/Divider';
-import FilterChips from './filter';
-import ButtonGroup from '@material-ui/core/ButtonGroup';
-import Icon from '@material-ui/core/Icon';
-import DeleteIcon from '@material-ui/icons/Delete';
+import SearchIcon from '@material-ui/icons/Search';
+import MenuIcon from '@material-ui/icons/Menu';
+import FilterListIcon from '@material-ui/icons/FilterList';
+import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
 import MobileMenu from './MobileMenu';
-import { searchResultData, refreshDashboard, filterMovieData } from '../../containers/actions/userActions';
+import { refreshDashboard, filterMovieData, searchTextAction } from '../../containers/actions/userActions';
 const styles = theme => ({
   grow: {
     flexGrow: 1,
@@ -111,14 +100,7 @@ class Appbar extends Component {
     updateOnce: true,
     restrictDisplay: false
   }
-  static getDerivedStateFromProps(nextProps, prevState) {
-    if (nextProps.user.user_cart) {
-      return {
-        userCart: nextProps.user.user_cart
-      }
-    }
-    else return null
-  }
+
   componentDidMount() {
     window.addEventListener('resize', this.onResize, false);
     console.log('appbar mount')
@@ -144,19 +126,15 @@ class Appbar extends Component {
   };
 
   handleChange = (event) => {
-    console.log(event)
     this.setState({ searchText: event.target.value })
-    this.props.refreshDashboard(true)
   }
 
-  handleKeyPress = (event) => {
-    if (event.key === 'Enter') {
+  handleKeyPress = async (event) => {
+    if (event.key === 'Enter' && this.state.searchText.length !== 0) {
       window.scrollTo(0, 0)
-
-      this.props.searchResultData({ searchText: this.state.searchText })
-    }
-    if (this.state.searchText.length === 0) {
-      this.props.refreshDashboard(false)
+      console.log(this.state.searchText)
+      this.props.searchTextAction(this.state.searchText)
+      this.props.history.push('/search/page1')
     }
   }
 
@@ -184,8 +162,9 @@ class Appbar extends Component {
   handleClear = () => {
     var selectedGenres = this.state.selectedGenres
     var allGenres = this.state.allGenres
-    selectedGenres.filter(function (el) { allGenres.push(el) })
+    selectedGenres.filter((el) => allGenres.push(el))
     this.setState({ allGenres: allGenres, selectedGenres: [] })
+    this.props.filterMovieData("")
     this.props.refreshDashboard(false)
   }
 
@@ -194,11 +173,20 @@ class Appbar extends Component {
       allGenresEnabled: !this.state.allGenresEnabled
     })
   }
+
   filterClick = () => {
     this.setState({
       allGenresEnabled: false
     })
-    this.props.filterMovieData(this.state.selectedGenres)
+    let data = this.state.selectedGenres
+    let genreArray = [];
+    for (let i = 0; i < data.length; i++) {
+      genreArray.push(data[i].id)
+    }
+    let genreString = genreArray.join("%2C");
+    // let params = { genres: genreString }
+    this.props.filterMovieData(genreString)
+    this.props.history.push("/filter/page1")
   }
 
   drawerSwitch = (toogle) => {
@@ -207,7 +195,7 @@ class Appbar extends Component {
 
   render() {
     const { classes } = this.props;
-
+    const { selectedGenres } = this.state
     return (
 
       <AppBar
@@ -263,8 +251,8 @@ class Appbar extends Component {
             <IconButton  >
               <Typography className={classes.title} variant="subtitle2"
                 component={Link}
-                style={{ color: window.location.pathname === "/movies" && '#E46E36' }}
-                to={`/movies`}
+                style={{ color: window.location.pathname.indexOf(`/movies/page`) > -1 && '#E46E36' }}
+                to={`/movies/page1`}
               >
                 Movies
             </Typography>
@@ -272,10 +260,10 @@ class Appbar extends Component {
 
             <IconButton  >
               <Typography className={classes.title}
-                style={{ color: window.location.pathname === "/tvshows" && '#E46E36' }}
+                style={{ color: window.location.pathname.indexOf(`/tvshows/page`) > -1 && '#E46E36' }}
                 variant="subtitle2"
                 component={Link}
-                to={`/tvshows`}
+                to={`/tvshows/page1`}
               >
                 TV Shows
             </Typography>
@@ -302,102 +290,97 @@ class Appbar extends Component {
             </IconButton>
           </Hidden>
 
-
           {/* SEARCH BOX  */}
-          {window.location.pathname === '/' ?
-            <div className={classes.search}>
-              <div className={classes.searchIcon}>
-                <SearchIcon />
-              </div>
-              <InputBase
-                placeholder="Search…"
-                classes={{
-                  root: classes.inputRoot,
-                  input: classes.inputInput,
-                }}
-
-                value={this.state.searchText}
-                onChange={this.handleChange}
-                onKeyPress={this.handleKeyPress}
-                inputProps={{ 'aria-label': 'search' }}
-              />
+          <div className={classes.search}>
+            <div className={classes.searchIcon}>
+              <SearchIcon />
             </div>
-            : null}
+            <InputBase
+              placeholder="Search…"
+              classes={{
+                root: classes.inputRoot,
+                input: classes.inputInput,
+              }}
+
+              value={this.state.searchText}
+              onChange={this.handleChange}
+              onKeyPress={this.handleKeyPress}
+              inputProps={{ 'aria-label': 'search' }}
+            />
+          </div>
 
           {/* FILTER */}
           <div className={classes.grow} />
-          {window.location.pathname === '/'
-            ?
-            <div style={{ display: 'flex', flexDirection: 'column', position: 'relative', }} >
-              <Paper className={classes.root}>
-                <Chip
-                  size="small"
-                  clickable
-                  icon={<FilterListIcon style={{ marginRight: -12 }} />}
-                  className={classes.chip}
-                  style={{ display: 'flex', marginLeft: 5 }}
-                  onClick={() => this.filterIconClick()}
-                />
-                {this.state.selectedGenres && this.state.selectedGenres.map(data => {
+
+          <div style={{ display: 'flex', flexDirection: 'column', position: 'relative', }} >
+            <Paper className={classes.root}>
+              <Chip
+                size="small"
+                clickable
+                icon={<FilterListIcon style={{ marginRight: -12 }} />}
+                className={classes.chip}
+                style={{ display: 'flex', marginLeft: 5 }}
+                onClick={() => this.filterIconClick()}
+              />
+              {selectedGenres.map(data => {
+                let icon;
+                return (
+                  <Chip
+                    size="small" key={data.id}
+                    icon={icon} label={data.name}
+                    onDelete={() => this.handleDelete(data)}
+                    className={classes.chip}
+                  />
+                );
+              })}
+
+              {selectedGenres.length > 0
+                ?
+
+                <div>
+                  <Chip
+                    size="small" clickable label='CLEAR'
+                    className={classes.chip}
+                    style={{ borderTopRightRadius: 5, borderBottomRightRadius: 5 }}
+                    onClick={() => this.handleClear()}
+                  />
+
+                  <Chip
+                    size="small" clickable label='FILTER'
+                    className={classes.chip}
+                    style={{ borderTopLeftRadius: 5, borderBottomLeftRadius: 5 }}
+                    onClick={() => this.filterClick()}
+                  />
+                </div>
+                : null
+              }
+            </Paper>
+
+            {this.state.allGenresEnabled
+              ?
+              <Paper variant="outlined"
+                elevation={3}
+                style={{
+                  position: 'absolute', justifyContent: 'space-evenly',
+                  flexWrap: 'wrap', backgroundColor: '#5E5E5E', width: 250,
+                  borderRadius: 11, padding: 5, top: 40, right: 0
+                }} >
+                {this.state.allGenres && this.state.allGenres.map(data => {
                   let icon;
                   return (
                     <Chip
                       size="small" key={data.id}
                       icon={icon} label={data.name}
-                      onDelete={() => this.handleDelete(data)}
+                      onClick={() => this.handleAdd(data)}
+                      style={{ margin: 3, padding: 0.2, }}
                       className={classes.chip}
                     />
                   );
                 })}
-
-                {this.state.selectedGenres.length > 0
-                  ?
-
-                  <div>
-                    <Chip
-                      size="small" clickable label='CLEAR'
-                      className={classes.chip}
-                      style={{ borderTopRightRadius: 5, borderBottomRightRadius: 5 }}
-                      onClick={() => this.handleClear()}
-                    />
-
-                    <Chip
-                      size="small" clickable label='FILTER'
-                      className={classes.chip}
-                      style={{ borderTopLeftRadius: 5, borderBottomLeftRadius: 5 }}
-                      onClick={() => this.filterClick()}
-                    />
-                  </div>
-                  : null
-                }
               </Paper>
+              : null}
+          </div>
 
-              {this.state.allGenresEnabled
-                ?
-                <Paper variant="outlined"
-                  elevation={3}
-                  style={{
-                    position: 'absolute', justifyContent: 'space-evenly',
-                    flexWrap: 'wrap', backgroundColor: '#5E5E5E', width: 250,
-                    borderRadius: 13, padding: 5, top: 40, right: 0
-                  }} >
-                  {this.state.allGenres && this.state.allGenres.map(data => {
-                    let icon;
-                    return (
-                      <Chip
-                        size="small" key={data.id}
-                        icon={icon} label={data.name}
-                        onClick={() => this.handleAdd(data)}
-                        style={{ margin: 3, padding: 0.2, }}
-                        className={classes.chip}
-                      />
-                    );
-                  })}
-                </Paper>
-                : null}
-            </div>
-            :
-            null}
 
         </Toolbar>
 
@@ -412,4 +395,4 @@ const mapStateToProps = state => ({
   user: state.user
 });
 
-export default withStyles(styles)(withRouter(connect(mapStateToProps, { searchResultData, refreshDashboard, filterMovieData })(Appbar)));
+export default withStyles(styles)(withRouter(connect(mapStateToProps, { refreshDashboard, filterMovieData, searchTextAction })(Appbar)));

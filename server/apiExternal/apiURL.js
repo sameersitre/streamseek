@@ -2,10 +2,13 @@ exports.trendingURL = (params) =>
     `${process.env.TMDB_URL}/trending/${params.type}/day?api_key=${process.env.TMDB_API_KEY}&page=${params.page}`
 
 exports.searchURL = (params) =>
-    `${process.env.TMDB_URL}/search/multi?api_key=${process.env.TMDB_API_KEY}&language=en-US&query=${params.searchText}&page=1&include_adult=false`
+    `${process.env.TMDB_URL}/search/multi?api_key=${process.env.TMDB_API_KEY}&language=en-US&query=${params.searchText}&page=${params.page}&include_adult=false`
 
 exports.filterURL = (params) =>
-    `${process.env.TMDB_URL}/discover/movie?api_key=${process.env.TMDB_API_KEY}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=1&with_genres=${params.genres}`
+    `${process.env.TMDB_URL}/discover/${params.type}?api_key=${process.env.TMDB_API_KEY}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=${params.page}&with_genres=${params.genres}`
+
+exports.upcomingURL = (params) =>
+    `https://api.themoviedb.org/3/movie/now_playing?api_key=a2d451cdbcf87912820b3b17b82514c3&language=en-US&page=${params.page}&region=IN`
 
 exports.detailsURL = (params) =>
     `${process.env.TMDB_URL}/${params.media_type}/${params.id}?api_key=${process.env.TMDB_API_KEY}&language=en-US`

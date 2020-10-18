@@ -10,6 +10,8 @@ router.post("/search", BingeController.searchList)
 
 router.post("/filter", BingeController.filterList)
 
+router.post("/upcoming", BingeController.upcomingList)
+
 router.post("/getDetails", BingeController.getDetails)
 
 router.post("/getVideos", BingeController.getVideos)

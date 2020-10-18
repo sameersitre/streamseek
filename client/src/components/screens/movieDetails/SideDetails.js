@@ -9,17 +9,12 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { withStyles } from '@material-ui/core/styles';
-import Chip from '@material-ui/core/Chip';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import Dialog from '@material-ui/core/Dialog';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
-import moment from 'moment';
 import Popover from '@material-ui/core/Popover';
-import Tooltip from '@material-ui/core/Tooltip';
-import Card from '@material-ui/core/Card';
-
 import Typography from '@material-ui/core/Typography';
 const styles = (theme) => ({
     dialog: {
@@ -72,15 +67,13 @@ class SideDetails extends Component {
         if (nextProps.movieData) {
             return {
                 movieData: nextProps.movieData,
-                videoData: nextProps.videoData,
+                videoData: nextProps.videoData.results,
             }
         }
         return null
     }
 
     componentDidMount() {
-
-        let locations = this.props.user.details_data
         console.log(this.props.user.details_data)
     }
 
@@ -187,7 +180,7 @@ class SideDetails extends Component {
                             height: 150,
                         }}
                     >
-                        {this.state.videoData && this.state.videoData.results.slice(0, 30).map((value, i) =>
+                        {this.state.videoData && this.state.videoData.slice(0, 30).map((value, i) =>
                             <Button
                                 key={i}
                                 variant="contained"

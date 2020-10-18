@@ -1,8 +1,6 @@
 import ReactGA from "react-ga"
-import { GoogleAnalyticsKey } from "./Keys"
-
 export const initilizeGoogleAnalytics = () => {
-  ReactGA.initialize(GoogleAnalyticsKey)
+  ReactGA.initialize(process.env.REACT_APP_GOOGLE_ANALYTICS_KEY)
 }
 
 export const pageView = () => {

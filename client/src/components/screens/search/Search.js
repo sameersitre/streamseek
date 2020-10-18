@@ -1,0 +1,72 @@
+/*
+  * Author: Sameer Sitre
+  * https://www.linkedin.com/in/sameersitre/
+  * https://github.com/sameersitre
+  * File Description:  
+ */
+import React, { Component } from 'react'
+import { withRouter } from 'react-router-dom';
+import { connect } from 'react-redux';
+import { axios } from '../../../services/apiCall';
+import { searchURL } from '../../../services/apiURL'
+import MediaList from '../../commonComponents/MediaList'
+class Search extends Component {
+    state = {
+        dataList: [],
+        refresh: false,
+        pageNumber: this.props.match.params.pageNumber,
+        searchText: ''
+    }
+
+    async componentDidMount() {
+        window.scrollTo(0, 0)
+        this.setState({ refresh: true })
+        let data = { searchText: this.props.user.search_text, page: 1 }
+        let apiData = await axios(searchURL, data)
+        this.setState({ dataList: apiData.results, refresh: false })
+    }
+
+    async componentDidUpdate(prevProps) {
+        if ((this.props.match.params.pageNumber !== this.state.pageNumber) ||
+            (this.state.searchText !== this.props.user.search_text)) {
+            let data = {
+                searchText: this.props.user.search_text,
+                page: this.props.match.params.pageNumber,
+            }
+            let apiData = await axios(searchURL, data)
+            this.setState({
+                searchText: this.props.user.search_text,
+                dataList: apiData.results,
+                pageNumber: this.props.match.params.pageNumber,
+                refresh: false
+            })
+        }
+    }
+
+    pageNavigate = (value) => {
+        window.scrollTo(0, 0)
+        this.setState({ pageNumber: value })
+        this.props.history.push({ pathname: `/search/page${value}` })
+    }
+
+    previous = () => { this.pageNavigate(parseInt(this.props.match.params.pageNumber) - 1) }
+
+    next = () => { this.pageNavigate(parseInt(this.props.match.params.pageNumber) + 1) }
+
+    render() {
+        const { dataList, refresh } = this.state
+        return (
+            <div>
+                <MediaList
+                    listData={dataList}
+                    refresh={refresh}
+                    previous={this.previous}
+                    next={this.next}
+                />
+            </div>
+        )
+    }
+}
+const mapStateToProps = state => ({ user: state.user })
+
+export default (withRouter(connect(mapStateToProps, {})(Search)));

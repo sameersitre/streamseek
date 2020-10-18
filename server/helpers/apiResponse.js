@@ -6,7 +6,7 @@ exports.successResponse = function (res, message, data) {
     var resData = {
         status: 1,
         message: message,
-        data: data,
+        ...data,
     }
     return res.status(200).json(resData)
 }

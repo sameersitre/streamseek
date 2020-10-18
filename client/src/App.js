@@ -5,9 +5,9 @@
  * File Description:
  */
 
-import React, { Component } from "react"
+import React from "react"
 import Routes from "./Routes"
-import {initilizeGoogleAnalytics, pageView} from './utils/Analytics'
+import { initilizeGoogleAnalytics, pageView } from './utils/Analytics'
 function App() {
   initilizeGoogleAnalytics()
   pageView()

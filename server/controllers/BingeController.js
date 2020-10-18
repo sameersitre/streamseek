@@ -94,6 +94,18 @@ exports.filterList = async function (req, res) {
     }
 }
 
+exports.upcomingList = async function (req, res) {
+    try {
+        apiResponse.successResponse(
+            res,
+            "Success.",
+            await apiCall.axios(apiURL.upcomingURL(req.body))
+        )
+    } catch (error) {
+        apiResponse.ErrorResponse(res, error)
+    }
+}
+
 exports.getVideos = async function (req, res) {
     // try {
     await client.connect()
