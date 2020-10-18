@@ -14,7 +14,7 @@ import Movies from './components/screens/movies/Movies';
 import TVShows from './components/screens/tvshows/TVShows.js';
 import Upcoming from './components/screens/upcoming/Upcoming';
 
-import MovieDetails from './components/movieDetails/MovieDetails';
+import MovieDetails from './components/screens/movieDetails/MovieDetails';
 import Filter from './components/screens/filter/Filter';
 
 import Search from './components/screens/search/Search'

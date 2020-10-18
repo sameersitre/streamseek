@@ -19,8 +19,8 @@ import Poster from './Poster';
 import SideDetails from './SideDetails';
 import Typography from '@material-ui/core/Typography';
 import moment from 'moment';
-import { axios } from '../../services/apiCall';
-import { getVideosURL, getDetailsURL, getOTTPlatformsURL } from '../../services/apiURL'
+import { axios } from '../../../services/apiCall';
+import { getVideosURL, getDetailsURL, getOTTPlatformsURL } from '../../../services/apiURL'
 
 const styles = (theme) => ({
     root: {
@@ -138,7 +138,7 @@ class MovieDetails extends Component {
                                 }}
                                     href={`https://www.imdb.com/title/${movieData.imdb_id}`} target="_blank" rel="noopener noreferrer"
                                 >
-                                    <img src={require('../../assets/Icons/imdb.png')} alt="Smiley face" height="28" width="28" />
+                                    <img src={require('../../../assets/Icons/imdb.png')} alt="Smiley face" height="28" width="28" />
                                     {movieData.vote_average > 0
                                         ?
                                         <Typography variant="body2" xs={12}  >
