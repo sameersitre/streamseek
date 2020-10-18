@@ -19,7 +19,7 @@ import Poster from './Poster';
 import SideDetails from './SideDetails';
 import Typography from '@material-ui/core/Typography';
 import moment from 'moment';
-import { axios } from '../../../services/apiCall';
+import apiCall from '../../../services/apiCall';
 import { getVideosURL, getDetailsURL, getOTTPlatformsURL } from '../../../services/apiURL'
 
 const styles = (theme) => ({
@@ -64,12 +64,12 @@ class MovieDetails extends Component {
         console.log(storData)
         let data = { id: storData.id, media_type: storData.media_type ? storData.media_type : "movie" }
         this.setState({
-            movieData: await axios(getDetailsURL, data),
+            movieData: await apiCall(getDetailsURL, data),
             refresh: false,
         })
         this.setState({
-            videoData: await axios(getVideosURL, data),
-            streamAvailablity: await axios(getOTTPlatformsURL, data),
+            videoData: await apiCall(getVideosURL, data),
+            streamAvailablity: await apiCall(getOTTPlatformsURL, data),
         })
     }
     render() {

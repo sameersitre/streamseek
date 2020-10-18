@@ -1,6 +1,6 @@
-const axios = require("axios")
+import axios from "axios"
 
-exports.axios = async function (URL, data) {
+const apiCall = async function (URL, data) {
     let result = null
     console.log(data)
     await axios.post(URL, data)
@@ -14,3 +14,5 @@ exports.axios = async function (URL, data) {
         })
     return result
 }
+
+export default apiCall        

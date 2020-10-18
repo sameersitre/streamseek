@@ -7,7 +7,7 @@
 import React, { Component } from 'react'
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { axios } from '../../../services/apiCall';
+import apiCall from '../../../services/apiCall';
 import { filterURL } from '../../../services/apiURL'
 import MediaList from '../../commonComponents/MediaList'
 
@@ -33,7 +33,7 @@ class Filter extends Component {
             type: "movie",
             genres: this.props.user.genre_filter
         }
-        let apiData = await axios(filterURL, data)
+        let apiData = await apiCall(filterURL, data)
         this.setState({ dataList: apiData.results, refresh: false })
     }
 
@@ -46,7 +46,7 @@ class Filter extends Component {
                 type: "movie",
                 genres: this.props.user.genre_filter
             }
-            let apiData = await axios(filterURL, data)
+            let apiData = await apiCall(filterURL, data)
             this.setState({
                 dataList: apiData.results,
                 pageNumber: this.props.match.params.pageNumber,

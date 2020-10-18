@@ -6,7 +6,7 @@
  */
 import React, { Component } from 'react'
 import { withRouter } from 'react-router-dom';
-import { axios } from '../../../services/apiCall';
+import apiCall from '../../../services/apiCall';
 import { trendingURL } from '../../../services/apiURL'
 import MediaList from '../../commonComponents/MediaList'
 
@@ -24,14 +24,14 @@ class Dashboard extends Component {
         window.scrollTo(0, 0)
         this.setState({ refresh: true })
         let data = { "page": 1, "type": "all" }
-        let apiData = await axios(trendingURL, data)
+        let apiData = await apiCall(trendingURL, data)
         this.setState({ dataList: apiData.results, refresh: false })
     }
 
     async componentDidUpdate(prevProps) {
         if (this.props.match.params.pageNumber !== this.state.pageNumber) {
             let data = { "page": this.props.match.params.pageNumber, "type": "all" }
-            let apiData = await axios(trendingURL, data)
+            let apiData = await apiCall(trendingURL, data)
             this.setState({
                 dataList: apiData.results,
                 pageNumber: this.props.match.params.pageNumber,

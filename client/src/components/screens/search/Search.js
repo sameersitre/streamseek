@@ -7,7 +7,7 @@
 import React, { Component } from 'react'
 import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { axios } from '../../../services/apiCall';
+import apiCall from '../../../services/apiCall';
 import { searchURL } from '../../../services/apiURL'
 import MediaList from '../../commonComponents/MediaList'
 class Search extends Component {
@@ -22,7 +22,7 @@ class Search extends Component {
         window.scrollTo(0, 0)
         this.setState({ refresh: true })
         let data = { searchText: this.props.user.search_text, page: 1 }
-        let apiData = await axios(searchURL, data)
+        let apiData = await apiCall(searchURL, data)
         this.setState({ dataList: apiData.results, refresh: false })
     }
 
@@ -33,7 +33,7 @@ class Search extends Component {
                 searchText: this.props.user.search_text,
                 page: this.props.match.params.pageNumber,
             }
-            let apiData = await axios(searchURL, data)
+            let apiData = await apiCall(searchURL, data)
             this.setState({
                 searchText: this.props.user.search_text,
                 dataList: apiData.results,

@@ -6,7 +6,7 @@
  */
 import React, { Component } from 'react'
 import { withRouter } from 'react-router-dom';
-import { axios } from '../../../services/apiCall';
+import apiCall from '../../../services/apiCall';
 import { upcomingURL } from '../../../services/apiURL'
 import MediaList from '../../commonComponents/MediaList'
 
@@ -24,14 +24,14 @@ class TVShows extends Component {
         window.scrollTo(0, 0)
         this.setState({ refresh: true })
         let data = { "page": 1, "type": "movie" }
-        let apiData = await axios(upcomingURL, data)
+        let apiData = await apiCall(upcomingURL, data)
         this.setState({ dataList: apiData.results, refresh: false })
     }
 
     async componentDidUpdate(prevProps) {
         if (this.props.match.params.pageNumber !== this.state.pageNumber) {
             let data = { "page": this.props.match.params.pageNumber, "type": "movie" }
-            let apiData = await axios(upcomingURL, data)
+            let apiData = await apiCall(upcomingURL, data)
             this.setState({
                 dataList: apiData.results,
                 pageNumber: this.props.match.params.pageNumber,
