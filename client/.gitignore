@@ -4,16 +4,17 @@
 /node_modules
 /.pnp
 .pnp.js
-.package-lock.json
+package-lock.json
 yarn.lock
 #/src/components/test
 # testing
 /coverage
-
+#.gitignore
 # production
 /build
 
 # misc
+.env
 .DS_Store
 .env.local
 .env.development.local
