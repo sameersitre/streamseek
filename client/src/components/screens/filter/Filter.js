@@ -9,7 +9,7 @@ import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import apiCall from '../../../services/apiCall';
 import { filterURL } from '../../../services/apiURL'
-import MediaList from '../../commonComponents/MediaList'
+import MediaList from '../../common/MediaList'
 
 class Filter extends Component {
     constructor(props) {

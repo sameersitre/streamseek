@@ -119,7 +119,7 @@ class MovieDetails extends Component {
                             {movieData.tagline &&
                                 <Typography gutterBottom variant="body2"
                                     style={{ color: '#E5CA49' }}>
-                                {movieData.tagline}
+                                    {movieData.tagline}
                                 </Typography>
                             }
                         </Grid>
@@ -179,6 +179,7 @@ class MovieDetails extends Component {
                                     {console.log(streamAvailablity.ottStreams)}
                                     {streamAvailablity.platforms && streamAvailablity.platforms.map((value, i) =>
                                         <Tooltip
+                                            title={''}
                                             key={i}
                                             placement="bottom-end"
                                             aria-label="add">

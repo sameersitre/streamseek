@@ -192,7 +192,7 @@ export class Footer extends Component {
                 }}>
                     <div>
                         <Typography variant="body2"  >
-                            Extermnal Links
+                            External Links
                             </Typography>
                         <IconButton color="inherit" width={50} height={50}
                             href={`https://github.com/sameersitre/bingefeast`} target="_blank"

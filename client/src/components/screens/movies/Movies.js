@@ -8,7 +8,7 @@ import React, { Component } from 'react'
 import { withRouter } from 'react-router-dom';
 import apiCall from '../../../services/apiCall';
 import { trendingURL } from '../../../services/apiURL'
-import MediaList from '../../commonComponents/MediaList'
+import MediaList from '../../common/MediaList'
 
 class Movies extends Component {
     constructor(props) {
