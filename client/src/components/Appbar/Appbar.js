@@ -27,9 +27,9 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import MobileMenu from './MobileMenu';
 import { refreshDashboard, filterMovieData, searchTextAction, userInfoAction } from '../../containers/actions/userActions';
-import userProperty from '../../services/userProperty'
+import sendUserProperty from '../../services/sendUserProperty'
 import getGeolocation from '../../services/location'
-
+import countryCode from '../../services/countryCode'
 const styles = theme => ({
   grow: {
     flexGrow: 1,
@@ -108,10 +108,12 @@ class Appbar extends PureComponent {
   }
 
   async componentDidMount() {
-    getGeolocation()
-    let userInfo = await userProperty()
-    this.setState({ userInfo: userInfo })
-    this.props.userInfoAction(userInfo)
+    await getGeolocation()
+    let locationInfo = await countryCode()
+    sendUserProperty(locationInfo)
+
+    this.setState({ userInfo: locationInfo })
+    this.props.userInfoAction(locationInfo)
     window.addEventListener('resize', this.onResize, false);
   }
 
@@ -293,7 +295,7 @@ class Appbar extends PureComponent {
               <Typography className={classes.title} variant="subtitle2"
                 style={{ color: window.location.pathname.indexOf(`/upcoming/page`) > -1 && '#E46E36' }}
                 component={Link}
-                to={userInfo.country_code && `/upcoming/page1&region=${userInfo.country_code}`}
+                to={userInfo?.region && `/upcoming/page1&region=${userInfo.region}`}
               >
                 Upcoming Movies
             </Typography>

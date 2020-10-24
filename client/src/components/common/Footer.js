@@ -19,7 +19,7 @@ import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import { event_GAnalytics } from "../../utils/Analytics"
 import { getFeedback } from '../../services/apiURL';
 import apiCall from '../../services/apiCall';
-import CountryCode from '../../services/countryCode';
+import countryCode from '../../services/countryCode';
 import { validateEmail } from '../../services/validations';
 const styles = (theme) => ({
 
@@ -81,12 +81,13 @@ class Footer extends Component {
             this.handleDialogOpen('Incorrect email format.', "Please enter correct email.")
         } else {
             if (this.state.message.length > 0 && this.state.email.length > 0) {
-                let details = await CountryCode()
+                let details = await countryCode()
                 console.log(details)
                 let params = {
                     email: this.state.email,
                     message: this.state.message,
-                    ...this.props.user.user_info
+                    ...this.props.user.user_info,
+                    coordinates: JSON.parse(localStorage.geolocation),
                 }
                 await apiCall(getFeedback, params)
                 this.handleDialogOpen('Message Sent!', this.state.message)

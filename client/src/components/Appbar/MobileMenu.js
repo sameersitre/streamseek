@@ -47,7 +47,7 @@ class MobileMenu extends Component {
 
           <ListItem button
             component={Link}
-            to={user_info.country_code && `/upcoming/page1&region=${user_info.country_code}`}
+            to={user_info.region && `/upcoming/page1&region=${user_info.region}`}
             style={{
               color: window.location.pathname.indexOf(`/upcoming/page`) > -1 ? '#E46E36' : '#FFFFFF'
             }}

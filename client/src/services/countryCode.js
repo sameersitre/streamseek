@@ -1,25 +1,23 @@
 import axios from "axios"
-const CountryCode = async function (URL, data) {
-    let ip = null
-    let countryCode = null
+const countryCode = async function () {
+    let abc = {}
     await axios.get(`https://www.cloudflare.com/cdn-cgi/trace`)
-        .then((res) => {
-            let ipStructure = /\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/
-            let x = res.data.match(ipStructure)[0]
-            ip = x
-        }
-        ).catch(function (error) {
-            return error
-        })
+        .then(async (res) => {
+            let ip = res.data.match(/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/)[0]
+            let region = res.data.match(/loc=(.*?)\n/s)
+            let colo = res.data.match(/colo=(.*?)\n/s)
 
-    await axios.get(`http://api.ipstack.com/${ip}?access_key=${process.env.REACT_APP_IPSTACK_KEY}&format=1`)
-        .then((res) => {
-            console.log(res.data)
-            countryCode = res.data
+            abc = {
+                ...abc,
+                ip: ip,
+                region: region[1],
+                colocation: colo[1],
+                userAgent: navigator.userAgent,
+            }
         }
         ).catch(function (error) {
             return error
         })
-    return countryCode
+    return abc
 }
-export default CountryCode
+export default countryCode
