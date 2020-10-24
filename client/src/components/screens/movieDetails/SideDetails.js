@@ -73,14 +73,9 @@ class SideDetails extends Component {
         return null
     }
 
-    componentDidMount() {
-        console.log(this.props.user.details_data)
-    }
-
-    getAvailableStreams = () => {
-        let locations = this.props.user.details_data && this.props.user.details_data[2]
-        console.log(locations)
-    }
+    // getAvailableStreams = () => {
+    //     let locations = this.props.user.details_data && this.props.user.details_data[2]
+    //  }
 
     handleDialogOpen = () => {
         this.setState({ dialogOpen: true })
@@ -164,6 +159,7 @@ class SideDetails extends Component {
                 </Dialog>
 
                 <Grid
+                    item
                     xs={12} sm={6}
                     style={{
                         overflow: 'hidden',

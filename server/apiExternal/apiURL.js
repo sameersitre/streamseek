@@ -1,3 +1,9 @@
+//var region = 
+
+exports.testURL = (params) =>
+    `https://api.themoviedb.org/3/discover/movie?api_key=a2d451cdbcf87912820b3b17b82514c3&language=en-US&region=IN&sort_by=popularity.desc&include_adult=false&include_video=false&page=1&primary_release_date.gte=2020-10-22T18%3A42%3A00.155Z`
+
+
 exports.trendingURL = (params) =>
     `${process.env.TMDB_URL}/trending/${params.type}/day?api_key=${process.env.TMDB_API_KEY}&page=${params.page}`
 
@@ -8,7 +14,9 @@ exports.filterURL = (params) =>
     `${process.env.TMDB_URL}/discover/${params.type}?api_key=${process.env.TMDB_API_KEY}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=${params.page}&with_genres=${params.genres}`
 
 exports.upcomingURL = (params) =>
-    `https://api.themoviedb.org/3/movie/now_playing?api_key=a2d451cdbcf87912820b3b17b82514c3&language=en-US&page=${params.page}&region=IN`
+    `https://api.themoviedb.org/3/discover/${params.type}?api_key=${process.env.TMDB_API_KEY}&language=en-US&region=${params.region}&sort_by=popularity.desc&include_adult=${params.adult}&include_video=false&page=${params.page}&primary_release_date.gte=${new Date().toISOString()}`
+
+// `https://api.themoviedb.org/3/movie/now_playing?api_key=a2d451cdbcf87912820b3b17b82514c3&language=en-US&page=${params.page}&region=US`
 
 exports.detailsURL = (params) =>
     `${process.env.TMDB_URL}/${params.media_type}/${params.id}?api_key=${process.env.TMDB_API_KEY}&language=en-US`

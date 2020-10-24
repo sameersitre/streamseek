@@ -22,4 +22,8 @@ router.post("/getOTTPlatforms", BingeController.getOTTStreams)
 
 router.post("/getCastDetails", BingeController.getCastDetails)
 
+router.post("/info", BingeController.getInfo)
+
+router.post("/feedback", BingeController.getFeedback)
+
 module.exports = router

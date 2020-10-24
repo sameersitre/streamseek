@@ -59,9 +59,9 @@ class MovieDetails extends Component {
 
     async componentDidMount() {
         window.scrollTo(0, 0)
+        console.log(this.props)
         this.setState({ refresh: true })
         let storData = JSON.parse(await localStorage.selectedMovieDetails)
-        console.log(storData)
         let data = { id: storData.id, media_type: storData.media_type ? storData.media_type : "movie" }
         this.setState({
             movieData: await apiCall(getDetailsURL, data),
@@ -176,7 +176,6 @@ class MovieDetails extends Component {
                                         color: '#FFFFFF', alignItems: 'baseline',
                                         textDecoration: 'none',
                                     }}>
-                                    {console.log(streamAvailablity.ottStreams)}
                                     {streamAvailablity.platforms && streamAvailablity.platforms.map((value, i) =>
                                         <Tooltip
                                             title={''}

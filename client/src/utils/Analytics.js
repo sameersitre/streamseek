@@ -1,6 +1,8 @@
 import ReactGA from "react-ga"
 export const initilizeGoogleAnalytics = () => {
-  ReactGA.initialize(process.env.REACT_APP_GOOGLE_ANALYTICS_KEY)
+  if (process.env.NODE_ENV !== "development") {
+    ReactGA.initialize(process.env.REACT_APP_ANALYTICS_KEY)
+  }
 }
 
 export const pageView = () => {

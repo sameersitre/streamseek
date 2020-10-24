@@ -4,9 +4,11 @@ import { withRouter } from 'react-router-dom';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
+import { connect } from 'react-redux';
 
 class MobileMenu extends Component {
   render() {
+    const { user_info } = this.props.user
     return (
       <div
         style={{
@@ -44,7 +46,8 @@ class MobileMenu extends Component {
           </ListItem>
 
           <ListItem button
-            component={Link} to={`/upcoming/page1`}
+            component={Link}
+            to={user_info.country_code && `/upcoming/page1&region=${user_info.country_code}`}
             style={{
               color: window.location.pathname.indexOf(`/upcoming/page`) > -1 ? '#E46E36' : '#FFFFFF'
             }}
@@ -57,5 +60,8 @@ class MobileMenu extends Component {
   }
 }
 
+const mapStateToProps = state => ({
+  user: state.user
+});
 
-export default withRouter(MobileMenu)
+export default withRouter(connect(mapStateToProps, {})(MobileMenu));

@@ -5,12 +5,10 @@
   * File Description:  
  */
 
-import React, { Component } from 'react'
-import { connect } from 'react-redux'
+import React, { PureComponent } from 'react' 
 import { withStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardActionArea from '@material-ui/core/CardActionArea';
-
 import CardMedia from '@material-ui/core/CardMedia';
 const styles = (theme) => ({
     root: {
@@ -21,46 +19,23 @@ const styles = (theme) => ({
         height: 300,
     },
 });
-export class Poster extends Component {
-    state = {
-
-    }
-    static getDerivedStateFromProps(nextProps, prevState) {
-        if (nextProps.data) {
-            return {
-                data: nextProps.data,
-                // genres: nextProps.user.Genres
-            }
-        }
-    }
+export class Poster extends PureComponent {
     render() {
-        const { classes } = this.props;
-
-        return (
+        const { classes, data } = this.props;
+         return (
             <Card className={classes.root}>
-               <CardActionArea>
+                <CardActionArea>
                     <CardMedia
                         className={classes.media}
-                        image={`https://image.tmdb.org/t/p/w500${this.state.data.poster_path}`}
-                        title={`Original Title: ${this.state.data.original_name
+                         image={`https://image.tmdb.org/t/p/w500${data.poster_path}`}
+                         title={`Original Title: ${data.original_name
                             ||
-                            this.state.data.original_title}`
+                             data.original_title}`
                         }
                     />
                 </CardActionArea>
-             </Card>
+            </Card>
         )
     }
 }
-
-
-const mapStateToProps = state => ({
-    user: state.user
-});
-
-
-const mapDispatchToProps = {
-
-}
-
-export default withStyles(styles)(connect(mapStateToProps, mapDispatchToProps)(Poster))
+export default withStyles(styles)(Poster)

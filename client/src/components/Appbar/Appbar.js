@@ -5,7 +5,7 @@
   * File Description:  
  */
 
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { withStyles, fade } from '@material-ui/core/styles';
 import { Link } from "react-router-dom";
 import AppBar from '@material-ui/core/AppBar';
@@ -20,11 +20,16 @@ import SwipeableDrawer from '@material-ui/core/SwipeableDrawer';
 import Dialog from '@material-ui/core/Dialog';
 import SearchIcon from '@material-ui/icons/Search';
 import MenuIcon from '@material-ui/icons/Menu';
+import AndroidIcon from '@material-ui/icons/Android';
+import AppleIcon from '@material-ui/icons/Apple';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import MobileMenu from './MobileMenu';
-import { refreshDashboard, filterMovieData, searchTextAction } from '../../containers/actions/userActions';
+import { refreshDashboard, filterMovieData, searchTextAction, userInfoAction } from '../../containers/actions/userActions';
+import userProperty from '../../services/userProperty'
+import getGeolocation from '../../services/location'
+
 const styles = theme => ({
   grow: {
     flexGrow: 1,
@@ -88,7 +93,7 @@ const styles = theme => ({
   },
 });
 
-class Appbar extends Component {
+class Appbar extends PureComponent {
   state = {
     setDialog: false,
     barColor: false,
@@ -98,17 +103,19 @@ class Appbar extends Component {
     selectedGenres: [],
     allGenresEnabled: false,
     updateOnce: true,
-    restrictDisplay: false
+    restrictDisplay: false,
+    userInfo: []
   }
 
-  componentDidMount() {
+  async componentDidMount() {
+    getGeolocation()
+    let userInfo = await userProperty()
+    this.setState({ userInfo: userInfo })
+    this.props.userInfoAction(userInfo)
     window.addEventListener('resize', this.onResize, false);
-    console.log('appbar mount')
-
   }
 
   onResize = () => {
-    // console.log(navigator.userAgent.indexOf('Mobile'))
     if ((window.innerWidth > window.innerHeight) && navigator.userAgent.indexOf('Mobile') > -1) {
       this.setState({ restrictDisplay: true })
     }
@@ -132,7 +139,6 @@ class Appbar extends Component {
   handleKeyPress = async (event) => {
     if (event.key === 'Enter' && this.state.searchText.length !== 0) {
       window.scrollTo(0, 0)
-      console.log(this.state.searchText)
       this.props.searchTextAction(this.state.searchText)
       this.props.history.push('/search/page1')
     }
@@ -195,7 +201,7 @@ class Appbar extends Component {
 
   render() {
     const { classes } = this.props;
-    const { selectedGenres } = this.state
+    const { selectedGenres, userInfo } = this.state
     return (
 
       <AppBar
@@ -210,6 +216,7 @@ class Appbar extends Component {
         }>
         <SwipeableDrawer anchor='left' open={this.state.drawerOpen}
           onClose={() => this.drawerSwitch(false)}
+          onOpen={() => this.drawerSwitch(true)}
         >
           <MobileMenu drawerClose={() => this.drawerSwitch(false)} />
         </SwipeableDrawer>
@@ -232,6 +239,19 @@ class Appbar extends Component {
             <Typography variant="h6"   >
               please go back to portrait mode or use the app.
           </Typography>
+            <IconButton color="inherit" width={50} height={50}
+              href={`https://play.google.com/store/apps/details?id=com.bingefeast`} target="_blank"
+            // onClick={() => this.handleAnalytics("Play store clicked")}
+            >
+              <AndroidIcon />
+            </IconButton>
+
+            <IconButton color="inherit"
+            // href={`http://itunes.apple.com/lb/app/truecaller-caller-id-number/id448142450?mt=8`} target="_blank"
+            // onClick={() => this.handleDialogOpen('Coming Soon!', 'Will be availabe soon on App Store.')}
+            >
+              <AppleIcon />
+            </IconButton>
           </div>
 
         </Dialog>
@@ -239,7 +259,7 @@ class Appbar extends Component {
         <Toolbar>
 
           <Hidden xsDown>
-            <IconButton href='/' >
+            <IconButton component={Link} to='/all/page1'  >
               <Typography className={classes.title} variant="h6" noWrap  >
                 BingeFeast
             </Typography>
@@ -273,7 +293,7 @@ class Appbar extends Component {
               <Typography className={classes.title} variant="subtitle2"
                 style={{ color: window.location.pathname.indexOf(`/upcoming/page`) > -1 && '#E46E36' }}
                 component={Link}
-                to={`/upcoming/page1`}
+                to={userInfo.country_code && `/upcoming/page1&region=${userInfo.country_code}`}
               >
                 Upcoming Movies
             </Typography>
@@ -395,4 +415,4 @@ const mapStateToProps = state => ({
   user: state.user
 });
 
-export default withStyles(styles)(withRouter(connect(mapStateToProps, { refreshDashboard, filterMovieData, searchTextAction })(Appbar)));
+export default withStyles(styles)(withRouter(connect(mapStateToProps, { refreshDashboard, filterMovieData, searchTextAction, userInfoAction })(Appbar)));

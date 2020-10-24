@@ -23,7 +23,7 @@ class MediaPagination extends Component {
     render() {
         const { classes, previous, next } = this.props
         return (
-            <Grid container xs={12} sm={12} justify='center'>
+            <Grid container justify='center'>
                 <ThemeProvider theme={createMuiTheme({ palette: { type: 'dark' } })} >
                     <div style={{ display: "flex", marginTop: 80, justifyContent: 'center' }}>
                         <Button

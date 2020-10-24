@@ -5,10 +5,12 @@
   * File Description:  
  */
 import React, { Component } from 'react'
+import { withRouter } from 'react-router-dom';
 import apiCall from '../../../services/apiCall';
-import { trendingURL } from '../../../services/apiURL'
 import MediaList from '../../common/MediaList'
-class Dashboard extends Component {
+import { testURL } from '../../../services/apiURL'
+
+class Movies extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -19,33 +21,19 @@ class Dashboard extends Component {
     }
 
     async componentDidMount() {
-        window.scrollTo(0, 0)
-        this.setState({ refresh: true })
-        console.log(process.env)
-        let data = { page: 1, type: "all" }
-        let apiData = await apiCall(trendingURL, data)
-        this.setState({ dataList: apiData.results, refresh: false })
-    }
 
-    async componentDidUpdate(prevProps, prevState) {
-        if (this.props.match.params.pageNumber !== this.state.pageNumber) {
-            let data = { "page": this.props.match.params.pageNumber, "type": "all" }
-            let apiData = await apiCall(trendingURL, data)
-            this.setState({
-                dataList: apiData.results,
-                pageNumber: this.props.match.params.pageNumber,
-                refresh: false
-            })
-        }
+        this.setState({ refresh: true })
+        let apiData = await apiCall(testURL, null)
+        this.setState({ dataList: apiData.results, refresh: false })
     }
 
     pageNavigate = (value) => {
         window.scrollTo(0, 0)
         this.setState({ pageNumber: value })
-        this.props.history.push({ pathname: `/all/page${value}` })
+        this.props.history.push({ pathname: `/test/page${value}` })
     }
-
     previous = () => { this.pageNavigate(parseInt(this.props.match.params.pageNumber) - 1) }
+
     next = () => { this.pageNavigate(parseInt(this.props.match.params.pageNumber) + 1) }
 
     render() {
@@ -62,4 +50,4 @@ class Dashboard extends Component {
         )
     }
 }
-export default Dashboard
+export default withRouter(Movies)

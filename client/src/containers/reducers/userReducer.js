@@ -6,13 +6,13 @@
  */
 
 import {
-  SEARCH_TEXT_AVAILABLE, SEARCH_TEXT, GENRE_FILTER
+  SEARCH_TEXT_AVAILABLE, SEARCH_TEXT, GENRE_FILTER, USER_INFO
 } from '../actions/types';
 
 import Genres from '../../utils/Genres';
 const initialState = {
   Genres,
-  search_text: ''
+  search_text: '',
 };
 
 export default function (state = initialState, action) {
@@ -27,12 +27,16 @@ export default function (state = initialState, action) {
         ...state,
         search_text: action.payload,
       };
-
     case GENRE_FILTER:
-        return {
-          ...state,
-          genre_filter: action.payload,
-        };
+      return {
+        ...state,
+        genre_filter: action.payload,
+      };
+    case USER_INFO:
+      return {
+        ...state,
+        user_info: action.payload,
+      };
 
     default:
       return state;

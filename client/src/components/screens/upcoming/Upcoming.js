@@ -23,14 +23,21 @@ class TVShows extends Component {
     async componentDidMount() {
         window.scrollTo(0, 0)
         this.setState({ refresh: true })
-        let data = { "page": 1, "type": "movie" }
+        let data = {
+            page: 1, type: "movie", adult: false,
+            region: this.props.match.params.region
+        }
         let apiData = await apiCall(upcomingURL, data)
         this.setState({ dataList: apiData.results, refresh: false })
     }
 
     async componentDidUpdate(prevProps) {
         if (this.props.match.params.pageNumber !== this.state.pageNumber) {
-            let data = { "page": this.props.match.params.pageNumber, "type": "movie" }
+            let data = {
+                page: this.props.match.params.pageNumber,
+                type: "movie", adult: false,
+                region: this.props.match.params.region
+            }
             let apiData = await apiCall(upcomingURL, data)
             this.setState({
                 dataList: apiData.results,
@@ -43,7 +50,7 @@ class TVShows extends Component {
     pageNavigate = (value) => {
         window.scrollTo(0, 0)
         this.setState({ pageNumber: value })
-        this.props.history.push({ pathname: `/upcoming/page${value}` })
+        this.props.history.push({ pathname: `/upcoming/page${value}&region=${this.props.match.params.region}` })
     }
     previous = () => { this.pageNavigate(parseInt(this.props.match.params.pageNumber) - 1) }
 

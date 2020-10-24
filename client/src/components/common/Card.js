@@ -26,9 +26,10 @@ const styles = (theme) => ({
     backgroundColor: "#101010",
   },
   CardContent: {
-    display: "flex",
+    // display: "flex",
     flexDirection: "column",
     position: "relative",
+    paddingLeft: 10
   },
   chipView: {
     display: "flex",
@@ -48,7 +49,7 @@ class MediaCard extends PureComponent {
   static getDerivedStateFromProps(nextProps, prevState) {
     if (nextProps.parentData) {
       return {
-        movieData: nextProps.parentData,
+        parentData: nextProps.parentData,
         genres: nextProps.user.Genres,
       }
     }
@@ -59,9 +60,9 @@ class MediaCard extends PureComponent {
   }
 
   getGenre = () => {
-    if (this.state.genres && this.state.movieData.genre_ids) {
+    if (this.state.genres && this.state.parentData.genre_ids) {
       let genres = this.state.genres.genres
-      let propGenres = this.state.movieData.genre_ids
+      let propGenres = this.state.parentData.genre_ids
       let genreStrings = []
       propGenres.forEach((value) => {
         for (let j = 0; j < genres.length; j++) {
@@ -75,20 +76,21 @@ class MediaCard extends PureComponent {
   }
 
   cardClick = () => {
-    event_GAnalytics("Card", "Click", this.state.movieData.original_title)
+    event_GAnalytics("Card", "Click", this.state.parentData.original_title)
     localStorage.setItem(
       "selectedMovieDetails",
-      JSON.stringify(this.state.movieData)
+      JSON.stringify(this.state.parentData)
     )
     this.props.history.push({ pathname: `/details` })
   }
 
   render() {
     const { classes } = this.props
+    const { parentData, genreStrings } = this.state
     return (
       <Card className={classes.root}>
         <div onClick={() => this.cardClick()}>
-          <Poster data={this.state.movieData} />
+          <Poster data={parentData} />
         </div>
 
         <CardContent className={classes.CardContent}>
@@ -97,11 +99,10 @@ class MediaCard extends PureComponent {
             variant="subtitle2"
             style={{
               color: "#E5CA49",
-              alignSelf: "center",
-              marginTop: -10,
+              //  marginTop: -10,
             }}
           >
-            {this.state.movieData.title || this.state.movieData.name}
+            {parentData.title || parentData.name}
           </Typography>
           <Grid
             style={{
@@ -111,24 +112,23 @@ class MediaCard extends PureComponent {
             }}
           >
             <div>
-              {this.state.movieData.vote_average !== 0 && (
+              {parentData.vote_average !== 0 && (
                 <Typography variant="body2">
-                  {`${this.state.movieData.vote_average} (${this.state.movieData.vote_count})`}
+                  {`${parentData.vote_average} (${parentData.vote_count})`}
                 </Typography>
               )}
               <Typography variant="body2">
                 {moment(
-                  this.state.movieData.release_date ||
-                    this.state.movieData.first_air_date
-                ).format("LL")}{" "}
-                (USA)
+                  parentData.release_date ||
+                  parentData.first_air_date
+                ).format("LL")} 
               </Typography>
             </div>
-            <div
+            {/* <div
               style={{ display: "flex", flexDirection: "row", marginTop: 10 }}
             >
               <div className={classes.chipView}>
-                {this.state.genreStrings.map((value, i) => (
+                {genreStrings.map((value, i) => (
                   <Chip
                     key={i}
                     size="small"
@@ -142,17 +142,13 @@ class MediaCard extends PureComponent {
                   />
                 ))}
               </div>
-            </div>
+            </div> */}
           </Grid>
         </CardContent>
       </Card>
     )
   }
 }
-// MediaCard.propTypes = {
-//     history: React.PropTypes.object.isRequired
-// }
-
 const mapStateToProps = (state) => ({
   user: state.user,
 })

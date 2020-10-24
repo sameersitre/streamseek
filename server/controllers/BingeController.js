@@ -9,53 +9,9 @@ const client = new MongoClient(uri, {
     //   useNewUrlParser: true,
     //   useMongoClient: true
 })
-var available_tmdbid_in_db = [];
-
-var list_movieID = [539885, 299534, 99861, 497582, 27205]
-var list_tvID = [];
-
-//add ids from movie & tv db
-// (async () => {
-//     await client.connect()
-//     let db = client.db("bingefeast")
-//     if (list_movieID.length === 0 || list_tvID.length === 0) {
-//         let movieList = await db
-//             .collection("details_movie")
-//             .find(undefined, { projection: { id: 1 } })
-//             .toArray()
-
-//         let tvList = await db
-//             .collection("details_tv")
-//             .find(undefined, { projection: { id: 1 } })
-//             .toArray()
-
-//         available_tmdbid_in_db = [
-//             ...available_tmdbid_in_db,
-//             ...movieList.map((data) => data.id),
-//             ...tvList.map((data) => data.id),
-//         ]
-
-//         list_movieID = [...movieList.map((data) => data.id)]
-//         list_tvID = [...tvList.map((data) => data.id)]
-
-//         console.log("movie ids", list_movieID)
-//         console.log("tv ids", list_tvID)
-//         console.log(available_tmdbid_in_db)
-//     }
-// })()
-
-// let check_ID_from_db = function (ID, mediaType) {
-//     let checkID = false
-
-//     for (let i = 0; i < available_tmdbid_in_db.length; i++) {
-//         if (req.body.id === available_tmdbid_in_db[i]) {
-//             checkID = true
-//         }
-//     }
-// }
 
 exports.test = async function (req, res) {
-    apiResponse.testSuccessResponse(res, "Success.", await apiExternal.castDetails(req.body))
+    apiResponse.successResponse(res, "Test Success.", await apiCall.axios(apiURL.testURL(req.body)))
 }
 
 exports.trendingList = async function (req, res) {
@@ -232,4 +188,37 @@ exports.getDetails = async function (req, res) {
     // } catch (error) {
     //     await apiResponse.ErrorResponse(res, error)
     // }
+}
+
+
+/**
+ * userInfo API
+ */
+
+exports.getInfo = async function (req, res) {
+    await client.connect()
+    let db = client.db("bingefeast")
+    let feedbackData = { ...req.body }
+
+    let db_videos = await db.collection("user_info").insertOne(req.body)
+    let ipStackCounter = await db.collection("counters")
+        .updateOne({ counterName: "ipStack" }, { $inc: { counts: +1 } })
+
+    console.log(`Doc created\n 
+    feedbacks id: ${db_videos.insertedId}
+    \nipStack:${ipStackCounter.insertedId}`)
+
+
+    await apiResponse.successResponse(res, "Doc Creation Successful.", feedbackData)
+}
+
+
+
+exports.getFeedback = async function (req, res) {
+    await client.connect()
+    let db = client.db("bingefeast")
+    let db_insert = await db.collection("feedbacks").insertOne(req.body)
+    console.log(`Doc created feedbacks id: ${db_insert.insertedId}`)
+
+    await apiResponse.successResponse(res, "Doc Creation Successful.", req.body)
 }
