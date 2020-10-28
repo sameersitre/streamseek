@@ -19,7 +19,7 @@ class MediaList extends PureComponent {
         return (
             <Grid container justify="center" alignItems='flex-start'
                 spacing={1} style={{
-                    paddingTop: 80, backgroundColor: "#1B1A20",
+                    paddingTop: 80,
                     minHeight: window.innerHeight
                 }}>
                 <Backdrop className={classes.backdrop} open={refresh}  >

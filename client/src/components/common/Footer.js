@@ -104,10 +104,9 @@ class Footer extends Component {
 
         return (
             <Grid container
-
                 style={{
                     backgroundColor: '#282828', color: '#BFBFBF', marginTop: 50,
-                    justifyContent: 'space-between',
+                    justifyContent: 'space-between', margin: 8
                 }} >
 
                 <ThemeProvider theme={createMuiTheme({ palette: { type: 'dark' } })} >

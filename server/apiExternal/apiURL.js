@@ -1,6 +1,4 @@
-//var region = 
-
-exports.testURL = (params) =>
+ exports.testURL = (params) =>
     `https://api.themoviedb.org/3/discover/movie?api_key=a2d451cdbcf87912820b3b17b82514c3&language=en-US&region=IN&sort_by=popularity.desc&include_adult=false&include_video=false&page=1&primary_release_date.gte=2020-10-22T18%3A42%3A00.155Z`
 
 
@@ -37,4 +35,4 @@ exports.videosURL = (params) =>
     `${process.env.TMDB_URL}/${params.media_type}/${params.id}/videos?api_key=${process.env.TMDB_API_KEY}&language=en-US`
 
 exports.recommendationsURL = (params) =>
-    `${process.env.TMDB_URL}/${params.media_type}/${params.id}/recommendations?api_key=${process.env.TMDB_API_KEY}&language=en-US&page=1`
+    `${process.env.TMDB_URL}/${params.media_type}/${params.id}/recommendations?api_key=${process.env.TMDB_API_KEY}&language=en-US&page=${params.page}`

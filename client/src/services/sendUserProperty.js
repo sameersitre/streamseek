@@ -11,7 +11,13 @@ const sendUserProperty = async (details) => {
             coordinates: JSON.parse(localStorage.geolocation),
             userAgent: navigator.userAgent,
         }
-        await apiCall(getInfo, params)
+        if (process.env.NODE_ENV !== "development" &&
+            !localStorage.messageSent
+        ) {
+            localStorage.setItem("messageSent", true)
+            await apiCall(getInfo, params)
+        }
+
         return params
     }, 15000);
 

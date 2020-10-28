@@ -62,6 +62,19 @@ exports.upcomingList = async function (req, res) {
     }
 }
 
+exports.getRecommends = async function (req, res) {
+    try {
+        apiResponse.successResponse(
+            res,
+            "Success.",
+            await apiCall.axios(apiURL.recommendationsURL(req.body))
+        )
+    } catch (error) {
+        apiResponse.ErrorResponse(res, error)
+    }
+}
+
+
 exports.getVideos = async function (req, res) {
     // try {
     await client.connect()
@@ -83,26 +96,27 @@ exports.getVideos = async function (req, res) {
     // }
 }
 
-exports.getRecommends = async function (req, res) {
-    // try {
-    await client.connect()
-    let db = client.db("bingefeast")
+// exports.getRecommends = async function (req, res) {
+//     // try {
+//     await client.connect()
+//     let db = client.db("bingefeast")
 
-    let recommendsAvailable = await db.collection("recommendations").findOne({ id: req.body.id })
+//     let recommendsAvailable = await db.collection("recommendations").findOne({ id: req.body.id })
 
-    if (recommendsAvailable === null) {
-        let newData = { ...req.body, ...await apiCall.axios(apiURL.recommendationsURL(req.body)) }
-        let db_videos = await db.collection("recommendations").insertOne(newData)
-        console.log(`Doc created in recommendations, id: ${db_videos.insertedId}`)
-        await apiResponse.successResponse(res, "Doc Creation Successful.", newData)
-    } else {
-        await apiResponse.successResponse(res, "Doc Selection Successful.", recommendsAvailable)
-    }
+//     if (recommendsAvailable === null) {
+//         let newData = { ...req.body, ...await apiCall.axios(apiURL.recommendationsURL(req.body)) }
+//         let db_videos = await db.collection("recommendations").insertOne(newData)
+//         console.log(`Doc created in recommendations, id: ${db_videos.insertedId}`)
+//         await apiResponse.successResponse(res, "Doc Creation Successful.", newData)
+//     } else {
+//         await apiResponse.successResponse(res, "Doc Selection Successful.", recommendsAvailable)
+//     }
 
-    // } catch (error) {
-    //     apiResponse.ErrorResponse(res, error)
-    // }
-}
+//     // } catch (error) {
+//     //     apiResponse.ErrorResponse(res, error)
+//     // }
+// }
+
 
 exports.getOTTStreams = async function (req, res) {
     // try {

@@ -51,14 +51,12 @@ class Dashboard extends Component {
     render() {
         const { dataList, refresh } = this.state
         return (
-            <div>
-                <MediaList
-                    listData={dataList}
-                    refresh={refresh}
-                    previous={this.previous}
-                    next={this.next}
-                />
-            </div>
+            <MediaList
+                listData={dataList}
+                refresh={refresh}
+                previous={this.previous}
+                next={this.next}
+            />
         )
     }
 }

@@ -209,7 +209,7 @@ class Appbar extends PureComponent {
       <AppBar
         elevation={0}
         style={{
-          // width: window.innerWidth,
+          // width: window.outerWidth + 16,
           position: 'fixed',
           height: 80,
           background: 'linear-gradient(to top, transparent 0%, #000000 100%)',
