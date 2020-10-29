@@ -1,4 +1,4 @@
- exports.testURL = (params) =>
+exports.testURL = (params) =>
     `https://api.themoviedb.org/3/discover/movie?api_key=a2d451cdbcf87912820b3b17b82514c3&language=en-US&region=IN&sort_by=popularity.desc&include_adult=false&include_video=false&page=1&primary_release_date.gte=2020-10-22T18%3A42%3A00.155Z`
 
 
@@ -27,6 +27,10 @@ exports.castDetailsURL = (params) =>
 
 exports.actorDetailsURL = (params) =>
     `${process.env.TMDB_URL}/find/${params.actor_id}?api_key=${process.env.TMDB_API_KEY}&language=en-US&external_source=imdb_id`
+
+exports.seasonsURL = (params) =>
+    `${process.env.TMDB_URL}/tv/${params.id}/season/${params.seasonNumber}?api_key=${process.env.TMDB_API_KEY}&language=en-US`
+
 
 exports.externalIDURL = (params) =>
     `${process.env.TMDB_URL}/${params.media_type}/${params.id}/external_ids?api_key=${process.env.TMDB_API_KEY}`

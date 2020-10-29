@@ -74,6 +74,17 @@ exports.getRecommends = async function (req, res) {
     }
 }
 
+exports.getSeasons = async function (req, res) {
+    try {
+        apiResponse.successResponse(
+            res,
+            "Success.",
+            await apiCall.axios(apiURL.seasonsURL(req.body))
+        )
+    } catch (error) {
+        apiResponse.ErrorResponse(res, error)
+    }
+}
 
 exports.getVideos = async function (req, res) {
     // try {
@@ -90,32 +101,8 @@ exports.getVideos = async function (req, res) {
     } else {
         await apiResponse.successResponse(res, "Doc Selection Successful.", mediaAvailable)
     }
-
-    // } catch (error) {
-    //     apiResponse.ErrorResponse(res, error)
-    // }
 }
 
-// exports.getRecommends = async function (req, res) {
-//     // try {
-//     await client.connect()
-//     let db = client.db("bingefeast")
-
-//     let recommendsAvailable = await db.collection("recommendations").findOne({ id: req.body.id })
-
-//     if (recommendsAvailable === null) {
-//         let newData = { ...req.body, ...await apiCall.axios(apiURL.recommendationsURL(req.body)) }
-//         let db_videos = await db.collection("recommendations").insertOne(newData)
-//         console.log(`Doc created in recommendations, id: ${db_videos.insertedId}`)
-//         await apiResponse.successResponse(res, "Doc Creation Successful.", newData)
-//     } else {
-//         await apiResponse.successResponse(res, "Doc Selection Successful.", recommendsAvailable)
-//     }
-
-//     // } catch (error) {
-//     //     apiResponse.ErrorResponse(res, error)
-//     // }
-// }
 
 
 exports.getOTTStreams = async function (req, res) {
@@ -139,14 +126,9 @@ exports.getOTTStreams = async function (req, res) {
     } else {
         await apiResponse.successResponse(res, "Doc Selection Successful.", dataFromDB)
     }
-
-    // } catch (error) {
-    //     apiResponse.ErrorResponse(res, error)
-    // }
 }
 
 exports.getCastDetails = async function (req, res) {
-    // try {
     await client.connect()
     let db = client.db("bingefeast")
 
@@ -162,10 +144,6 @@ exports.getCastDetails = async function (req, res) {
     } else {
         await apiResponse.successResponse(res, "Doc Selection Successful.", dataFromDB)
     }
-
-    // } catch (error) {
-    //     apiResponse.ErrorResponse(res, error)
-    // }
 }
 
 exports.getDetails = async function (req, res) {
@@ -180,7 +158,6 @@ exports.getDetails = async function (req, res) {
             : req.body.media_type === "tv"
                 ? "details_tv"
                 : null
-    // try {
 
     let dbSearch = await db.collection(collectionSelect).findOne({ id: req.body.id })
 
@@ -199,9 +176,6 @@ exports.getDetails = async function (req, res) {
     } else {
         await apiResponse.successResponse(res, "Doc Selection Successful.", dbSearch)
     }
-    // } catch (error) {
-    //     await apiResponse.ErrorResponse(res, error)
-    // }
 }
 
 
@@ -225,8 +199,6 @@ exports.getInfo = async function (req, res) {
 
     await apiResponse.successResponse(res, "Doc Creation Successful.", feedbackData)
 }
-
-
 
 exports.getFeedback = async function (req, res) {
     await client.connect()

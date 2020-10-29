@@ -18,6 +18,8 @@ router.post("/getVideos", BingeController.getVideos)
 
 router.post("/getRecommendations", BingeController.getRecommends)
 
+router.post("/getSeasons", BingeController.getSeasons)
+
 router.post("/getOTTPlatforms", BingeController.getOTTStreams)
 
 router.post("/getCastDetails", BingeController.getCastDetails)
