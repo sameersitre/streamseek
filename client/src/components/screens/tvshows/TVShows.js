@@ -23,14 +23,14 @@ class TVShows extends Component {
     async componentDidMount() {
         window.scrollTo(0, 0)
         this.setState({ refresh: true })
-        let data = { "page": 1, "type": "tv" }
+        let data = { page: 1, media_type: "tv" }
         let apiData = await apiCall(trendingURL, data)
         this.setState({ dataList: apiData.results, refresh: false })
     }
 
     async componentDidUpdate(prevProps) {
         if (this.props.match.params.pageNumber !== this.state.pageNumber) {
-            let data = { "page": this.props.match.params.pageNumber, "type": "tv" }
+            let data = { page: this.props.match.params.pageNumber, media_type: "tv" }
             let apiData = await apiCall(trendingURL, data)
             this.setState({
                 dataList: apiData.results,

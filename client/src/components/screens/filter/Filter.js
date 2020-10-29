@@ -30,7 +30,7 @@ class Filter extends Component {
         })
         let data = {
             page: 1,
-            type: "movie",
+            media_type: "movie",
             genres: this.props.user.genre_filter
         }
         let apiData = await apiCall(filterURL, data)
@@ -43,7 +43,7 @@ class Filter extends Component {
         ) {
             let data = {
                 page: this.props.match.params.pageNumber,
-                type: "movie",
+                media_type: "movie",
                 genres: this.props.user.genre_filter
             }
             let apiData = await apiCall(filterURL, data)

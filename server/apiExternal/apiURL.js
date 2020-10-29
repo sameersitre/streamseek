@@ -3,16 +3,16 @@ exports.testURL = (params) =>
 
 
 exports.trendingURL = (params) =>
-    `${process.env.TMDB_URL}/trending/${params.type}/day?api_key=${process.env.TMDB_API_KEY}&page=${params.page}`
+    `${process.env.TMDB_URL}/trending/${params.media_type}/day?api_key=${process.env.TMDB_API_KEY}&page=${params.page}`
 
 exports.searchURL = (params) =>
     `${process.env.TMDB_URL}/search/multi?api_key=${process.env.TMDB_API_KEY}&language=en-US&query=${params.searchText}&page=${params.page}&include_adult=false`
 
 exports.filterURL = (params) =>
-    `${process.env.TMDB_URL}/discover/${params.type}?api_key=${process.env.TMDB_API_KEY}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=${params.page}&with_genres=${params.genres}`
+    `${process.env.TMDB_URL}/discover/${params.media_type}?api_key=${process.env.TMDB_API_KEY}&language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=${params.page}&with_genres=${params.genres}`
 
 exports.upcomingURL = (params) =>
-    `https://api.themoviedb.org/3/discover/${params.type}?api_key=${process.env.TMDB_API_KEY}&language=en-US&region=${params.region}&sort_by=popularity.desc&include_adult=${params.adult}&include_video=false&page=${params.page}&primary_release_date.gte=${new Date().toISOString()}`
+    `https://api.themoviedb.org/3/discover/${params.media_type}?api_key=${process.env.TMDB_API_KEY}&language=en-US&region=${params.region}&sort_by=popularity.desc&include_adult=${params.adult}&include_video=false&page=${params.page}&primary_release_date.gte=${new Date().toISOString()}`
 
 // `https://api.themoviedb.org/3/movie/now_playing?api_key=a2d451cdbcf87912820b3b17b82514c3&language=en-US&page=${params.page}&region=US`
 

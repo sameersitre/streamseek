@@ -22,14 +22,14 @@ class Dashboard extends Component {
         window.scrollTo(0, 0)
         this.setState({ refresh: true })
         console.log(process.env)
-        let data = { page: 1, type: "all" }
+        let data = { page: 1, media_type: "all" }
         let apiData = await apiCall(trendingURL, data)
         this.setState({ dataList: apiData.results, refresh: false })
     }
 
     async componentDidUpdate(prevProps, prevState) {
         if (this.props.match.params.pageNumber !== this.state.pageNumber) {
-            let data = { "page": this.props.match.params.pageNumber, "type": "all" }
+            let data = { page: this.props.match.params.pageNumber, media_type: "all" }
             let apiData = await apiCall(trendingURL, data)
             this.setState({
                 dataList: apiData.results,

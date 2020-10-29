@@ -24,7 +24,7 @@ class TVShows extends Component {
         window.scrollTo(0, 0)
         this.setState({ refresh: true })
         let data = {
-            page: 1, type: "movie", adult: false,
+            page: 1, media_type: "movie", adult: false,
             region: this.props.match.params.region
         }
         let apiData = await apiCall(upcomingURL, data)
@@ -35,7 +35,7 @@ class TVShows extends Component {
         if (this.props.match.params.pageNumber !== this.state.pageNumber) {
             let data = {
                 page: this.props.match.params.pageNumber,
-                type: "movie", adult: false,
+                media_type: "movie", adult: false,
                 region: this.props.match.params.region
             }
             let apiData = await apiCall(upcomingURL, data)

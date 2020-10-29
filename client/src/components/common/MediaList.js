@@ -17,7 +17,7 @@ class MediaList extends PureComponent {
     render() {
         const { classes, listData, previous, next, refresh } = this.props
         return (
-            <Grid container justify="center" alignItems='flex-start'
+            <Grid container xs={12} justify="center" alignItems='flex-start'
                 spacing={1} style={{
                     paddingTop: 80,
                     minHeight: window.innerHeight
