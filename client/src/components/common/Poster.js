@@ -13,10 +13,10 @@ import CardMedia from '@material-ui/core/CardMedia';
 const styles = (theme) => ({
     root: {
         width: '11rem',
-        height: 300,
+        height: 280,
     },
     media: {
-        height: 300,
+        height: 280,
     },
 });
 export class Poster extends PureComponent {

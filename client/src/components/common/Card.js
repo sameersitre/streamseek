@@ -5,15 +5,11 @@
  * File Description:
  */
 
-import React, { PureComponent } from "react"
-
+import React, { PureComponent } from "react" 
 import { withStyles } from "@material-ui/core/styles"
-import Card from "@material-ui/core/Card"
-
-import CardContent from "@material-ui/core/CardContent"
-
-import Typography from "@material-ui/core/Typography"
-import Chip from "@material-ui/core/Chip"
+import Card from "@material-ui/core/Card" 
+import CardContent from "@material-ui/core/CardContent" 
+import Typography from "@material-ui/core/Typography" 
 import Grid from "@material-ui/core/Grid"
 import moment from "moment"
 import { connect } from "react-redux"
@@ -27,9 +23,13 @@ const styles = (theme) => ({
   },
   CardContent: {
     // display: "flex",
+    width: 140,
+    backgroundColor: 'black',
     flexDirection: "column",
-    position: "relative",
-    paddingLeft: 10
+    position: "absolute",
+    // paddingLeft: 10,
+    borderBottomRightRadius: 5,
+    borderBottomLeftRadius: 5, 
   },
   chipView: {
     display: "flex",
@@ -44,6 +44,7 @@ const styles = (theme) => ({
 class MediaCard extends PureComponent {
   state = {
     genreStrings: [],
+    showCardContent: false,
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
@@ -85,7 +86,7 @@ class MediaCard extends PureComponent {
   }
 
   render() {
-    const { classes } = this.props
+    const { classes, showCardContent, enteredCardID } = this.props
     const { parentData, genreStrings } = this.state
     return (
       <Card className={classes.root}>
@@ -93,58 +94,63 @@ class MediaCard extends PureComponent {
           <Poster data={parentData} />
         </div>
 
-        <CardContent className={classes.CardContent}>
-          <Typography
-            gutterBottom
-            variant="subtitle2"
-            style={{
-              color: "#E5CA49",
-              //  marginTop: -10,
-            }}
-          >
-            {parentData.title || parentData.name}
-          </Typography>
-          <Grid
-            style={{
-              display: "flex",
-              color: "#FFFFFF",
-              flexDirection: "column",
-            }}
-          >
-            <div>
-              {parentData.vote_average !== 0 && (
-                <Typography variant="body2">
-                  {`${parentData.vote_average} (${parentData.vote_count})`}
-                </Typography>
-              )}
-              <Typography variant="body2">
-                {moment(
-                  parentData.release_date ||
-                  parentData.first_air_date
-                ).format("LL")} 
-              </Typography>
-            </div>
-            {/* <div
-              style={{ display: "flex", flexDirection: "row", marginTop: 10 }}
+        {(showCardContent && (enteredCardID === parentData.id)) &&
+          <CardContent className={classes.CardContent}>
+            <Typography
+              gutterBottom
+            variant="caption"
+              style={{
+                color: "#E5CA49",
+                fontSize: 11
+              }}
             >
-              <div className={classes.chipView}>
-                {genreStrings.map((value, i) => (
-                  <Chip
-                    key={i}
-                    size="small"
-                    label={value}
-                    style={{
-                      color: "#000000",
-                      backgroundColor: "#6A6A6A",
-                      height: 20,
-                    }}
-                    component="a"
-                  />
-                ))}
+              {parentData.title || parentData.name}
+            </Typography>
+            <Grid
+              style={{
+                display: "flex",
+                color: "#FFFFFF",
+                flexDirection: "column",
+              }}
+            >
+              <div>
+                {parentData.vote_average !== 0 && (
+                <Typography style={{ fontSize: 11 }}>
+                    {`${parentData.vote_average} (${parentData.vote_count})`}
+                  </Typography>
+                )}
+              <Typography style={{ fontSize: 11 }}>
+                  {moment(
+                    parentData.release_date ||
+                    parentData.first_air_date
+                  ).format("LL")}
+                </Typography>
               </div>
-            </div> */}
-          </Grid>
-        </CardContent>
+            <div
+              style={{ display: "flex", flexDirection: "row", }}
+              >
+                <div className={classes.chipView}>
+                  {genreStrings.map((value, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        display: 'flex', flexDirection: 'row',
+                        alignItems: 'baseline', fontSize: 11
+                      }}>
+                      <Typography style={{ fontSize: 10 }}>{value}&nbsp;</Typography>
+
+                      {i + 1 !== genreStrings.length ?
+                        (
+                          <Typography style={{ color: '#757575', fontSize: 10 }}>
+                            &nbsp;|
+                          </Typography>
+                        ) : null}
+                    </div>
+                  ))}
+                </div>
+            </div>
+            </Grid>
+          </CardContent>}
       </Card>
     )
   }

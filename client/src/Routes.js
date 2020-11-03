@@ -5,8 +5,7 @@
   * File Description:  
  */
 import React from 'react';
-import { Route, Switch, withRouter, Redirect } from 'react-router-dom';
-import Appbar from './components/Appbar/Appbar';
+import { Route, Switch, withRouter, Redirect } from 'react-router-dom'; 
 import Dashboard from './components/screens/dashboard/Dashboard';
 import Movies from './components/screens/movies/Movies';
 import TVShows from './components/screens/tvshows/TVShows.js';
