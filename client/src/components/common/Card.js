@@ -5,11 +5,11 @@
  * File Description:
  */
 
-import React, { PureComponent } from "react" 
+import React, { PureComponent } from "react"
 import { withStyles } from "@material-ui/core/styles"
-import Card from "@material-ui/core/Card" 
-import CardContent from "@material-ui/core/CardContent" 
-import Typography from "@material-ui/core/Typography" 
+import Card from "@material-ui/core/Card"
+import CardContent from "@material-ui/core/CardContent"
+import Typography from "@material-ui/core/Typography"
 import Grid from "@material-ui/core/Grid"
 import moment from "moment"
 import { connect } from "react-redux"
@@ -20,6 +20,7 @@ const styles = (theme) => ({
   root: {
     width: "11rem",
     backgroundColor: "#101010",
+
   },
   CardContent: {
     // display: "flex",
@@ -29,7 +30,7 @@ const styles = (theme) => ({
     position: "absolute",
     // paddingLeft: 10,
     borderBottomRightRadius: 5,
-    borderBottomLeftRadius: 5, 
+    borderBottomLeftRadius: 5,
   },
   chipView: {
     display: "flex",
@@ -89,7 +90,10 @@ class MediaCard extends PureComponent {
     const { classes, showCardContent, enteredCardID } = this.props
     const { parentData, genreStrings } = this.state
     return (
-      <Card className={classes.root}>
+      <Card className={classes.root} style={{
+        boxShadow: enteredCardID === parentData.id ?
+          '0 4px 15px 0 rgba(0, 0, 0, 0.6), 0 6px 20px 0 rgba(0, 0, 0, 0.19)' : 'none',
+      }}>
         <div onClick={() => this.cardClick()}>
           <Poster data={parentData} />
         </div>
@@ -98,7 +102,7 @@ class MediaCard extends PureComponent {
           <CardContent className={classes.CardContent}>
             <Typography
               gutterBottom
-            variant="caption"
+              variant="caption"
               style={{
                 color: "#E5CA49",
                 fontSize: 11
@@ -115,19 +119,19 @@ class MediaCard extends PureComponent {
             >
               <div>
                 {parentData.vote_average !== 0 && (
-                <Typography style={{ fontSize: 11 }}>
+                  <Typography style={{ fontSize: 11 }}>
                     {`${parentData.vote_average} (${parentData.vote_count})`}
                   </Typography>
                 )}
-              <Typography style={{ fontSize: 11 }}>
+                <Typography style={{ fontSize: 11 }}>
                   {moment(
                     parentData.release_date ||
                     parentData.first_air_date
                   ).format("LL")}
                 </Typography>
               </div>
-            <div
-              style={{ display: "flex", flexDirection: "row", }}
+              <div
+                style={{ display: "flex", flexDirection: "row", }}
               >
                 <div className={classes.chipView}>
                   {genreStrings.map((value, i) => (
@@ -148,7 +152,7 @@ class MediaCard extends PureComponent {
                     </div>
                   ))}
                 </div>
-            </div>
+              </div>
             </Grid>
           </CardContent>}
       </Card>
