@@ -24,8 +24,8 @@ const styles = (theme) => ({
   },
   CardContent: {
     // display: "flex",
-    width: 140,
-    backgroundColor: 'black',
+    width: "9rem",
+        backgroundColor: 'black',
     flexDirection: "column",
     position: "absolute",
     // paddingLeft: 10,
