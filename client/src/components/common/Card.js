@@ -24,11 +24,11 @@ const styles = (theme) => ({
   },
   CardContent: {
     // display: "flex",
-    width: "9rem",
+    width: 165,
         backgroundColor: 'black',
     flexDirection: "column",
     position: "absolute",
-    // paddingLeft: 10,
+    padding: 5,
     borderBottomRightRadius: 5,
     borderBottomLeftRadius: 5,
   },

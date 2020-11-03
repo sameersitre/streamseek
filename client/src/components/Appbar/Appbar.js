@@ -191,8 +191,7 @@ class Appbar extends PureComponent {
     for (let i = 0; i < data.length; i++) {
       genreArray.push(data[i].id)
     }
-    let genreString = genreArray.join("%2C");
-    // let params = { genres: genreString }
+    let genreString = genreArray.join("%2C"); 
     this.props.filterMovieData(genreString)
     this.props.history.push("/filter/page1")
   }

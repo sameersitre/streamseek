@@ -5,7 +5,7 @@
   * File Description:  
  */
 
-import React, { PureComponent } from 'react' 
+import React, { PureComponent } from 'react'
 import { withStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardActionArea from '@material-ui/core/CardActionArea';
@@ -22,16 +22,13 @@ const styles = (theme) => ({
 export class Poster extends PureComponent {
     render() {
         const { classes, data } = this.props;
-         return (
+        return (
             <Card className={classes.root}>
                 <CardActionArea>
                     <CardMedia
                         className={classes.media}
-                         image={`https://image.tmdb.org/t/p/w500${data.poster_path}`}
-                         title={`Original Title: ${data.original_name
-                            ||
-                             data.original_title}`
-                        }
+                        image={`https://image.tmdb.org/t/p/w300${data.poster_path}`}
+                        // title={`Original Title: ${data.original_name || data.original_title}`}
                     />
                 </CardActionArea>
             </Card>

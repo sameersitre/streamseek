@@ -39,7 +39,7 @@ class MediaList extends PureComponent {
                         display: 'flex', alignSelf: 'center',
                         justifyContent: 'center',
                         paddingTop: 80,
-                        minHeight: window.innerHeight, 
+                        minHeight: window.innerHeight,
                     }}>
                     <Backdrop className={classes.backdrop} open={refresh}  >
                         <CircularProgress color="inherit" />
@@ -48,7 +48,7 @@ class MediaList extends PureComponent {
                     {listData?.map((value, i) => (
                         <motion.div
                             style={{ margin: 5 }}
-                            whileHover={{ scale: 1.2, zIndex: 1, delay: 100 }}
+                            whileHover={{ scale: 1.3, zIndex: 1, }}
                             whileTap={{ scale: 0.9 }}
                             onMouseEnter={() => this.handleBoxTrue(value.id)}
                             onMouseLeave={() => this.handleBoxFalse(value.id)}  >
@@ -67,9 +67,9 @@ class MediaList extends PureComponent {
 
 
                 </Grid>
-                  {listData?.length > 0 &&
-                        <Footer />
-                    }
+                {listData?.length > 0 &&
+                    <Footer />
+                }
             </div>
         )
     }
