@@ -21,11 +21,11 @@ function Recommends(props) {
     }, [props.parentData.id]);
 
 
-    function cardClick(params) {
-        event_GAnalytics("Card", "Click", params)
+    function cardClick() {
+        event_GAnalytics("Card", "Click", cardSelected)
         localStorage.setItem(
             "selectedMovieDetails",
-            JSON.stringify(params)
+            JSON.stringify(cardSelected)
         )
         props.history.push({ pathname: `/details` })
     }
@@ -39,7 +39,7 @@ function Recommends(props) {
                         item.poster_path ?
                             <div key={i}
                                 className="maincard"
-                                onClick={() => cardClick(item)}
+                                onClick={() => setcardSelected(item)}
                             >
                                 <img
                                     className="poster"
