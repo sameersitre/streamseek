@@ -31,15 +31,7 @@ const styles = (theme) => ({
     padding: 5,
     borderBottomRightRadius: 5,
     borderBottomLeftRadius: 5,
-  },
-  chipView: {
-    display: "flex",
-    justifyContent: "flex-start",
-    flexWrap: "wrap",
-    "& > *": {
-      margin: theme.spacing(0.3),
-    },
-  },
+  }
 })
 
 class MediaCard extends PureComponent {
@@ -91,15 +83,20 @@ class MediaCard extends PureComponent {
     const { parentData, genreStrings } = this.state
     return (
       <Card className={classes.root} style={{
-        boxShadow: enteredCardID === parentData.id ?
-          '0 4px 15px 0 rgba(0, 0, 0, 0.6), 0 6px 20px 0 rgba(0, 0, 0, 0.19)' : 'none',
+        boxShadow: enteredCardID === parentData.id &&
+          '0 4px 15px 0 rgba(0, 0, 0, 0.6), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
       }}>
         <div onClick={() => this.cardClick()}>
           <Poster data={parentData} />
         </div>
 
         {(showCardContent && (enteredCardID === parentData.id)) &&
-          <CardContent className={classes.CardContent}>
+          <CardContent
+            style={{
+              boxShadow: enteredCardID === parentData.id &&
+                '0 4px 15px 0 rgba(0, 0, 0, 0.6), 0 6px 20px 0 rgba(0, 0, 0, 0.19)'
+            }}
+            className={classes.CardContent}>
             <Typography
               gutterBottom
               variant="caption"

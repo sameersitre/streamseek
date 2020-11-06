@@ -9,30 +9,24 @@ import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { withRouter } from 'react-router-dom';
 import { withStyles } from '@material-ui/core/styles';
-import Chip from '@material-ui/core/Chip';
-import Tooltip from '@material-ui/core/Tooltip';
-import CardMedia from '@material-ui/core/CardMedia';
 import Backdrop from '@material-ui/core/Backdrop';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Grid from '@material-ui/core/Grid';
 import Poster from './Poster';
-import SideDetails from './SideDetails';
 import Typography from '@material-ui/core/Typography';
 import moment from 'moment';
 import apiCall from '../../../services/apiCall';
 import { getVideosURL, getDetailsURL, getOTTPlatformsURL } from '../../../services/apiURL'
-
+import Cast from './Cast'
+import Background from './Background'
+import Streams from './Streams'
+import Overview from './Overview'
+import Videos from './Videos';
+import Recommends from './Recommends'
 const styles = (theme) => ({
     root: {
-        width: window.innerWidth,
-        // height: window.innerHeight  ,
-        margin: 0,
-        backgroundColor: 'grey'
-    },
-    media: {
-        width: window.innerWidth,
-        height: window.innerHeight,
-        backgroundSize: 'cover'
+        display: 'flex',
+        color: '#FFFFFF',
     },
     backdrop: {
         zIndex: theme.zIndex.drawer + 1,
@@ -43,163 +37,133 @@ const styles = (theme) => ({
         justifyContent: 'flex-start',
         marginTop: 10,
         flexWrap: 'wrap',
-        '& > *': {
-            margin: theme.spacing(0.3),
-        },
     },
 });
 class MovieDetails extends Component {
-
     state = {
         movieData: [],
-        videoData: [],
-        streamAvailablity: [],
-        refresh: false
+        videoData: null,
+        streamAvailablity: null,
+        refresh: false,
+        apiParams: []
     }
-
     async componentDidMount() {
         window.scrollTo(0, 0)
-        console.log(this.props)
         this.setState({ refresh: true })
         let storData = JSON.parse(await localStorage.selectedMovieDetails)
-        let data = { id: storData.id, media_type: storData.media_type ? storData.media_type : "movie" }
+        let params = {
+            id: storData.id,
+            media_type: storData.media_type ? storData.media_type : "movie"
+        }
+
+        this.setState({ movieData: await apiCall(getDetailsURL, params), apiParams: params, refresh: false, })
         this.setState({
-            movieData: await apiCall(getDetailsURL, data),
-            refresh: false,
-        })
-        this.setState({
-            videoData: await apiCall(getVideosURL, data),
-            streamAvailablity: await apiCall(getOTTPlatformsURL, data),
+            videoData: await apiCall(getVideosURL, params),
+            streamAvailablity: await apiCall(getOTTPlatformsURL, params),
         })
     }
     render() {
 
         const { classes } = this.props;
-        const { movieData, streamAvailablity, refresh } = this.state;
+        const { movieData, videoData, streamAvailablity, refresh, apiParams } = this.state;
 
         return (
-            <Grid item xs={12} display="flex" style={{ color: '#FFFFFF', backgroundColor: '#1B1A20', }}>
+            <div className={classes.root}  >
                 <Backdrop className={classes.backdrop} open={refresh}  >
                     <CircularProgress color="inherit" />
                 </Backdrop>
-                <Grid
-                    style={{
-                        display: 'flex', position: 'relative',
-                    }}
-                >
-                    {/* BACKGROUND IMAGE */}
-                    <CardMedia
-                        className={classes.media}
-                        image={`https://image.tmdb.org/t/p/w500${movieData?.backdrop_path}`}
-                    />
 
-                    {/* BACKGROUND LINEAR GRADIENT */}
+                <Background backdropPath={movieData?.backdrop_path} />
+
+                <Grid style={{
+                    position: 'absolute',
+                    width: '95vw', margin: 10, marginTop: 50,
+                }}
+                >
+
+                    {/*  TITLE + TAGLINE */}
+                    <Grid
+                        style={{
+                            display: 'flex', flexDirection: 'column',
+                            alignItems: 'flex-start',
+                        }} >
+                        <Typography gutterBottom variant="h6" style={{ color: '#E5CA49', }}  >
+                            {movieData.title || movieData.name}
+                        </Typography>
+                        {movieData.tagline &&
+                            <Typography gutterBottom variant="body2"
+                                style={{ color: '#E5CA49' }}>
+                                {movieData.tagline}
+                            </Typography>
+                        }
+                    </Grid>
+
                     <div
                         style={{
-                            position: 'absolute',
-                            backgroundSize: 'cover',
-                            width: window.innerWidth - 25,
-                            height: window.innerHeight,
-                            background: 'linear-gradient(to left, transparent 0%, black 80%)'
-                        }} >
+                            display: 'flex', flexDirection: 'row',
+                        }}>
+                        <Poster data={movieData} />
+                        <Grid
+                            style={{ margin: 5 }}
+                        >
+                            <a style={{
+                                display: 'flex', flexDirection: 'row', alignItems: 'center',
+                                color: '#FFFFFF', textDecoration: 'none',
+                            }}
+                                href={`https://www.imdb.com/title/${movieData.imdb_id}`} target="_blank" rel="noopener noreferrer"
+                            >
+                                <img src={require('../../../assets/Icons/imdb.png')} alt="Smiley face" height="28" width="28" />
+                                {movieData.vote_average > 0
+                                    ?
+                                    <Typography variant="body2" xs={12}  >
+                                        &nbsp;&nbsp;{`${movieData.vote_average} (${movieData.vote_count})`}
+                                    </Typography>
+                                    :
+                                    <Typography variant="body2">&nbsp;&nbsp;NA</Typography>
+                                }
+                            </a>
+                            <Typography variant="body2"   >
+                                {moment(movieData.release_date
+                                    ||
+                                    movieData.first_air_date).format('ll')
+                                } (USA)
+                                        </Typography>
+                            <Typography variant="body2" style={{ marginTop: 10 }}  >
+                                {movieData.runtime || movieData.episode_run_time} mins
+                                        </Typography>
+                            <div className={classes.chipView} >
+                                {movieData.genres && movieData.genres.map((value, i) =>
+                                    <div key={i}
+                                        style={{
+                                            display: 'flex',
+                                            flexDirection: 'row',
+                                            alignItems: 'baseline'
+                                        }}>
+                                        <Typography variant="body2">{value.name}&nbsp;
+                                            </Typography>
+                                        {i + 1 !== movieData.genres.length ? (
+                                            <Typography variant="body2"
+                                                style={{ color: '#757575' }}>
+                                                |&nbsp;
+                                            </Typography>
+                                        ) : null}
+                                    </div>
+                                )}
+                            </div>
+                        </Grid>
                     </div>
 
-                    <Grid style={{ position: 'absolute', margin: 10, marginTop: 50 }} >
+                    {streamAvailablity && <Streams parentData={streamAvailablity} />}
 
-                        {/*  TITLE + TAGLINE */}
-                        <Grid item xs={12} sm={12}
-                            style={{
-                                display: 'flex', flexDirection: 'column',
-                                alignItems: 'flex-start',
-                                // backgroundColor: 'pink',
-                            }} >
-                            <Typography gutterBottom variant="h6" style={{ color: '#E5CA49', }}  >
-                                {movieData.title || movieData.name}
-                            </Typography>
-                            {movieData.tagline &&
-                                <Typography gutterBottom variant="body2"
-                                    style={{ color: '#E5CA49' }}>
-                                    {movieData.tagline}
-                                </Typography>
-                            }
-                        </Grid>
+                    {movieData && <Overview parentData={movieData} />}
 
-                        <div
-                            style={{
-                                display: 'flex', flexDirection: 'row',
-                            }}>
-                            <Poster data={movieData} />
-                            <Grid
-                                style={{ margin: 5 }}
-                            >
-                                <a style={{
-                                    display: 'flex', flexDirection: 'row', alignItems: 'center',
-                                    color: '#FFFFFF', textDecoration: 'none',
-                                }}
-                                    href={`https://www.imdb.com/title/${movieData.imdb_id}`} target="_blank" rel="noopener noreferrer"
-                                >
-                                    <img src={require('../../../assets/Icons/imdb.png')} alt="Smiley face" height="28" width="28" />
-                                    {movieData.vote_average > 0
-                                        ?
-                                        <Typography variant="body2" xs={12}  >
-                                            &nbsp;&nbsp;{`${movieData.vote_average} (${movieData.vote_count})`}
-                                        </Typography>
-                                        :
-                                        <Typography variant="body2">&nbsp;&nbsp;NA</Typography>
-                                    }
-                                </a>
-                                <Typography variant="body2"   >
-                                    {moment(movieData.release_date
-                                        ||
-                                        movieData.first_air_date).format('ll')
-                                    } (USA)
-                                        </Typography>
-                                <Typography variant="body2" style={{ marginTop: 10 }}  >
-                                    {movieData.runtime || movieData.episode_run_time} mins
-                                        </Typography>
-                                <div className={classes.chipView} >
-                                    {movieData.genres && movieData.genres.map((value, i) =>
-                                        <Chip
-                                            key={i}
-                                            size="small"
-                                            label={value.name}
-                                            component="a"
-                                            variant="outlined"
-                                            style={{ color: '#FFFFFF', backgroundColor: '#5A5A5A' }}
-                                            href="#chip" clickable />
-                                    )}
-                                </div>
+                    {videoData && <Videos videoData={videoData} />}
 
-                                {/* streaming icons */}
-                                <Grid
-                                    style={{
-                                        color: '#FFFFFF', alignItems: 'baseline',
-                                        textDecoration: 'none',
-                                    }}>
-                                    {streamAvailablity.platforms && streamAvailablity.platforms.map((value, i) =>
-                                        <Tooltip
-                                            title={''}
-                                            key={i}
-                                            placement="bottom-end"
-                                            aria-label="add">
-                                            <a style={{ margin: 10 }}
-                                                href={value.url} target="_blank" rel="noopener noreferrer"  >
-                                                <img src={value.icon} alt="Smiley face" width="70" />
-                                            </a>
-                                        </Tooltip>
-                                    )}
-                                </Grid>
-                            </Grid>
+                    {apiParams && <Cast parentData={apiParams} />}
+                    {apiParams && <Recommends parentData={apiParams} history={this.props.history} />}
 
-                        </div>
-                        <SideDetails
-                            movieData={movieData}
-                            videoData={this.state.videoData}
-                            streamAvailablity={this.state.streamAvailablity}
-                        />
-                    </Grid>
                 </Grid>
-            </Grid>
+            </div>
         )
     }
 }

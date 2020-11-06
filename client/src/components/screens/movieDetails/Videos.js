@@ -4,8 +4,6 @@
   * https://github.com/sameersitre
   * File Description:  
  */
-
-
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { withStyles } from '@material-ui/core/styles';
@@ -64,9 +62,8 @@ class SideDetails extends Component {
 
     static getDerivedStateFromProps(nextProps, prevState) {
 
-        if (nextProps.movieData) {
+        if (nextProps.videoData) {
             return {
-                movieData: nextProps.movieData,
                 videoData: nextProps.videoData.results,
             }
         }
@@ -104,8 +101,7 @@ class SideDetails extends Component {
                     flexDirection: 'column',
                     justifyItems: 'space-between',
                     alignContent: 'flex-start',
-                    color: '#FFFFFF', marginLeft: 10,//backgroundColor:'pink',
-                    // height: '25rem'
+                    color: '#FFFFFF',
                 }}>
                 <Popover
                     id="mouse-over-popover"
@@ -158,22 +154,18 @@ class SideDetails extends Component {
                     />
                 </Dialog>
 
-                <Grid
-                    item
-                    xs={12} sm={6}
+                <Grid item
                     style={{
                         overflow: 'hidden',
-                        height: 250,
-                    }}
-                    container className={classes.buttons} spacing={1} >
-                    {/* OVERVIEW */}
-                    <Typography variant="body2" style={{ marginTop: 10 }}   >
-                        &nbsp;{this.state.movieData.overview}
-                    </Typography>
+                        marginTop: 15
+                    }}>
+
+                    <Typography style={{ marginTop: 10 }} variant="subtitle2">
+                        Trailers/Videos:</Typography>
                     <div
                         style={{
                             overflow: 'auto',
-                            height: 150,
+                            maxHeight: 100,
                         }}
                     >
                         {this.state.videoData && this.state.videoData.slice(0, 30).map((value, i) =>

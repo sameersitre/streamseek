@@ -1,0 +1,38 @@
+.root{
+    display: flex;
+    /* flex-direction: 'row'; */
+    align-items: inherit;
+    /* width: 600px; */
+    overflow-x: scroll;
+    overflow-y: hidden;
+    scrollbar-width:none;
+    flex-wrap: nowrap;
+    /* background-color: aquamarine; */
+}
+
+
+.maincard{
+    flex: 0 0 auto;
+    width: 125px;
+    height: fit-content;
+    margin: 7px;
+    background-color: rgba(192,192,192, 0.2);
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    border-radius: 5px;
+
+}
+
+.poster{
+    width: 125px;
+    height: 180px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+.castinfo{
+    margin: 5px;
+}
+
+.root::-webkit-scrollbar{
+display: none;
+}

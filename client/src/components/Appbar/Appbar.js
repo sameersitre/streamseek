@@ -207,8 +207,7 @@ class Appbar extends PureComponent {
 
       <AppBar
         elevation={0}
-        style={{
-          // width: window.outerWidth + 16,
+        style={{ 
           position: 'fixed',
           height: 80,
           background: 'linear-gradient(to top, transparent 0%, #000000 100%)',
@@ -226,7 +225,7 @@ class Appbar extends PureComponent {
           fullScreen
           disableBackdropClick
           disableEscapeKeyDown
-          open={this.state.restrictDisplay}
+        //  open={this.state.restrictDisplay}
           style={{ width: '85%', height: '85%', margin: 'auto' }}
         >
           <div style={{
