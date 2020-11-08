@@ -23,7 +23,7 @@ function Recommends(props) {
         async function fetchData() {
             let params = { ...props.parentData, page: 1 }
             let recommendsList = params.id && await apiCall(getRecommendationsURL, params)
-            setRecommendsList(recommendsList)
+            setRecommendsList(recommendsList.results)
         }
         fetchData();
     }, [props.parentData.id]);
@@ -43,33 +43,38 @@ function Recommends(props) {
 
     return (recommendsList ?
         <Grid style={{ marginTop: 15, marginBottom: 25, }}   >
-            <Typography variant="subtitle2">Recommendations:</Typography>
-            <div style={{ display: 'flex', alignSelf: 'center' }}>
-                <Hidden xsDown>
-                    <Button style={{ backgroundColor: 'rgba(192,192,192, 0.2)', color: '#FFFFFF', minWidth: 20 }} onClick={() => scroll(-250)}><ArrowBackIos /></Button>
-                </Hidden>
-                <div className='rec-root' ref={myRef}>
-                    {
-                        recommendsList?.results.map((item, i) =>
-                            item.poster_path ?
-                                <div key={i}
-                                    className="rec-maincard"
-                                    onClick={() => setcardSelected(item)}
-                                >
-                                    <img
-                                        className="rec-poster"
-                                        src={`https://image.tmdb.org/t/p/w500${item.poster_path}`}
-                                    // alt="cast Image"
-                                    />
-                                </div> : null
-                        )
+            {recommendsList?.length > 0 &&
+                <div>
+                    <Typography variant="subtitle2">Recommendations:</Typography>
+                    <div style={{ display: 'flex', alignSelf: 'center' }}>
+                        <Hidden xsDown>
+                        <Button style={{ backgroundColor: 'rgba(192,192,192, 0.2)', color: '#FFFFFF' }} onClick={() => scroll(-250)}><ArrowBackIos /></Button>
+                        </Hidden>
+                        <div className='rec-root' ref={myRef}>
+                            {
+                            recommendsList?.map((item, i) =>
+                                    item.poster_path ?
+                                        <div key={i}
+                                            className="rec-maincard"
+                                            onClick={() => setcardSelected(item)}
+                                        >
+                                            <img
+                                                className="rec-poster"
+                                                src={`https://image.tmdb.org/t/p/w500${item.poster_path}`}
+                                            // alt="cast Image"
+                                            />
+                                        </div> : null
+                                )
 
-                    }
+                            }
+                        </div>
+                        <Hidden xsDown>
+                        <Button style={{ backgroundColor: 'rgba(192,192,192, 0.2)', zIndex: 5, color: '#FFFFFF' }} onClick={() => scroll(+250)}><ArrowForwardIos /></Button>
+                        </Hidden>
+                    </div>
                 </div>
-                <Hidden xsDown>
-                    <Button style={{ backgroundColor: 'rgba(192,192,192, 0.2)', zIndex: 5, color: '#FFFFFF', minWidth: 20 }} onClick={() => scroll(+250)}><ArrowForwardIos /></Button>
-                </Hidden>
-            </div>
+            }
+
         </Grid>
         :
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 100 }} >

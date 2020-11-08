@@ -21,6 +21,8 @@ import Cast from './Cast'
 import Background from './Background'
 import Streams from './Streams'
 import Overview from './Overview'
+import Videos from './Videos';
+
 import Recommends from './Recommends'
 const styles = (theme) => ({
     root: {
@@ -63,7 +65,7 @@ class MovieDetails extends Component {
     render() {
 
         const { classes } = this.props;
-        const { detailsData, refresh, apiParams } = this.state;
+        const { detailsData, refresh, videoData, apiParams } = this.state;
 
         return (
             detailsData !== null ?
@@ -153,7 +155,7 @@ class MovieDetails extends Component {
 
                         {detailsData && <Overview parentData={detailsData} />}
 
-                        {/* {videoData && <Videos videoData={videoData} />} */}
+                        {videoData && <Videos videoData={videoData} />}
 
                         {apiParams && <Cast parentData={apiParams} />}
                         {apiParams && <Recommends parentData={apiParams} history={this.props.history} />}

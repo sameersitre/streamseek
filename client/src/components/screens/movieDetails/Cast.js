@@ -37,7 +37,7 @@ function Cast(props) {
                             <Hidden xsDown>
                             <Button style={{
                                 backgroundColor: 'rgba(192,192,192, 0.2)',
-                                color: '#FFFFFF', minWidth: 20
+                                color: '#FFFFFF'
                             }} onClick={() => scroll(-250)}><ArrowBackIos /></Button>
                             </Hidden>
                             <div className='root' ref={myRef}>
@@ -61,7 +61,7 @@ function Cast(props) {
                                 }
                             </div>
                             <Hidden xsDown>
-                            <Button style={{ backgroundColor: 'rgba(192,192,192, 0.2)', color: '#FFFFFF', minWidth: 20 }} onClick={() => scroll(+250)}><ArrowForwardIos /></Button>
+                            <Button style={{ backgroundColor: 'rgba(192,192,192, 0.2)', color: '#FFFFFF' }} onClick={() => scroll(+250)}><ArrowForwardIos /></Button>
                             </Hidden>
                         </div>
                     </div>}
