@@ -46,7 +46,7 @@ function Recommends(props) {
             <Typography variant="subtitle2">Recommendations:</Typography>
             <div style={{ display: 'flex', alignSelf: 'center' }}>
                 <Hidden xsDown>
-                    <Button style={{ backgroundColor: 'rgba(192,192,192, 0.2)', color: '#FFFFFF' }} onClick={() => scroll(-250)}><ArrowBackIos /></Button>
+                    <Button style={{ backgroundColor: 'rgba(192,192,192, 0.2)', color: '#FFFFFF', minWidth: 20 }} onClick={() => scroll(-250)}><ArrowBackIos /></Button>
                 </Hidden>
                 <div className='rec-root' ref={myRef}>
                     {
@@ -67,7 +67,7 @@ function Recommends(props) {
                     }
                 </div>
                 <Hidden xsDown>
-                    <Button style={{ backgroundColor: 'rgba(192,192,192, 0.2)', color: '#FFFFFF' }} onClick={() => scroll(+250)}><ArrowForwardIos /></Button>
+                    <Button style={{ backgroundColor: 'rgba(192,192,192, 0.2)', zIndex: 5, color: '#FFFFFF', minWidth: 20 }} onClick={() => scroll(+250)}><ArrowForwardIos /></Button>
                 </Hidden>
             </div>
         </Grid>

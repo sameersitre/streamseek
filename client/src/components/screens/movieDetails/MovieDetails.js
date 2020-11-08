@@ -73,7 +73,7 @@ class MovieDetails extends Component {
                     <Background backdropPath={detailsData?.backdrop_path} />
                     <Grid style={{
                         position: 'absolute',
-                        width: '97vw', marginTop: 50,
+                        width: '97vw', marginTop: 50, padding: 10
                     }}
                     >
 

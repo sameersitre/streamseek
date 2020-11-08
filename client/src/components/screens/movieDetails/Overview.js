@@ -5,8 +5,8 @@ function Overview(props) {
     const { overview } = props.parentData
     return (
         <div>
-            <Typography variant="subtitle2">Overview:</Typography>
-            <Typography variant="body2" style={{ marginTop: 10 }}>
+            <Typography style={{ marginTop: 10 }} variant="subtitle2">Overview:</Typography>
+            <Typography variant="body2">
                 &nbsp;{overview}
             </Typography>
         </div>

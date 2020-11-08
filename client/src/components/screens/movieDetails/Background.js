@@ -16,14 +16,14 @@ function Background(props) {
         <div>
             <CardMedia
                 className={classes.media}
-                image={`https://image.tmdb.org/t/p/w500${props.backdropPath}`}
+                image={`https://image.tmdb.org/t/p/original${props.backdropPath}`}
             />
 
             {/* BACKGROUND LINEAR GRADIENT */}
             <div
                 className={classes.media}
                 style={{
-                    background: 'linear-gradient(to left, transparent 0%, black 80%)',
+                    background: 'linear-gradient(to bottom, transparent 0%, black 70%)',
                     position: 'fixed'
                 }} >
             </div>

@@ -21,7 +21,7 @@ function Streams(props) {
     }, [props.parentData.id]);
 
 
-    return (
+    return ((streamsList?.length > 0) ?
         <Grid
             style={{
                 color: '#FFFFFF', alignItems: 'baseline',
@@ -41,7 +41,7 @@ function Streams(props) {
                     </a>
                 </Tooltip>
             )}
-        </Grid>
+        </Grid> : null
     )
 }
 

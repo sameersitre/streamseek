@@ -210,7 +210,7 @@ class Appbar extends PureComponent {
         style={{ 
           position: 'fixed',
           height: 80,
-          background: 'linear-gradient(to top, transparent 0%, #000000 100%)',
+          background: 'linear-gradient(to top, transparent 0%, rgba(0, 0, 0, 0.9) 100%)',
           backgroundColor: 'none'
         }
         }>
