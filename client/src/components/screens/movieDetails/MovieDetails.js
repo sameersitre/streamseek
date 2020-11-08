@@ -32,6 +32,12 @@ const styles = (theme) => ({
         zIndex: theme.zIndex.drawer + 1,
         color: '#fff',
     },
+    chipView: {
+        display: 'flex',
+        justifyContent: 'flex-start',
+        marginTop: 10,
+        flexWrap: 'wrap',
+    },
 });
 class MovieDetails extends Component {
     state = {
@@ -71,7 +77,7 @@ class MovieDetails extends Component {
 
                 <Grid style={{
                     position: 'absolute',
-                    width: '100vw', marginTop: 50,
+                    width: '97vw', marginTop: 50,
                 }}
                 >
 
@@ -97,8 +103,8 @@ class MovieDetails extends Component {
                             display: 'flex', flexDirection: 'row',
                         }}>
                         <Poster data={movieData} />
-                        <Grid
-                            style={{ margin: 5 }}
+                        <Grid 
+                            style={{ margin: 5, flexDirection: 'row' }}
                         >
                             <a style={{
                                 display: 'flex', flexDirection: 'row', alignItems: 'center',
@@ -109,7 +115,7 @@ class MovieDetails extends Component {
                                 <img src={require('../../../assets/Icons/imdb.png')} alt="Smiley face" height="28" width="28" />
                                 {movieData.vote_average > 0
                                     ?
-                                    <Typography variant="body2" xs={12}  >
+                                    <Typography variant="body2"   >
                                         &nbsp;&nbsp;{`${movieData.vote_average} (${movieData.vote_count})`}
                                     </Typography>
                                     :
@@ -151,7 +157,7 @@ class MovieDetails extends Component {
 
                     {movieData && <Overview parentData={movieData} />}
 
-                    {videoData && <Videos videoData={videoData} />}
+                    {/* {videoData && <Videos videoData={videoData} />} */}
 
                     {apiParams && <Cast parentData={apiParams} />}
                     {apiParams && <Recommends parentData={apiParams} history={this.props.history} />}

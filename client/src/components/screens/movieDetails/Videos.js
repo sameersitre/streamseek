@@ -98,10 +98,12 @@ class SideDetails extends Component {
         return (
             <div
                 style={{
+                    display: 'flex',
                     flexDirection: 'column',
                     justifyItems: 'space-between',
                     alignContent: 'flex-start',
                     color: '#FFFFFF',
+                    width: '90vw'
                 }}>
                 <Popover
                     id="mouse-over-popover"

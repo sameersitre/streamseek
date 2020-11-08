@@ -1,4 +1,4 @@
-.root{
+.rec-root{
     display: flex;
     /* flex-direction: 'row'; */
     align-items: inherit;
@@ -11,14 +11,14 @@
     background-color: rgba(192,192,192, 0.2);
 }
 
-.root::-webkit-scrollbar{
+.rec-root::-webkit-scrollbar{
 display: none;
 }
 
-.maincard{
+.rec-maincard{
     flex: 0 0 auto;
-    width: 125px;
-    height: fit-content;
+    /* width: 130px; */
+    height: 190px;
     margin: 7px;
     background-color: rgba(192,192,192, 0.2);
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
@@ -26,14 +26,13 @@ display: none;
 
 }
 
-.poster{
-    width: 125px;
-    height: 180px;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
+.rec-poster{
+    width: 130px;
+    height: 190px;
+    border-radius: 5px;
 }
 
-.castinfo{
+.rec-castinfo{
     margin: 5px;
 }
 
