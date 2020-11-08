@@ -2,7 +2,7 @@
     display: flex;
     /* flex-direction: 'row'; */
     align-items: inherit;
-    /* width: 600px; */
+    width: -webkit-fill-available;
     overflow-x: scroll;
     overflow-y: hidden;
     scrollbar-width:none;
