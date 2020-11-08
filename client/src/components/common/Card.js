@@ -23,9 +23,9 @@ const styles = (theme) => ({
 
   },
   CardContent: {
-    // display: "flex",
+    display: "flex",
     width: 165,
-        backgroundColor: 'black',
+    backgroundColor: 'black',
     flexDirection: "column",
     position: "absolute",
     padding: 5,
@@ -94,7 +94,8 @@ class MediaCard extends PureComponent {
           <CardContent
             style={{
               boxShadow: enteredCardID === parentData.id &&
-                '0 4px 15px 0 rgba(0, 0, 0, 0.6), 0 6px 20px 0 rgba(0, 0, 0, 0.19)'
+              '0 4px 15px 0 rgba(0, 0, 0, 0.6), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
+            paddingBottom: 10
             }}
             className={classes.CardContent}>
             <Typography
@@ -102,7 +103,8 @@ class MediaCard extends PureComponent {
               variant="caption"
               style={{
                 color: "#E5CA49",
-                fontSize: 11
+                fontSize: 11,
+                alignSelf: 'center'
               }}
             >
               {parentData.title || parentData.name}
@@ -127,29 +129,25 @@ class MediaCard extends PureComponent {
                   ).format("LL")}
                 </Typography>
               </div>
-              <div
-                style={{ display: "flex", flexDirection: "row", }}
-              >
-                <div className={classes.chipView}>
-                  {genreStrings.map((value, i) => (
-                    <div
-                      key={i}
-                      style={{
-                        display: 'flex', flexDirection: 'row',
-                        alignItems: 'baseline', fontSize: 11
-                      }}>
-                      <Typography style={{ fontSize: 10 }}>{value}&nbsp;</Typography>
+            <div style={{ display: "flex", flexDirection: "row", flexWrap: 'wrap' }}  >
+                {genreStrings.map((value, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      display: 'flex', flexDirection: 'row',
+                      alignItems: 'baseline', fontSize: 11
+                    }}>
+                    <Typography style={{ fontSize: 10 }}>{value}&nbsp;</Typography>
 
-                      {i + 1 !== genreStrings.length ?
-                        (
-                          <Typography style={{ color: '#757575', fontSize: 10 }}>
-                            &nbsp;|
-                          </Typography>
-                        ) : null}
-                    </div>
-                  ))}
-                </div>
-              </div>
+                    {i + 1 !== genreStrings.length ?
+                      (
+                        <Typography style={{ color: '#757575', fontSize: 10 }}>
+                          |&nbsp;
+                        </Typography>
+                      ) : null}
+                  </div>
+                ))}
+            </div>
             </Grid>
           </CardContent>}
       </Card>
