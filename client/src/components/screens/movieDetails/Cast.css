@@ -7,6 +7,7 @@
     overflow-y: hidden;
     scrollbar-width:none;
     flex-wrap: nowrap;
+    scroll-behavior: smooth;
     /* background-color: aquamarine; */
 }
 

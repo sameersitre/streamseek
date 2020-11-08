@@ -32,12 +32,6 @@ const styles = (theme) => ({
         zIndex: theme.zIndex.drawer + 1,
         color: '#fff',
     },
-    chipView: {
-        display: 'flex',
-        justifyContent: 'flex-start',
-        marginTop: 10,
-        flexWrap: 'wrap',
-    },
 });
 class MovieDetails extends Component {
     state = {
@@ -77,7 +71,7 @@ class MovieDetails extends Component {
 
                 <Grid style={{
                     position: 'absolute',
-                    width: '95vw', margin: 10, marginTop: 50,
+                    width: '100vw', marginTop: 50,
                 }}
                 >
 
