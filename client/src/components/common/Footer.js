@@ -134,7 +134,7 @@ class Footer extends Component {
                             justifyContent: 'space-between', padding: 20
                         }} >
                         <Typography variant="subtitle1">
-                            This app is for experimentation purposes only.
+                            This web app is for experimentation purposes only.
                     </Typography>
                         <Typography variant="subtitle1">
                             Any queries please contact:

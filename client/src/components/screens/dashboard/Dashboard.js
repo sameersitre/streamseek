@@ -19,6 +19,10 @@ class Dashboard extends Component {
     }
 
     async componentDidMount() {
+        if (this.props.match.params.routedFrom) {
+            localStorage.setItem("routedFrom", this.props.match.params.routedFrom)
+        }
+        this.props.history.push({ pathname: `/all/page1` }) //to change the default route
         window.scrollTo(0, 0)
         this.setState({ refresh: true })
         console.log(process.env)

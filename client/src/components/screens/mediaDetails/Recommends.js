@@ -29,13 +29,15 @@ function Recommends(props) {
     }, [props.parentData.id]);
 
 
-    function cardClick() {
+    function cardClick(params) {
         event_GAnalytics("Card", "Click", cardSelected)
         localStorage.setItem(
             "selectedMovieDetails",
             JSON.stringify(cardSelected)
         )
-        props.history.push({ pathname: `/details` })
+        props.history.push({ pathname: `/details/mediatype=${params.media_type}&id=${params.id}` })
+
+        // props.history.push({ pathname: `/details` })
     }
     const scroll = (scrollOffset) => {
         myRef.current.scrollLeft += scrollOffset;
@@ -48,15 +50,15 @@ function Recommends(props) {
                     <Typography variant="subtitle2">Recommendations:</Typography>
                     <div style={{ display: 'flex', alignSelf: 'center' }}>
                         <Hidden xsDown>
-                        <Button style={{ backgroundColor: 'rgba(192,192,192, 0.2)', color: '#FFFFFF' }} onClick={() => scroll(-250)}><ArrowBackIos /></Button>
+                            <Button style={{ backgroundColor: 'rgba(192,192,192, 0.2)', color: '#FFFFFF' }} onClick={() => scroll(-250)}><ArrowBackIos /></Button>
                         </Hidden>
                         <div className='rec-root' ref={myRef}>
                             {
-                            recommendsList?.map((item, i) =>
+                                recommendsList?.map((item, i) =>
                                     item.poster_path ?
                                         <div key={i}
                                             className="rec-maincard"
-                                            onClick={() => setcardSelected(item)}
+                                            onClick={() => cardClick(item)}
                                         >
                                             <img
                                                 className="rec-poster"
@@ -69,7 +71,7 @@ function Recommends(props) {
                             }
                         </div>
                         <Hidden xsDown>
-                        <Button style={{ backgroundColor: 'rgba(192,192,192, 0.2)', zIndex: 5, color: '#FFFFFF' }} onClick={() => scroll(+250)}><ArrowForwardIos /></Button>
+                            <Button style={{ backgroundColor: 'rgba(192,192,192, 0.2)', zIndex: 5, color: '#FFFFFF' }} onClick={() => scroll(+250)}><ArrowForwardIos /></Button>
                         </Hidden>
                     </div>
                 </div>

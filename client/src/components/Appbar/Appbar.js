@@ -27,9 +27,10 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import MobileMenu from './MobileMenu';
 import { refreshDashboard, filterMovieData, searchTextAction, userInfoAction } from '../../containers/actions/userActions';
-import sendUserProperty from '../../services/sendUserProperty'
 import getGeolocation from '../../services/location'
 import countryCode from '../../services/countryCode'
+import apiCall from '../../services/apiCall';
+import { getInfo } from '../../services/apiURL'
 const styles = theme => ({
   grow: {
     flexGrow: 1,
@@ -108,12 +109,31 @@ class Appbar extends PureComponent {
   }
 
   async componentDidMount() {
+    console.log("%cappbar", "color:red")
     await getGeolocation()
     let locationInfo = await countryCode()
-    sendUserProperty(locationInfo)
+    let params = {
+      ip: locationInfo.ip,
+      region: locationInfo.region,
+      colocation: locationInfo.colocation,
+      accessDate: new Date(),
+      userAgent: navigator.userAgent,
+      routedFrom: localStorage.routedFrom
+    }
+
+    setTimeout(async () => {
+      if (!localStorage.messageSent) {
+        localStorage.setItem("messageSent", true)
+        let userDetails = {
+          ...params,
+          coordinates: localStorage.geolocation && JSON.parse(localStorage.geolocation)
+        }
+        this.props.userInfoAction(userDetails)
+        await apiCall(getInfo, userDetails)
+      }
+    }, 10000);
 
     this.setState({ userInfo: locationInfo })
-    this.props.userInfoAction(locationInfo)
     window.addEventListener('resize', this.onResize, false);
   }
 
@@ -191,7 +211,7 @@ class Appbar extends PureComponent {
     for (let i = 0; i < data.length; i++) {
       genreArray.push(data[i].id)
     }
-    let genreString = genreArray.join("%2C"); 
+    let genreString = genreArray.join("%2C");
     this.props.filterMovieData(genreString)
     this.props.history.push("/filter/page1")
   }
@@ -207,7 +227,7 @@ class Appbar extends PureComponent {
 
       <AppBar
         elevation={0}
-        style={{ 
+        style={{
           position: 'fixed',
           height: 80,
           background: 'linear-gradient(to top, transparent 0%, rgba(0, 0, 0, 0.9) 100%)',
@@ -225,7 +245,7 @@ class Appbar extends PureComponent {
           fullScreen
           disableBackdropClick
           disableEscapeKeyDown
-        //  open={this.state.restrictDisplay}
+          //  open={this.state.restrictDisplay}
           style={{ width: '85%', height: '85%', margin: 'auto' }}
         >
           <div style={{

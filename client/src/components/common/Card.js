@@ -71,11 +71,8 @@ class MediaCard extends PureComponent {
 
   cardClick = () => {
     event_GAnalytics("Card", "Click", this.state.parentData.original_title)
-    localStorage.setItem(
-      "selectedMovieDetails",
-      JSON.stringify(this.state.parentData)
-    )
-    this.props.history.push({ pathname: `/details` })
+    const { id, media_type } = this.state.parentData
+    this.props.history.push({ pathname: `/details/mediatype=${media_type}&id=${id}` })
   }
 
   render() {
@@ -94,8 +91,8 @@ class MediaCard extends PureComponent {
           <CardContent
             style={{
               boxShadow: enteredCardID === parentData.id &&
-              '0 4px 15px 0 rgba(0, 0, 0, 0.6), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
-            paddingBottom: 10
+                '0 4px 15px 0 rgba(0, 0, 0, 0.6), 0 6px 20px 0 rgba(0, 0, 0, 0.19)',
+              paddingBottom: 10
             }}
             className={classes.CardContent}>
             <Typography
@@ -129,7 +126,7 @@ class MediaCard extends PureComponent {
                   ).format("LL")}
                 </Typography>
               </div>
-            <div style={{ display: "flex", flexDirection: "row", flexWrap: 'wrap' }}  >
+              <div style={{ display: "flex", flexDirection: "row", flexWrap: 'wrap' }}  >
                 {genreStrings.map((value, i) => (
                   <div
                     key={i}
@@ -147,7 +144,7 @@ class MediaCard extends PureComponent {
                       ) : null}
                   </div>
                 ))}
-            </div>
+              </div>
             </Grid>
           </CardContent>}
       </Card>

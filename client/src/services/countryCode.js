@@ -12,7 +12,6 @@ const countryCode = async function () {
                 ip: ip,
                 region: region[1],
                 colocation: colo[1],
-                userAgent: navigator.userAgent,
             }
         }
         ).catch(function (error) {

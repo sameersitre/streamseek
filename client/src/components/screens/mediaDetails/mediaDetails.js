@@ -16,7 +16,7 @@ import Poster from './Poster';
 import Typography from '@material-ui/core/Typography';
 import moment from 'moment';
 import apiCall from '../../../services/apiCall';
-import { getVideosURL, getDetailsURL, getOTTPlatformsURL } from '../../../services/apiURL'
+import { getVideosURL, getDetailsURL } from '../../../services/apiURL'
 import Cast from './Cast'
 import Background from './Background'
 import Streams from './Streams'
@@ -51,13 +51,15 @@ class MovieDetails extends Component {
     async componentDidMount() {
         window.scrollTo(0, 0)
         this.setState({ refresh: true })
-        let storData = JSON.parse(await localStorage.selectedMovieDetails)
         let params = {
-            id: storData.id,
-            media_type: storData.media_type ? storData.media_type : "movie"
+            id: this.props.match.params.mediaid,
+            media_type: this.props.match.params.mediatype ? this.props.match.params.mediatype : "movie"
         }
 
-        this.setState({ detailsData: await apiCall(getDetailsURL, params), apiParams: params, refresh: false, })
+        this.setState({
+            detailsData: await apiCall(getDetailsURL, params),
+            apiParams: params, refresh: false
+        })
         this.setState({
             videoData: await apiCall(getVideosURL, params),
         })
@@ -91,7 +93,7 @@ class MovieDetails extends Component {
                             {detailsData.tagline &&
                                 <Typography gutterBottom variant="body2"
                                     style={{ color: '#E5CA49' }}>
-                                {detailsData.tagline}
+                                    {detailsData.tagline}
                                 </Typography>
                             }
                         </Grid>

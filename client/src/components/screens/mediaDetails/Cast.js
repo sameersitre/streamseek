@@ -12,6 +12,7 @@ import { getCastDetailsURL } from '../../../services/apiURL'
 
 function Cast(props) {
     console.log(props)
+    const { id } = props.parentData
     const myRef = React.createRef();
     const [castList, setCastList] = useState();
     useEffect(() => {
@@ -21,7 +22,7 @@ function Cast(props) {
             setCastList(castList.cast)
         }
         fetchData();
-    }, [props.parentData.id]);
+    }, [id]);
 
     const scroll = (scrollOffset) => {
         myRef.current.scrollLeft += scrollOffset;
@@ -35,10 +36,10 @@ function Cast(props) {
                         <Typography variant="subtitle2">Cast:</Typography>
                         <div style={{ display: 'flex', alignSelf: 'center', }}>
                             <Hidden xsDown>
-                            <Button style={{
-                                backgroundColor: 'rgba(192,192,192, 0.2)',
-                                color: '#FFFFFF'
-                            }} onClick={() => scroll(-250)}><ArrowBackIos /></Button>
+                                <Button style={{
+                                    backgroundColor: 'rgba(192,192,192, 0.2)',
+                                    color: '#FFFFFF'
+                                }} onClick={() => scroll(-250)}><ArrowBackIos /></Button>
                             </Hidden>
                             <div className='root' ref={myRef}>
                                 {castList?.map((item, i) =>
@@ -61,7 +62,7 @@ function Cast(props) {
                                 }
                             </div>
                             <Hidden xsDown>
-                            <Button style={{ backgroundColor: 'rgba(192,192,192, 0.2)', color: '#FFFFFF' }} onClick={() => scroll(+250)}><ArrowForwardIos /></Button>
+                                <Button style={{ backgroundColor: 'rgba(192,192,192, 0.2)', color: '#FFFFFF' }} onClick={() => scroll(+250)}><ArrowForwardIos /></Button>
                             </Hidden>
                         </div>
                     </div>}
