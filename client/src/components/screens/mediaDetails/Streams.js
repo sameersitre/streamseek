@@ -4,21 +4,17 @@ import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
 import apiCall from '../../../services/apiCall';
 import { getOTTPlatformsURL } from '../../../services/apiURL'
-import { event_GAnalytics } from "../../../utils/Analytics"
-function Streams(props) {
-    const { platforms } = props.parentData
-    console.log(props)
-    const myRef = React.createRef();
-    const [streamsList, setStreamsList] = useState();
+ function Streams(props) {
+     const { id } = props.parentData
+     const [streamsList, setStreamsList] = useState();
 
-    useEffect(() => {
-
+     useEffect(() => {
         async function fetchData() {
             let streamsList = props.parentData.id && await apiCall(getOTTPlatformsURL, props.parentData)
             setStreamsList(streamsList.platforms)
         }
         fetchData();
-    }, [props.parentData.id]);
+    }, [id]);
 
 
     return ((streamsList?.length > 0) ?

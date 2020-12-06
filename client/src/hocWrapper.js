@@ -10,7 +10,6 @@ export const mapDispatchToProps = {
 }
 
 export const hocWrapper = (WrappedComponent) => {
-    console.log('hocwrapper')
     const hocComponent = ({ ...props }) => <WrappedComponent {...props} />
 
     hocComponent.propTypes = {

@@ -4,8 +4,7 @@ const apiCall = async function (URL, data) {
     let result = null
     await axios.post(URL, data)
         .then((res) => {
-            console.log(`API Called: ${URL}, params:${JSON.stringify(data)}`)
-            result = res.data
+             result = res.data
         }
         )
         .catch(function (error) {

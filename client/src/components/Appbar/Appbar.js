@@ -109,7 +109,6 @@ class Appbar extends PureComponent {
   }
 
   async componentDidMount() {
-    console.log("%cappbar", "color:red")
     await getGeolocation()
     let locationInfo = await countryCode()
     let params = {
@@ -245,7 +244,6 @@ class Appbar extends PureComponent {
           fullScreen
           disableBackdropClick
           disableEscapeKeyDown
-          //  open={this.state.restrictDisplay}
           style={{ width: '85%', height: '85%', margin: 'auto' }}
         >
           <div style={{

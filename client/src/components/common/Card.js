@@ -72,7 +72,7 @@ class MediaCard extends PureComponent {
   cardClick = () => {
     event_GAnalytics("Card", "Click", this.state.parentData.original_title)
     const { id, media_type } = this.state.parentData
-    this.props.history.push({ pathname: `/details/mediatype=${media_type}&id=${id}` })
+    this.props.history.push({ pathname: `/details/mediatype=${media_type ? media_type : "movie"}&id=${id}` })
   }
 
   render() {

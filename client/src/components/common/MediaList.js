@@ -18,9 +18,7 @@ class MediaList extends PureComponent {
         showCardContent: false,
         enteredCardID: null
     }
-    componentDidMount() {
-        //   window.addEventListener()
-    }
+
     handleBoxTrue = (param) => this.setState({ showCardContent: true, enteredCardID: param });
     handleBoxFalse = (param) => this.setState({ showCardContent: false, enteredCardID: param });
 
@@ -30,8 +28,7 @@ class MediaList extends PureComponent {
         return (
             <div
                 style={{
-                    display: 'flex', alignContent: 'center',
-                    flexDirection: 'column',
+                    display: 'flex', alignContent: 'center', flexDirection: 'column',
                 }}
             >
                 <Grid container lg={10}
@@ -75,4 +72,4 @@ class MediaList extends PureComponent {
     }
 }
 
-export default withStyles(styles)(withRouter(MediaList))
+export default withStyles(styles)(MediaList)

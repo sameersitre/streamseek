@@ -11,16 +11,17 @@ import apiCall from '../../../services/apiCall';
 import { getCastDetailsURL } from '../../../services/apiURL'
 
 function Cast(props) {
-    console.log(props)
-    const { id } = props.parentData
+    let id = props.parentData.id;
     const myRef = React.createRef();
     const [castList, setCastList] = useState();
+
     useEffect(() => {
-        setCastList()
-        async function fetchData() {
+         setCastList()
+        const fetchData = async () => {
             let castList = props.parentData.id && await apiCall(getCastDetailsURL, props.parentData)
             setCastList(castList.cast)
         }
+
         fetchData();
     }, [id]);
 
@@ -48,7 +49,7 @@ function Cast(props) {
                                             <img
                                                 className="poster"
                                                 src={`https://image.tmdb.org/t/p/w500${item.profile_path}`}
-                                            // alt="cast Image"
+                                                alt=""
                                             />
                                             <div className="castinfo" >
                                                 <Typography variant="subtitle2">

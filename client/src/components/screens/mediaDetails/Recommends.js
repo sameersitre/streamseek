@@ -11,33 +11,24 @@ import apiCall from '../../../services/apiCall';
 import { getRecommendationsURL } from '../../../services/apiURL'
 import { event_GAnalytics } from "../../../utils/Analytics"
 
-
 function Recommends(props) {
-    console.log(props)
+    const { id } = props.parentData
     const myRef = React.createRef();
     const [recommendsList, setRecommendsList] = useState();
-    const [cardSelected, setcardSelected] = useState();
-
+ 
     useEffect(() => {
-
         async function fetchData() {
             let params = { ...props.parentData, page: 1 }
             let recommendsList = params.id && await apiCall(getRecommendationsURL, params)
             setRecommendsList(recommendsList.results)
         }
         fetchData();
-    }, [props.parentData.id]);
+    }, [id]);
 
 
     function cardClick(params) {
-        event_GAnalytics("Card", "Click", cardSelected)
-        localStorage.setItem(
-            "selectedMovieDetails",
-            JSON.stringify(cardSelected)
-        )
-        props.history.push({ pathname: `/details/mediatype=${params.media_type}&id=${params.id}` })
-
-        // props.history.push({ pathname: `/details` })
+        event_GAnalytics("Card", "Click", params)
+        props.history.push({ pathname: `/details/mediatype=${props.parentData.media_type}&id=${params.id}` })
     }
     const scroll = (scrollOffset) => {
         myRef.current.scrollLeft += scrollOffset;
@@ -63,11 +54,10 @@ function Recommends(props) {
                                             <img
                                                 className="rec-poster"
                                                 src={`https://image.tmdb.org/t/p/w500${item.poster_path}`}
-                                            // alt="cast Image"
+                                                alt=""
                                             />
                                         </div> : null
-                                )
-
+                            )
                             }
                         </div>
                         <Hidden xsDown>

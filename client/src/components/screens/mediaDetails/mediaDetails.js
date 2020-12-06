@@ -40,35 +40,42 @@ const styles = (theme) => ({
         flexWrap: 'wrap',
     },
 });
-class MovieDetails extends Component {
+class MediaDetails extends Component {
     state = {
         detailsData: null,
         videoData: null,
-        streamAvailablity: null,
-        refresh: false,
-        apiParams: []
+        refresh: true,
+        id: '',
+        media_type: '',
     }
-    async componentDidMount() {
-        window.scrollTo(0, 0)
+
+    componentDidMount() {
         this.setState({ refresh: true })
+        this.getData()
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if (prevProps.match.params.mediaid !== this.props.match.params.mediaid) {
+            this.setState({ refresh: true })
+            this.getData()
+        }
+    }
+
+    getData = async () => {
+        window.scrollTo(0, 0)
         let params = {
             id: this.props.match.params.mediaid,
-            media_type: this.props.match.params.mediatype ? this.props.match.params.mediatype : "movie"
+            media_type: this.props.match.params.mediatype
         }
-
-        this.setState({
-            detailsData: await apiCall(getDetailsURL, params),
-            apiParams: params, refresh: false
-        })
-        this.setState({
-            videoData: await apiCall(getVideosURL, params),
-        })
+        this.setState({ id: params.id, media_type: params.media_type })
+        this.setState({ detailsData: await apiCall(getDetailsURL, params) })
+        this.setState({ videoData: await apiCall(getVideosURL, params), refresh: false })
     }
+
     render() {
-
         const { classes } = this.props;
-        const { detailsData, refresh, videoData, apiParams } = this.state;
-
+        const { detailsData, refresh, videoData, id, media_type } = this.state;
+        const apiParams = { id, media_type }
         return (
             detailsData !== null ?
 
@@ -154,11 +161,8 @@ class MovieDetails extends Component {
                         </div>
 
                         {apiParams && <Streams parentData={apiParams} />}
-
                         {detailsData && <Overview parentData={detailsData} />}
-
-                        {videoData && <Videos videoData={videoData} />}
-
+                        {videoData && <Videos parentData={videoData} />}
                         {apiParams && <Cast parentData={apiParams} />}
                         {apiParams && <Recommends parentData={apiParams} history={this.props.history} />}
 
@@ -174,4 +178,4 @@ class MovieDetails extends Component {
 const mapStateToProps = (state) => ({
     user: state.user
 })
-export default withStyles(styles)(connect(mapStateToProps)(withRouter(MovieDetails)))
+export default withStyles(styles)(connect(mapStateToProps)(withRouter(MediaDetails)))

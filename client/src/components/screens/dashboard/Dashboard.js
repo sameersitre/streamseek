@@ -8,38 +8,47 @@ import React, { Component } from 'react'
 import apiCall from '../../../services/apiCall';
 import { trendingURL } from '../../../services/apiURL'
 import MediaList from '../../common/MediaList'
+import { withRouter } from 'react-router-dom';
 class Dashboard extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            dataList: [],
-            refresh: false,
-            pageNumber: this.props.match.params.pageNumber,
-        }
+
+    state = {
+        dataList: [],
+        refresh: false,
+        pageNumber: this.props.match?.params && this.props.match.params.pageNumber,
     }
 
     async componentDidMount() {
-        if (this.props.match.params.routedFrom) {
-            localStorage.setItem("routedFrom", this.props.match.params.routedFrom)
+        try {
+            if (this.props.match?.params.routedFrom) {
+                localStorage.setItem("routedFrom", this.props.match.params.routedFrom)
+            }
+            this.props.history.push({ pathname: `/all/page1` }) //to change the default route
+            window.scrollTo(0, 0)
+            this.setState({ refresh: true })
+            console.log(process.env)
+            let data = { page: 1, media_type: "all" }
+            let apiData = await apiCall(trendingURL, data)
+            this.setState({ dataList: apiData.results, refresh: false })
+        } catch (error) {
+            console.log(error)
         }
-        this.props.history.push({ pathname: `/all/page1` }) //to change the default route
-        window.scrollTo(0, 0)
-        this.setState({ refresh: true })
-        console.log(process.env)
-        let data = { page: 1, media_type: "all" }
-        let apiData = await apiCall(trendingURL, data)
-        this.setState({ dataList: apiData.results, refresh: false })
+
     }
 
     async componentDidUpdate(prevProps, prevState) {
         if (this.props.match.params.pageNumber !== this.state.pageNumber) {
-            let data = { page: this.props.match.params.pageNumber, media_type: "all" }
-            let apiData = await apiCall(trendingURL, data)
-            this.setState({
-                dataList: apiData.results,
-                pageNumber: this.props.match.params.pageNumber,
-                refresh: false
-            })
+            try {
+                let data = { page: this.props.match.params.pageNumber, media_type: "all" }
+                let apiData = await apiCall(trendingURL, data)
+                this.setState({
+                    dataList: apiData.results,
+                    pageNumber: this.props.match.params.pageNumber,
+                    refresh: false
+                })
+            } catch (error) {
+                console.log(error)
+            }
+
         }
     }
 
@@ -64,4 +73,4 @@ class Dashboard extends Component {
         )
     }
 }
-export default Dashboard
+export default withRouter(Dashboard) 

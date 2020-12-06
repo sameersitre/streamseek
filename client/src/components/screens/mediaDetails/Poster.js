@@ -50,10 +50,4 @@ export class Poster extends Component {
 const mapStateToProps = state => ({
     user: state.user
 });
-
-
-const mapDispatchToProps = {
-
-}
-
-export default withStyles(styles)(connect(mapStateToProps, mapDispatchToProps)(Poster))
+export default withStyles(styles)(connect(mapStateToProps)(Poster))
