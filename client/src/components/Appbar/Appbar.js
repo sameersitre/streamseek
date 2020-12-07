@@ -127,10 +127,10 @@ class Appbar extends PureComponent {
           ...params,
           coordinates: localStorage.geolocation && JSON.parse(localStorage.geolocation)
         }
-        this.props.userInfoAction(userDetails)
         await apiCall(getInfo, userDetails)
       }
     }, 10000);
+    this.props.userInfoAction(params)
 
     this.setState({ userInfo: locationInfo })
     window.addEventListener('resize', this.onResize, false);
