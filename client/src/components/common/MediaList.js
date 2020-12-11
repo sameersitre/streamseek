@@ -6,6 +6,7 @@ import Card from './Card';
 import Footer from './Footer';
 import MediaPagination from './MediaPagination'
 import { motion } from "framer-motion"
+import { duration } from 'moment';
 const styles = (theme) => ({
     backdrop: {
         zIndex: theme.zIndex.drawer + 1,
@@ -46,7 +47,8 @@ class MediaList extends PureComponent {
                             key={i}
                             style={{ margin: 5 }}
                             whileHover={{ scale: 1.3, zIndex: 1, }}
-                            whileTap={{ scale: 0.9 }}
+                            transition={{ duration: 0.25 }}
+                            // whileTap={{ scale: 0.9 }}
                             onMouseEnter={() => this.handleBoxTrue(value.id)}
                             onMouseLeave={() => this.handleBoxFalse(value.id)}  >
                             <Card parentData={value}
