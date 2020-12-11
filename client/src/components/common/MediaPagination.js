@@ -30,7 +30,7 @@ class MediaPagination extends Component {
                             variant="contained"
                             color="secondary"
                             size="small"
-                            disabled={parseInt(this.props.match.params.pageNumber) <= 1 ? true : false}
+                            disabled={(!this.props.match.params.pageNumber || parseInt(this.props.match.params.pageNumber) <= 1) ? true : false}
                             className={classes.button}
                             startIcon={<NavigateBefore />}
                             onClick={() => previous()}

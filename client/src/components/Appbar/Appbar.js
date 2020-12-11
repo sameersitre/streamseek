@@ -134,7 +134,7 @@ class Appbar extends PureComponent {
 
     this.setState({ userInfo: locationInfo })
     window.addEventListener('resize', this.onResize, false);
-  }
+  } 
 
   onResize = () => {
     if ((window.innerWidth > window.innerHeight) && navigator.userAgent.indexOf('Mobile') > -1) {
@@ -157,13 +157,22 @@ class Appbar extends PureComponent {
     this.setState({ searchText: event.target.value })
   }
 
-  handleKeyPress = async (event) => {
-    if (event.key === 'Enter' && this.state.searchText.length !== 0) {
-      window.scrollTo(0, 0)
-      this.props.searchTextAction(this.state.searchText)
-      this.props.history.push('/search/page1')
+  handleKeyUp = () => {
+    if (this.state.searchText.length > 1) {
+      let timedAssignText = this.state.searchText
+      setTimeout(() => {
+        if (timedAssignText === this.state.searchText) {
+          this.getData()
+        }
+      }, 1300);
     }
   }
+
+  getData = () => {
+    this.props.searchTextAction(this.state.searchText)
+    this.props.history.push('/search/page1')
+  }
+
 
   handleDelete = (chipToDelete) => {
 
@@ -277,7 +286,8 @@ class Appbar extends PureComponent {
         <Toolbar>
 
           <Hidden xsDown>
-            <IconButton component={Link} to='/all/page1'  >
+            <IconButton component={Link} to='/all/page1'
+              onClick={() => this.setState({ searchText: '' })}  >
               <Typography className={classes.title} variant="h6" noWrap  >
                 BingeFeast
             </Typography>
@@ -286,7 +296,7 @@ class Appbar extends PureComponent {
             </Typography>
             </IconButton>
 
-            <IconButton  >
+            <IconButton onClick={() => this.setState({ searchText: '' })} >
               <Typography className={classes.title} variant="subtitle2"
                 component={Link}
                 style={{ color: window.location.pathname.indexOf(`/movies/page`) > -1 && '#E46E36' }}
@@ -296,7 +306,7 @@ class Appbar extends PureComponent {
             </Typography>
             </IconButton>
 
-            <IconButton  >
+            <IconButton onClick={() => this.setState({ searchText: '' })} >
               <Typography className={classes.title}
                 style={{ color: window.location.pathname.indexOf(`/tvshows/page`) > -1 && '#E46E36' }}
                 variant="subtitle2"
@@ -307,7 +317,7 @@ class Appbar extends PureComponent {
             </Typography>
             </IconButton>
 
-            <IconButton  >
+            <IconButton onClick={() => this.setState({ searchText: '' })} >
               <Typography className={classes.title} variant="subtitle2"
                 style={{ color: window.location.pathname.indexOf(`/upcoming/page`) > -1 && '#E46E36' }}
                 component={Link}
@@ -339,10 +349,9 @@ class Appbar extends PureComponent {
                 root: classes.inputRoot,
                 input: classes.inputInput,
               }}
-
+              onKeyUp={this.handleKeyUp}
               value={this.state.searchText}
               onChange={this.handleChange}
-              onKeyPress={this.handleKeyPress}
               inputProps={{ 'aria-label': 'search' }}
             />
           </div>

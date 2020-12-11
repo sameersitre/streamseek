@@ -20,27 +20,31 @@ class Search extends Component {
 
     async componentDidMount() {
         window.scrollTo(0, 0)
-        this.setState({ refresh: true })
-        let data = { searchText: this.props.user.search_text, page: 1 }
-        let apiData = await apiCall(searchURL, data)
-        this.setState({ dataList: apiData.results, refresh: false })
+        console.log('cdid mount')
+        this.getData()
     }
 
     async componentDidUpdate(prevProps) {
-        if ((this.props.match.params.pageNumber !== this.state.pageNumber) ||
-            (this.state.searchText !== this.props.user.search_text)) {
-            let data = {
-                searchText: this.props.user.search_text,
-                page: this.props.match.params.pageNumber,
-            }
-            let apiData = await apiCall(searchURL, data)
-            this.setState({
-                searchText: this.props.user.search_text,
-                dataList: apiData.results,
-                pageNumber: this.props.match.params.pageNumber,
-                refresh: false
-            })
+        if ((this.props.match.params.pageNumber !== this.state.pageNumber)) {
+            console.log('cdid update')
+            this.getData()
         }
+    }
+
+    getData = async () => {
+        this.setState({
+            searchText: this.props.user.search_text,
+            pageNumber: this.props.match.params.pageNumber
+        })
+        let data = {
+            searchText: this.props.user.search_text,
+            page: this.props.match.params.pageNumber,
+        }
+        let apiData = await apiCall(searchURL, data)
+        this.setState({
+            dataList: apiData.results,
+            refresh: false
+        })
     }
 
     pageNavigate = (value) => {

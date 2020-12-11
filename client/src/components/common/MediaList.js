@@ -1,6 +1,5 @@
 import React, { PureComponent } from 'react'
 import { withStyles } from '@material-ui/core/styles';
-import { withRouter } from 'react-router-dom';
 import { Backdrop, Grid } from '@material-ui/core';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Card from './Card';
@@ -44,6 +43,7 @@ class MediaList extends PureComponent {
 
                     {listData?.map((value, i) => (
                         <motion.div
+                            key={i}
                             style={{ margin: 5 }}
                             whileHover={{ scale: 1.3, zIndex: 1, }}
                             whileTap={{ scale: 0.9 }}
