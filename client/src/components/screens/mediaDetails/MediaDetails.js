@@ -50,12 +50,14 @@ class MediaDetails extends Component {
     }
 
     componentDidMount() {
+        console.log('cd mount')
         this.setState({ refresh: true })
         this.getData()
     }
 
     componentDidUpdate(prevProps, prevState) {
         if (prevProps.match.params.mediaid !== this.props.match.params.mediaid) {
+            console.log('cd update')
             this.setState({ refresh: true })
             this.getData()
         }

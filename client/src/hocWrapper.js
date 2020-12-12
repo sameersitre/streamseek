@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import { CircularProgress } from '@material-ui/core';
 import { useDispatch } from "react-redux";
 import { searchTextAction } from './containers/actions/userActions'
 export default function (ComposedClass) {
@@ -12,23 +11,7 @@ export default function (ComposedClass) {
                 dispatch(searchTextAction(''))
             }
         }, []);
-
-        if (!true) {
-            return (
-                <div
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        minHeight: '100vh',
-                    }}
-                >
-                    <CircularProgress style={{ color: 'primary' }} thickness={7} />
-                </div>
-            );
-        } else {
-            return <ComposedClass />;
-        }
+        return <ComposedClass {...props} />;
     };
     return ClosedRouteForUser;
 }

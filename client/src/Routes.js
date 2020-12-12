@@ -17,15 +17,15 @@ import Search from './components/screens/search/Search'
 import Test from './components/screens/test/Test';
 const Routes = (props) => (
     <Switch style={{ position: 'absolute' }}>
-        <Route exact path={["/", "/routedFrom=:routedFrom"]} component={hocWrapper(Dashboard)} />
-        <Route exact path="/all/page:pageNumber" component={hocWrapper(Dashboard)} />
-        <Route exact path="/movies/page:pageNumber" component={hocWrapper(Movies)} />
-        <Route exact path="/tvshows/page:pageNumber" component={hocWrapper(TVShows)} />
-        <Route exact path="/upcoming/page:pageNumber&region=:region" component={hocWrapper(Upcoming)} />
-        <Route exact path="/search/page:pageNumber" component={hocWrapper(Search)} />
-        <Route exact path="/details/mediatype=:mediatype&id=:mediaid" component={hocWrapper(MediaDetails)} />
-        <Route exact path="/filter/page:pageNumber" component={hocWrapper(Filter)} />
-        <Route exact path="/test/page:pageNumber" component={hocWrapper(Test)} />
+        <Route exact path={["/", "/routedFrom=:routedFrom"]} component={Dashboard} />
+        <Route exact path="/all/page:pageNumber" component={Dashboard} />
+        <Route exact path="/movies/page:pageNumber" component={Movies} />
+        <Route exact path="/tvshows/page:pageNumber" component={TVShows} />
+        <Route exact path="/upcoming/page:pageNumber&region=:region" component={Upcoming} />
+        <Route exact path="/search/page:pageNumber" component={Search} />
+        <Route exact path="/details/mediatype=:mediatype&id=:mediaid" component={MediaDetails} />
+        <Route exact path="/filter/page:pageNumber" component={Filter} />
+        <Route exact path="/test/page:pageNumber" component={Test} />
     </Switch>
 );
 export default withRouter(Routes);

@@ -6,7 +6,6 @@ import Card from './Card';
 import Footer from './Footer';
 import MediaPagination from './MediaPagination'
 import { motion } from "framer-motion"
-import { duration } from 'moment';
 const styles = (theme) => ({
     backdrop: {
         zIndex: theme.zIndex.drawer + 1,

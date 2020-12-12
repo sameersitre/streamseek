@@ -36,18 +36,14 @@ class Dashboard extends Component {
 
     async componentDidUpdate(prevProps, prevState) {
         if (this.props.match.params.pageNumber !== this.state.pageNumber) {
-            try {
-                console.log('cd updates')
-                let data = { page: this.props.match.params.pageNumber, media_type: "all" }
-                let apiData = await apiCall(trendingURL, data)
-                this.setState({
-                    dataList: apiData.results,
-                    pageNumber: this.props.match.params.pageNumber,
-                    refresh: false
-                })
-            } catch (error) {
-                console.log(error)
-            }
+            console.log('cd updates')
+            let data = { page: this.props.match.params.pageNumber, media_type: "all" }
+            let apiData = await apiCall(trendingURL, data)
+            this.setState({
+                dataList: apiData.results,
+                pageNumber: this.props.match.params.pageNumber,
+                refresh: false
+            })
 
         }
     }
@@ -55,7 +51,7 @@ class Dashboard extends Component {
     pageNavigate = (value) => {
         window.scrollTo(0, 0)
         this.setState({ pageNumber: value })
-        this.props.history.push({ pathname: `/all/page${value}` })
+        this.props.history.replace({ pathname: `/all/page${value}` })
     }
 
     previous = () => {
