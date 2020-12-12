@@ -33,8 +33,12 @@ class Filter extends Component {
             media_type: "movie",
             genres: this.props.user.genre_filter
         }
-        let apiData = await apiCall(filterURL, data)
-        this.setState({ dataList: apiData.results, refresh: false })
+        if (data.genres) {
+            let apiData = await apiCall(filterURL, data)
+            this.setState({ dataList: apiData.results })
+        }
+        this.setState({ refresh: false })
+
     }
 
     async componentDidUpdate(prevProps) {

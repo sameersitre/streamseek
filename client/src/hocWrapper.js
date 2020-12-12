@@ -1,25 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { CircularProgress } from '@material-ui/core';
-import { useHistory } from 'react-router-dom';
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { searchTextAction } from './containers/actions/userActions'
 export default function (ComposedClass) {
     const ClosedRouteForUser = (props) => {
-        const [loading, setLoading] = useState(true);
-        const reduxState = useSelector(state => state.user);
         const dispatch = useDispatch();
-
-
         useEffect(() => {
             console.log(window.location.pathname)
             if (window.location.pathname !== `/search/page1` &&
                 window.location.pathname.includes('details') === false) {
                 dispatch(searchTextAction(''))
             }
-
         }, []);
 
-        if (!loading) {
+        if (!true) {
             return (
                 <div
                     style={{

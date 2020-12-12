@@ -9,6 +9,7 @@ import React, { Component } from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
+import Typography from '@material-ui/core/Typography';
 import Chip from '@material-ui/core/Chip';
 import Paper from '@material-ui/core/Paper';
 import FilterListIcon from '@material-ui/icons/FilterList';
@@ -17,11 +18,11 @@ import { filterMovieData, refreshDashboard } from '../../containers/actions/user
 const styles = (theme) => ({
     root: {
         display: 'flex',
+        flexDirection: 'column',
         justifyContent: 'flex-end',
         flexWrap: 'wrap',
-        backgroundColor: '#454545',
         maxWidth: 800,
-        borderRadius: 25,
+        borderRadius: 13,
         padding: 0.2,
     },
     chip: {
@@ -39,7 +40,7 @@ class ChipsArray extends Component {
             updateOnce: true
         }
     }
- 
+
     handleDelete = (chipToDelete) => {
 
         var filtered = this.state.selectedGenres.filter(function (el) { return el.id !== chipToDelete.id; });
@@ -76,85 +77,110 @@ class ChipsArray extends Component {
         })
     }
     filterClick = () => {
+
         this.setState({
             allGenresEnabled: false
         })
-        this.props.filterMovieData(this.state.selectedGenres)
+        let data = this.state.selectedGenres
+        let genreArray = [];
+        for (let i = 0; i < data.length; i++) {
+            genreArray.push(data[i].id)
+        }
+        let genreString = genreArray.join("%2C");
+        this.props.filterMovieData(genreString)
+        this.props.history.push("/filter/page1")
     }
 
     render() {
         const { classes } = this.props;
-
+        const { selectedGenres, allGenresEnabled } = this.state
         return (
-            <div style={{ display: 'flex', flexDirection: 'column', position: 'relative', }} >
-                <Paper className={classes.root}>
-                    <Chip
-                        size="small"
-                        clickable
-                        icon={<FilterListIcon style={{ marginRight: -12 }} />}
-                        className={classes.chip}
-                        style={{ display: 'flex', marginLeft: 5 }}
-                        onClick={() => this.filterIconClick()}
-                    />
-                    {this.state.selectedGenres && this.state.selectedGenres.map(data => {
-                        let icon;
-                        return (
+            <div style={{
+                display: 'flex', flexDirection: 'column',
+                right: 5, top: 12, position: 'fixed', width: 250,
+            }} >
+                <Paper className={classes.root}
+                    elevation={0}
+                    style={{
+                        backgroundColor: allGenresEnabled === true || selectedGenres.length > 0
+                            ? 'rgba(192,192,192, 0.2)' : 'rgba(192,192,192, 0)'
+                    }}>
+                    <div>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', }}>
                             <Chip
-                                size="small" key={data.id}
-                                icon={icon} label={data.name}
-                                onDelete={() => this.handleDelete(data)}
+                                size="small"
+                                color="secondary"
+                                style={{ backgroundColor: 'rgba(192,192,192, 0.4)' }}
+                                clickable
+                                icon={<FilterListIcon style={{ marginRight: -12 }} />}
                                 className={classes.chip}
+                                onClick={() => this.filterIconClick()}
                             />
-                        );
-                    })}
+                            {selectedGenres.length > 0
+                                ?
+                                <div>
+                                    <Chip
+                                        size="small" clickable label='CLEAR'
+                                        color="secondary"
+                                        className={classes.chip}
+                                        style={{ backgroundColor: 'rgba(192,192,192, 0.2)', borderTopRightRadius: 5, borderBottomRightRadius: 5 }}
+                                        onClick={() => this.handleClear()}
+                                    />
 
-                    {this.state.selectedGenres.length > 0
-                        ?
-
-                        <div>
-                            <Chip
-                                size="small" clickable label='CLEAR'
-                                className={classes.chip}
-                                style={{ borderTopRightRadius: 5, borderBottomRightRadius: 5 }}
-                                onClick={() => this.handleClear()}
-                            />
-
-                            <Chip
-                                size="small" clickable label='FILTER'
-                                className={classes.chip}
-                                style={{ borderTopLeftRadius: 5, borderBottomLeftRadius: 5 }}
-                                onClick={() => this.filterClick()}
-                            />
+                                    <Chip
+                                        size="small" clickable label='FILTER'
+                                        color="secondary"
+                                        className={classes.chip}
+                                        style={{ backgroundColor: 'rgba(192,192,192, 0.2)', borderTopLeftRadius: 5, borderBottomLeftRadius: 5 }}
+                                        onClick={() => this.filterClick()}
+                                    />
+                                </div>
+                                : null
+                            }
                         </div>
-                        : null
-                    }
 
-
-                </Paper>
-
-                {this.state.allGenresEnabled
-                    ?
-                    <Paper variant="outlined"
-                        elevation={3}
-                        style={{
-                            position: 'absolute', justifyContent: 'space-evenly',
-                            flexWrap: 'wrap', backgroundColor: '#5E5E5E', width: 250,
-                            borderRadius: 13, padding: 5, top: 40, right: 0
-                        }} >
-                        {this.state.allGenres && this.state.allGenres.map(data => {
+                        {selectedGenres && selectedGenres.map(data => {
                             let icon;
                             return (
                                 <Chip
-                                    size="small" key={data.id}
+                                    key={data.id}
+                                    size="small"
+                                    color="secondary"
+                                    style={{ backgroundColor: 'rgba(0,0,0, 0.3)', }}
                                     icon={icon} label={data.name}
-                                    onClick={() => this.handleAdd(data)}
-                                    style={{ margin: 3, padding: 0.2, }}
+                                    onDelete={() => this.handleDelete(data)}
                                     className={classes.chip}
                                 />
                             );
                         })}
-                    </Paper>
-                    : null}
+                    </div>
+
+                    {allGenresEnabled ?
+                            <Paper variant="outlined"
+                            elevation={5}
+                                style={{
+                                    justifyContent: 'space-evenly',
+                                    flexWrap: 'wrap', backgroundColor: 'rgba(192,192,192, 0.5)',
+                                    borderRadius: 12, padding: 5, marginTop: 20 
+                                }} >
+                            <Typography variant="subtitle2" color='inherit'  >
+                                Select Genres:
+                                </Typography>
+                                {this.state.allGenres && this.state.allGenres.map(data => {
+                                    let icon;
+                                    return (
+                                        <Chip
+                                            size="small" key={data.id}
+                                            icon={icon} label={data.name}
+                                            onClick={() => this.handleAdd(data)}
+                                            style={{ margin: 3, padding: 0.2, }}
+                                            className={classes.chip}
+                                        />
+                                    );
+                                })}
+                            </Paper>
+                        : null}
+                </Paper>
             </div>
         );
     }

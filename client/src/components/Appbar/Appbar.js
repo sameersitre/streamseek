@@ -12,8 +12,6 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Hidden from '@material-ui/core/Hidden';
-import Chip from '@material-ui/core/Chip';
-import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import InputBase from '@material-ui/core/InputBase';
 import SwipeableDrawer from '@material-ui/core/SwipeableDrawer';
@@ -22,10 +20,10 @@ import SearchIcon from '@material-ui/icons/Search';
 import MenuIcon from '@material-ui/icons/Menu';
 import AndroidIcon from '@material-ui/icons/Android';
 import AppleIcon from '@material-ui/icons/Apple';
-import FilterListIcon from '@material-ui/icons/FilterList';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import MobileMenu from './MobileMenu';
+import Filter from './filter'
 import { refreshDashboard, filterMovieData, searchTextAction, userInfoAction } from '../../containers/actions/userActions';
 import getGeolocation from '../../services/location'
 import countryCode from '../../services/countryCode'
@@ -78,8 +76,6 @@ const styles = theme => ({
       width: 150,
     },
   },
-
-
   root: {
     display: 'flex',
     justifyContent: 'flex-end',
@@ -131,27 +127,9 @@ class Appbar extends PureComponent {
       }
     }, 10000);
     this.props.userInfoAction(params)
-
     this.setState({ userInfo: locationInfo })
-    window.addEventListener('resize', this.onResize, false);
   } 
 
-  onResize = () => {
-    if ((window.innerWidth > window.innerHeight) && navigator.userAgent.indexOf('Mobile') > -1) {
-      this.setState({ restrictDisplay: true })
-    }
-    else {
-      this.setState({ restrictDisplay: false })
-    }
-  }
-
-  handleClickOpen = () => {
-    this.setState({ setDialog: true })
-  };
-
-  handleClose = () => {
-    this.setState({ setDialog: false })
-  };
 
   handleChange = (event) => {
     this.setState({ searchText: event.target.value })
@@ -173,64 +151,13 @@ class Appbar extends PureComponent {
     this.props.history.push('/search/page1')
   }
 
-
-  handleDelete = (chipToDelete) => {
-
-    var filtered = this.state.selectedGenres.filter(function (el) { return el.id !== chipToDelete.id; });
-    var allGenres = this.state.allGenres
-
-    allGenres.push(chipToDelete)
-    this.setState({ allGenres: allGenres, selectedGenres: filtered })
-    if (this.state.selectedGenres.length === 0) {
-      this.props.refreshDashboard(false)
-    }
-  }
-
-  handleAdd = (chipToadd) => {
-    var filtered = this.state.allGenres.filter(function (el) { return el.id !== chipToadd.id; });
-    var selectedGenres = this.state.selectedGenres
-
-    selectedGenres.push(chipToadd)
-    this.setState({ selectedGenres: selectedGenres, allGenres: filtered })
-    this.props.refreshDashboard(true)
-  }
-
-  handleClear = () => {
-    var selectedGenres = this.state.selectedGenres
-    var allGenres = this.state.allGenres
-    selectedGenres.filter((el) => allGenres.push(el))
-    this.setState({ allGenres: allGenres, selectedGenres: [] })
-    this.props.filterMovieData("")
-    this.props.refreshDashboard(false)
-  }
-
-  filterIconClick = () => {
-    this.setState({
-      allGenresEnabled: !this.state.allGenresEnabled
-    })
-  }
-
-  filterClick = () => {
-    this.setState({
-      allGenresEnabled: false
-    })
-    let data = this.state.selectedGenres
-    let genreArray = [];
-    for (let i = 0; i < data.length; i++) {
-      genreArray.push(data[i].id)
-    }
-    let genreString = genreArray.join("%2C");
-    this.props.filterMovieData(genreString)
-    this.props.history.push("/filter/page1")
-  }
-
   drawerSwitch = (toogle) => {
     this.setState({ drawerOpen: toogle })
   }
 
   render() {
     const { classes } = this.props;
-    const { selectedGenres, userInfo } = this.state
+    const { userInfo } = this.state
     return (
 
       <AppBar
@@ -357,80 +284,11 @@ class Appbar extends PureComponent {
           </div>
 
           {/* FILTER */}
-          <div className={classes.grow} />
-
-          <div style={{ display: 'flex', flexDirection: 'column', position: 'relative', }} >
-            <Paper className={classes.root}>
-              <Chip
-                size="small"
-                clickable
-                icon={<FilterListIcon style={{ marginRight: -12 }} />}
-                className={classes.chip}
-                style={{ display: 'flex', marginLeft: 5 }}
-                onClick={() => this.filterIconClick()}
-              />
-              {selectedGenres.map(data => {
-                let icon;
-                return (
-                  <Chip
-                    size="small" key={data.id}
-                    icon={icon} label={data.name}
-                    onDelete={() => this.handleDelete(data)}
-                    className={classes.chip}
-                  />
-                );
-              })}
-
-              {selectedGenres.length > 0
-                ?
-
-                <div>
-                  <Chip
-                    size="small" clickable label='CLEAR'
-                    className={classes.chip}
-                    style={{ borderTopRightRadius: 5, borderBottomRightRadius: 5 }}
-                    onClick={() => this.handleClear()}
-                  />
-
-                  <Chip
-                    size="small" clickable label='FILTER'
-                    className={classes.chip}
-                    style={{ borderTopLeftRadius: 5, borderBottomLeftRadius: 5 }}
-                    onClick={() => this.filterClick()}
-                  />
-                </div>
-                : null
-              }
-            </Paper>
-
-            {this.state.allGenresEnabled
-              ?
-              <Paper variant="outlined"
-                elevation={3}
-                style={{
-                  position: 'absolute', justifyContent: 'space-evenly',
-                  flexWrap: 'wrap', backgroundColor: '#5E5E5E', width: 250,
-                  borderRadius: 11, padding: 5, top: 40, right: 0
-                }} >
-                {this.state.allGenres && this.state.allGenres.map(data => {
-                  let icon;
-                  return (
-                    <Chip
-                      size="small" key={data.id}
-                      icon={icon} label={data.name}
-                      onClick={() => this.handleAdd(data)}
-                      style={{ margin: 3, padding: 0.2, }}
-                      className={classes.chip}
-                    />
-                  );
-                })}
-              </Paper>
-              : null}
+          {/* <div className={classes.grow} /> */}
+          <div>
+            <Filter />
           </div>
-
-
         </Toolbar>
-
       </AppBar>
 
     );
