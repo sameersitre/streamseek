@@ -18,23 +18,20 @@ class Dashboard extends Component {
     }
 
     async componentDidMount() {
-        try {
-            if (this.props.match?.params.routedFrom) {
-                localStorage.setItem("routedFrom", this.props.match.params.routedFrom)
-            }
-            console.log('cd mount')
-            window.scrollTo(0, 0)
-            this.setState({ refresh: true })
-            let data = { page: 1, media_type: "all" }
-            let apiData = await apiCall(trendingURL, data)
-            this.setState({ dataList: apiData.results, refresh: false })
-        } catch (error) {
-            console.log(error)
+        if (this.props.match?.params.routedFrom) {
+            localStorage.setItem("routedFrom", this.props.match.params.routedFrom)
         }
-
+        console.log('cd mount')
+        window.scrollTo(0, 0)
+        this.setState({ refresh: true })
+        let data = { page: 1, media_type: "all" }
+        // let apiData = await apiCall(trendingURL, data)
+        // this.setState({ dataList: apiData.results })
+        this.setState({ refresh: false })
     }
 
-    async componentDidUpdate(prevProps, prevState) {
+
+    async componentDidUpdate(prevProps) {
         if (this.props.match.params.pageNumber !== this.state.pageNumber) {
             console.log('cd updates')
             let data = { page: this.props.match.params.pageNumber, media_type: "all" }
@@ -51,7 +48,7 @@ class Dashboard extends Component {
     pageNavigate = (value) => {
         window.scrollTo(0, 0)
         this.setState({ pageNumber: value })
-        this.props.history.replace({ pathname: `/all/page${value}` })
+        this.props.history.push({ pathname: `/all/page${value}` })
     }
 
     previous = () => {

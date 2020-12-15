@@ -109,6 +109,7 @@ class Appbar extends PureComponent {
     let locationInfo = await countryCode()
     let params = {
       ip: locationInfo.ip,
+      type: "webapp",
       region: locationInfo.region,
       colocation: locationInfo.colocation,
       accessDate: new Date(),
@@ -125,7 +126,7 @@ class Appbar extends PureComponent {
         }
         await apiCall(getInfo, userDetails)
       }
-    }, 10000);
+    }, 15000);
     this.props.userInfoAction(params)
     this.setState({ userInfo: locationInfo })
   } 

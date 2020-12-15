@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { Redirect, Route, Switch, withRouter } from 'react-router-dom';
-import hocWrapper from './hocWrapper'
+// import hocWrapper from './hocWrapper'
 import Dashboard from './components/screens/dashboard/Dashboard';
 import Movies from './components/screens/movies/Movies';
 import TVShows from './components/screens/tvshows/TVShows.js';
@@ -17,7 +17,10 @@ import Search from './components/screens/search/Search'
 import Test from './components/screens/test/Test';
 const Routes = (props) => (
     <Switch style={{ position: 'absolute' }}>
-        <Route exact path={["/", "/routedFrom=:routedFrom"]} component={Dashboard} />
+        {console.log(props)}
+        <Route exact path={["/", "/routedFrom=:routedFrom"]} component={Dashboard} >
+            <Redirect to={`/all/page1/routedFrom=${props.match.params.routedFrom}`} />
+        </Route>
         <Route exact path="/all/page:pageNumber" component={Dashboard} />
         <Route exact path="/movies/page:pageNumber" component={Movies} />
         <Route exact path="/tvshows/page:pageNumber" component={TVShows} />

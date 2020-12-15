@@ -81,12 +81,15 @@ class Footer extends Component {
             this.handleDialogOpen('Incorrect email format.', "Please enter correct email.")
         } else {
             if (this.state.message.length > 0 && this.state.email.length > 0) {
-                let details = await countryCode()
-                console.log(details)
+                let locationInfo = await countryCode()
                 let params = {
+                    ip: locationInfo.ip,
+                    type: "webapp",
+                    region: locationInfo.region,
+                    colocation: locationInfo.colocation,
+                    accessDate: new Date(),
                     email: this.state.email,
                     message: this.state.message,
-                    ...this.props.user.user_info,
                     coordinates: JSON.parse(localStorage.geolocation),
                 }
                 await apiCall(getFeedback, params)
@@ -101,14 +104,12 @@ class Footer extends Component {
 
     render() {
         const { classes } = this.props;
-
         return (
             <Grid container
                 style={{
                     backgroundColor: '#282828', color: '#BFBFBF', marginTop: 50,
-                    justifyContent: 'space-between' 
+                    justifyContent: 'space-between'
                 }} >
-
                 <ThemeProvider theme={createMuiTheme({ palette: { type: 'dark' } })} >
                     <Dialog
                         open={this.state.messageDialog}
@@ -128,6 +129,7 @@ class Footer extends Component {
                             </Button>
                         </DialogActions>
                     </Dialog>
+
                     <Grid container item xs={12} sm={4}
                         style={{
                             display: 'flex', flexDirection: 'column',
@@ -137,7 +139,7 @@ class Footer extends Component {
                             This web app is for experimentation purposes only.
                     </Typography>
                         <Typography variant="subtitle1">
-                            Any queries please contact:
+                            For any queries / suggestions please contact:
                     </Typography>
                         <TextField
                             color='secondary'
@@ -173,50 +175,53 @@ class Footer extends Component {
                             Submit
                     </Button>
                     </Grid>
-
                 </ThemeProvider>
 
-                <Grid style={{
-                    display: 'flex', flexDirection: 'column',
-                    backgroundColor: '#282828', padding: 20, height: 150,
-                }}>
-                    <div>
-                        <Typography variant="body2"  >
-                            External Links
+                <Grid
+                    container item xs={12} sm={4}
+                    style={{
+                        backgroundColor: '#282828', padding: 20,
+                    }}>
+                    <div style={{
+                        display: 'flex',
+                        flexDirection: 'column', justifyContent: 'space-between', width: '100%',
+                        border: 'solid', borderColor: '#5A5A5A', borderWidth: 1.5, borderRadius: 7, padding: 20
+                    }}>
+                        <div style={{ marginBottom: 20 }}>
+                            <Typography variant="body2"  >
+                                External Links
                             </Typography>
-                        <IconButton color="inherit" width={50} height={50}
-                            href={`https://github.com/sameersitre/bingefeast`} target="_blank"
-                            onClick={() => this.handleAnalytics("github clicked")}
-                        >
-                            <GitHub />
-                        </IconButton>
-
-                        <IconButton color="inherit"
-                            href={`https://www.linkedin.com/in/sameersitre/`} target="_blank"
-                            onClick={() => this.handleAnalytics("linkedin clicked")}
-                        >
-                            <LinkedIn />
-                        </IconButton>
-                    </div>
-                    <div style={{ marginTop: 20 }}>
-                        <Typography variant="body2"
-
-                        >
-                            Also Available in App Store and Play Store
+                            <IconButton color="inherit" width={50} height={50}
+                                href={`https://github.com/sameersitre/bingefeast`} target="_blank"
+                                onClick={() => this.handleAnalytics("github clicked")}
+                            >
+                                <GitHub />
+                            </IconButton>
+                            <IconButton color="inherit"
+                                href={`https://www.linkedin.com/in/sameersitre/`} target="_blank"
+                                onClick={() => this.handleAnalytics("linkedin clicked")}
+                            >
+                                <LinkedIn />
+                            </IconButton>
+                        </div>
+                        <div >
+                            <Typography variant="body2"  >
+                                Also Available in App Store and Play Store
                             </Typography>
-                        <IconButton color="inherit" width={50} height={50}
-                            href={`https://play.google.com/store/apps/details?id=com.bingefeast`} target="_blank"
-                            onClick={() => this.handleAnalytics("Play store clicked")}
-                        >
-                            <AndroidIcon />
-                        </IconButton>
+                            <IconButton color="inherit" width={50} height={50}
+                                href={`https://play.google.com/store/apps/details?id=com.bingefeast`} target="_blank"
+                                onClick={() => this.handleAnalytics("Play store clicked")}
+                            >
+                                <AndroidIcon />
+                            </IconButton>
 
-                        <IconButton color="inherit"
-                            // href={`http://itunes.apple.com/lb/app/truecaller-caller-id-number/id448142450?mt=8`} target="_blank"
-                            onClick={() => this.handleDialogOpen('Coming Soon!', 'Will be availabe soon on App Store.')}
-                        >
-                            <AppleIcon />
-                        </IconButton>
+                            <IconButton color="inherit"
+                                // href={`http://itunes.apple.com/lb/app/truecaller-caller-id-number/id448142450?mt=8`} target="_blank"
+                                onClick={() => this.handleDialogOpen('Coming Soon!', 'Will be availabe soon on App Store.')}
+                            >
+                                <AppleIcon />
+                            </IconButton>
+                        </div>
                     </div>
                 </Grid>
             </Grid>

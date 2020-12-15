@@ -62,12 +62,10 @@ class MediaList extends PureComponent {
                             next={next}
                             previous={previous}
                         />}
-
-
                 </Grid>
-                {listData?.length > 0 &&
+                {/* {listData?.length > 0 && */}
                     <Footer />
-                }
+                {/* } */}
             </div>
         )
     }
