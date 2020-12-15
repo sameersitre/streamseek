@@ -97,7 +97,7 @@ class ChipsArray extends Component {
         return (
             <div style={{
                 display: 'flex', flexDirection: 'column',
-                right: 5, top: 12, position: 'fixed', width: 250,
+                right: 30, top: 60, position: 'fixed', width: 250,
             }} >
                 <Paper className={classes.root}
                     elevation={0}

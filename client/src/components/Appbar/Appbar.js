@@ -20,10 +20,16 @@ import SearchIcon from '@material-ui/icons/Search';
 import MenuIcon from '@material-ui/icons/Menu';
 import AndroidIcon from '@material-ui/icons/Android';
 import AppleIcon from '@material-ui/icons/Apple';
+import MenuItem from '@material-ui/core/MenuItem';
+import Menu from '@material-ui/core/Menu';
+import AccountCircle from '@material-ui/icons/AccountCircle';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
+
+import Auth from '../authentication/Auth'
 import MobileMenu from './MobileMenu';
 import Filter from './filter'
+
 import { refreshDashboard, filterMovieData, searchTextAction, userInfoAction } from '../../containers/actions/userActions';
 import getGeolocation from '../../services/location'
 import countryCode from '../../services/countryCode'
@@ -92,16 +98,19 @@ const styles = theme => ({
 
 class Appbar extends PureComponent {
   state = {
-    setDialog: false,
+    isDialogOpen: true,
     barColor: false,
     searchText: '',
     drawerOpen: false,
+
     allGenres: this.props.user.Genres.genres,
     selectedGenres: [],
     allGenresEnabled: false,
     updateOnce: true,
     restrictDisplay: false,
-    userInfo: []
+    userInfo: [],
+    auth: true,
+    anchorEl_userMenu: null
   }
 
   async componentDidMount() {
@@ -129,7 +138,7 @@ class Appbar extends PureComponent {
     }, 15000);
     this.props.userInfoAction(params)
     this.setState({ userInfo: locationInfo })
-  } 
+  }
 
 
   handleChange = (event) => {
@@ -156,9 +165,27 @@ class Appbar extends PureComponent {
     this.setState({ drawerOpen: toogle })
   }
 
+  handleuserMenu = (event) => {
+    this.setState({ anchorEl_userMenu: event.currentTarget, });
+  };
+
+  handleuserMenuClose = () => {
+    this.setState({ anchorEl_userMenu: null });
+  };
+
+  signInClick = () => {
+    this.setState({ isDialogOpen: true, anchorEl_userMenu: null });
+  }
+
+  signUpClick = () => {
+    this.setState({ isDialogOpen: true, anchorEl_userMenu: null });
+
+
+  }
+
   render() {
     const { classes } = this.props;
-    const { userInfo } = this.state
+    const { userInfo, auth, drawerOpen, isDialogOpen, anchorEl_userMenu } = this.state
     return (
 
       <AppBar
@@ -170,49 +197,18 @@ class Appbar extends PureComponent {
           backgroundColor: 'none'
         }
         }>
-        <SwipeableDrawer anchor='left' open={this.state.drawerOpen}
+        <SwipeableDrawer anchor='left' open={drawerOpen}
           onClose={() => this.drawerSwitch(false)}
           onOpen={() => this.drawerSwitch(true)}
         >
           <MobileMenu drawerClose={() => this.drawerSwitch(false)} />
         </SwipeableDrawer>
-
-        <Dialog
-          fullScreen
-          disableBackdropClick
-          disableEscapeKeyDown
-          style={{ width: '85%', height: '85%', margin: 'auto' }}
-        >
-          <div style={{
-            width: '100%', height: '100%', color: '#FFFFFF', backgroundColor: '#1B1A20',
-            display: 'flex', flexDirection: 'column', justifyContent: 'center',
-            alignItems: 'center',
-          }}>
-            <Typography variant="h6"   >
-              For best experience,
-          </Typography>
-            <Typography variant="h6"   >
-              please go back to portrait mode or use the app.
-          </Typography>
-            <IconButton color="inherit" width={50} height={50}
-              href={`https://play.google.com/store/apps/details?id=com.bingefeast`} target="_blank"
-            // onClick={() => this.handleAnalytics("Play store clicked")}
-            >
-              <AndroidIcon />
-            </IconButton>
-
-            <IconButton color="inherit"
-            // href={`http://itunes.apple.com/lb/app/truecaller-caller-id-number/id448142450?mt=8`} target="_blank"
-            // onClick={() => this.handleDialogOpen('Coming Soon!', 'Will be availabe soon on App Store.')}
-            >
-              <AppleIcon />
-            </IconButton>
-          </div>
-
-        </Dialog>
+        <Auth
+          isDialogOpen={isDialogOpen}
+          setDialogClose={() => this.setState({ isDialogOpen: false })}
+        />
 
         <Toolbar>
-
           <Hidden xsDown>
             <IconButton component={Link} to='/all/page1'
               onClick={() => this.setState({ searchText: '' })}  >
@@ -283,7 +279,39 @@ class Appbar extends PureComponent {
               inputProps={{ 'aria-label': 'search' }}
             />
           </div>
+          <div className={classes.grow} />
 
+          {auth && (
+            <div>
+              <IconButton
+                aria-label="account of current user"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
+                onClick={this.handleuserMenu}
+                color="inherit"
+              >
+                <AccountCircle />
+              </IconButton>
+              <Menu
+                id="menu-appbar"
+                anchorEl={anchorEl_userMenu}
+                anchorOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                keepMounted
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right',
+                }}
+                open={anchorEl_userMenu}
+                onClose={this.handleuserMenuClose}
+              >
+                <MenuItem onClick={this.signInClick}>Login</MenuItem>
+                <MenuItem onClick={this.signUpClick}>Sign Up</MenuItem>
+              </Menu>
+            </div>
+          )}
           {/* FILTER */}
           {/* <div className={classes.grow} /> */}
           <div>
