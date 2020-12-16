@@ -9,21 +9,25 @@ import React from "react"
 import ReactDOM from "react-dom"
 import App from "./App"
 import Appbar from './components/Appbar/Appbar';
-
 import { BrowserRouter } from "react-router-dom"
 import { Provider } from "react-redux"
-import Store from "./Store"
+ import Store from "./Store"
+import { ThemeProvider } from "@material-ui/core";
+import theme from "./themeProvider";
 ReactDOM.render(
 
   <Provider store={Store} >
-    <div style={{ backgroundColor: "#1B1A20", margin: -8, }} >
+    <ThemeProvider theme={theme}>
+       <div style={{ backgroundColor: "#1B1A20", margin: -8, }} >
       <BrowserRouter>
         <Appbar />
         <App />
       </BrowserRouter>
     </div>
+    </ThemeProvider>
+
   </Provider>
   ,
   document.getElementById("root")
 )
-//serviceWorker.register()
+// serviceWorker.register()

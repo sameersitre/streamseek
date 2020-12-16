@@ -15,18 +15,15 @@ import Hidden from '@material-ui/core/Hidden';
 import Typography from '@material-ui/core/Typography';
 import InputBase from '@material-ui/core/InputBase';
 import SwipeableDrawer from '@material-ui/core/SwipeableDrawer';
-import Dialog from '@material-ui/core/Dialog';
 import SearchIcon from '@material-ui/icons/Search';
 import MenuIcon from '@material-ui/icons/Menu';
-import AndroidIcon from '@material-ui/icons/Android';
-import AppleIcon from '@material-ui/icons/Apple';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 
-import Auth from '../authentication/Auth'
+import Authentication from '../authentication/Authentication'
 import MobileMenu from './MobileMenu';
 import Filter from './filter'
 
@@ -35,6 +32,7 @@ import getGeolocation from '../../services/location'
 import countryCode from '../../services/countryCode'
 import apiCall from '../../services/apiCall';
 import { getInfo } from '../../services/apiURL'
+import { Avatar } from '@material-ui/core';
 const styles = theme => ({
   grow: {
     flexGrow: 1,
@@ -102,7 +100,7 @@ class Appbar extends PureComponent {
     barColor: false,
     searchText: '',
     drawerOpen: false,
-
+    userPhotoURL: '',
     allGenres: this.props.user.Genres.genres,
     selectedGenres: [],
     allGenresEnabled: false,
@@ -137,7 +135,13 @@ class Appbar extends PureComponent {
       }
     }, 15000);
     this.props.userInfoAction(params)
-    this.setState({ userInfo: locationInfo })
+
+    let userProfile = localStorage.userInfo ? JSON.parse(localStorage.userInfo) : null
+
+    this.setState({
+      userInfo: locationInfo,
+      userPhotoURL: userProfile?.photoURL
+    })
   }
 
 
@@ -185,7 +189,7 @@ class Appbar extends PureComponent {
 
   render() {
     const { classes } = this.props;
-    const { userInfo, auth, drawerOpen, isDialogOpen, anchorEl_userMenu } = this.state
+    const { userInfo, auth, drawerOpen, userPhotoURL, isDialogOpen, anchorEl_userMenu } = this.state
     return (
 
       <AppBar
@@ -203,7 +207,8 @@ class Appbar extends PureComponent {
         >
           <MobileMenu drawerClose={() => this.drawerSwitch(false)} />
         </SwipeableDrawer>
-        <Auth
+
+        <Authentication
           isDialogOpen={isDialogOpen}
           setDialogClose={() => this.setState({ isDialogOpen: false })}
         />
@@ -290,7 +295,7 @@ class Appbar extends PureComponent {
                 onClick={this.handleuserMenu}
                 color="inherit"
               >
-                <AccountCircle />
+                {userPhotoURL ? <Avatar src={userPhotoURL} alt="" /> : <AccountCircle />}
               </IconButton>
               <Menu
                 id="menu-appbar"
@@ -308,11 +313,9 @@ class Appbar extends PureComponent {
                 onClose={this.handleuserMenuClose}
               >
                 <MenuItem onClick={this.signInClick}>Login</MenuItem>
-                <MenuItem onClick={this.signUpClick}>Sign Up</MenuItem>
               </Menu>
             </div>
           )}
-          {/* FILTER */}
           {/* <div className={classes.grow} /> */}
           <div>
             <Filter />

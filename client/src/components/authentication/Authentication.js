@@ -2,25 +2,20 @@ import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 import { makeStyles, createStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-import SaveIcon from '@material-ui/icons/Save';
-
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
-
 import Dialog from '@material-ui/core/Dialog';
-
-import AndroidIcon from '@material-ui/icons/Android';
-import AppleIcon from '@material-ui/icons/Apple';
 import CloseIcon from '@material-ui/icons/Close';
-
 import GoogleIcon from '../../assets/Icons/googleIcon'
-
 import FacebookIcon from '../../assets/Icons/facebookIcon'
 import TwitterIcon from '../../assets/Icons/twitterIcon'
-
-import { refreshDashboard, filterMovieData, searchTextAction, userInfoAction } from '../../containers/actions/userActions';
+import SmsIcon from '@material-ui/icons/Sms';
+import SignUp from './SignUp'
+import { refreshDashboard, } from '../../containers/actions/userActions';
 import apiCall from '../../services/apiCall';
 import { getInfo } from '../../services/apiURL'
+import { signin, signInWithGoogle } from "../../utils/auth";
+import { useDispatch } from "react-redux";
 const useStyles = makeStyles((theme) => createStyles({
     dialog: {
         width: 500, height: 800, borderRadius: 15,
@@ -32,9 +27,11 @@ const useStyles = makeStyles((theme) => createStyles({
         marginTop: 10,
     },
     button: {
+        width: 250,
         color: '#FFFFFF',
-        backgroundColor: '#5A5A5A',
-        margin: theme.spacing(0.6),
+
+        backgroundColor: '#707070',
+        margin: theme.spacing(0.9),
     },
     popover: {
         pointerEvents: 'none',
@@ -46,19 +43,26 @@ const useStyles = makeStyles((theme) => createStyles({
         color: theme.palette.text.primary,
     }
 }));
-export function Auth(props) {
+export function Authentication(props) {
     const setDialogClose = props.setDialogClose
     const myRef = React.createRef();
     const [recommendsList, setRecommendsList] = useState();
+    const [emailError, setEmailError] = useState();
+
     const [isDialogOpen, setDialogOpen] = useState(false)
     const classes = useStyles();
-
     useEffect(() => {
         setDialogOpen(props.isDialogOpen)
     }, [props]);
 
+    async function googleSignIn() {
+        await signInWithGoogle().then((data) => {
+            console.log(data)
+            localStorage.setItem("accessToken", data.accessToken)
+            localStorage.setItem("userInfo", JSON.stringify(data))
+        }).then(setDialogClose);
 
-
+    }
     return (
         <div>
             <Dialog
@@ -72,32 +76,32 @@ export function Auth(props) {
                 <div style={{
                     width: '100%', height: '100%', color: '#FFFFFF',
                     backgroundColor: '#1B1A20',
-
                     display: 'flex', flexDirection: 'column', justifyContent: 'center',
                     alignItems: 'center',
                 }}>
                     <IconButton
                         size='small'
-                        // color="default"
                         onClick={setDialogClose}
                         aria-label="Close"
                         style={{ position: 'fixed', zIndex: 1, backgroundColor: 'white', top: '13vh', right: '12.5vw' }}
                     >
                         <CloseIcon color='secondary' />
                     </IconButton>
+
                     <Button
                         variant="outlined"
-                        color="primary"
-                        size="large"
+                        color="secondary"
+                        size="medium"
                         className={classes.button}
                         startIcon={<GoogleIcon />}
+                        onClick={googleSignIn}
                     >
                         Sign in with Google
                     </Button>
                     <Button
                         variant="outlined"
-                        color="primary"
-                        size="large"
+                        color="secondary"
+                        size="medium"
                         className={classes.button}
                         startIcon={<FacebookIcon />}
                     >
@@ -105,8 +109,8 @@ export function Auth(props) {
                     </Button>
                     <Button
                         variant="outlined"
-                        color="primary"
-                        size="large"
+                        color="secondary"
+                        size="medium"
                         autoCapitalize='none'
                         className={classes.button}
                         startIcon={<TwitterIcon />}
@@ -115,46 +119,24 @@ export function Auth(props) {
                     </Button>
                     <Button
                         variant="outlined"
-                        color="primary"
-                        size="large"
+                        color="secondary"
+                        size="medium"
                         className={classes.button}
-                        startIcon={<GoogleIcon />}
+                        startIcon={<SmsIcon />}
                     >
-                        Sign in with Google
+                        Sign in with OTP
                     </Button>
+                    <Typography style={{ color: '#757575', fontSize: 18, margin: 15 }}>OR</Typography>
+                    <Typography style={{ color: '#757575', fontSize: 15 }}>Sign in via Credentials</Typography>
 
-                    <Typography variant="h6"   >
-                        For best experience,
-                    </Typography>
-                    <Typography variant="h6"   >
-                        please go back to portrait mode or use the app.
-                    </Typography>
-                    <IconButton color="inherit" width={50} height={50}
-                        href={`https://play.google.com/store/apps/details?id=com.bingefeast`} target="_blank"
-                    // onClick={() => this.handleAnalytics("Play store clicked")}
-                    >
-                        <AndroidIcon />
-                    </IconButton>
-
-                    <IconButton color="inherit" onClick={setDialogClose}
-                    // href={`http://itunes.apple.com/lb/app/truecaller-caller-id-number/id448142450?mt=8`} target="_blank"
-                    // onClick={() => this.handleDialogOpen('Coming Soon!', 'Will be availabe soon on App Store.')}
-                    >
-                        <AppleIcon />
-                    </IconButton>
+                    <SignUp />
                 </div>
-
             </Dialog>
         </div>
     )
 }
-
 const mapStateToProps = (state) => ({
-
 })
-
 const mapDispatchToProps = {
-
 }
-
-export default Auth
+export default Authentication
