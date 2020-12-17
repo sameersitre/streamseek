@@ -16,7 +16,8 @@ import { userProfileAction } from '../../containers/actions/userActions';
 import apiCall from '../../services/apiCall';
 import { getInfo } from '../../services/apiURL'
 import { signin, signInWithGoogle } from "../../utils/auth";
-
+import { auth } from '../../utils/firebase'
+import SignInOTP from './SignInOTP'
 const useStyles = makeStyles((theme) => createStyles({
     dialog: {
         width: 500, height: 800, borderRadius: 15,
@@ -48,22 +49,23 @@ export function Authentication(props) {
 
     const setDialogClose = props.setDialogClose
     const myRef = React.createRef();
+    const captchaRef = React.useRef(null);
     const [recommendsList, setRecommendsList] = useState();
     const [emailError, setEmailError] = useState();
-
     const [isDialogOpen, setDialogOpen] = useState(false)
     const dispatch = useDispatch();
 
     const classes = useStyles();
     useEffect(() => {
         setDialogOpen(props.isDialogOpen)
+
     }, [props]);
 
     async function googleSignIn(provider) {
         console.log(provider)
         await signInWithGoogle(provider).then((data) => {
             if (data !== null) {
-            localStorage.setItem("accessToken", data.accessToken)
+                localStorage.setItem("accessToken", data.accessToken)
                 localStorage.setItem("userProfile", JSON.stringify(data))
                 dispatch(userProfileAction(data))
             }
@@ -73,6 +75,16 @@ export function Authentication(props) {
 
         }).then(setDialogClose);
 
+    }
+    async function phoneSignIn() {
+        console.log('phoneSignIn')
+        window.recaptchaVerifier = new auth.RecaptchaVerifier('sign-in-button', {
+            'size': 'invisible',
+            'callback': function (response) {
+                // reCAPTCHA solved, allow signInWithPhoneNumber.
+                // onSignInSubmit();
+            }
+        });
     }
     return (
         <div>
@@ -125,15 +137,19 @@ export function Authentication(props) {
                         Sign in with Twitter
                     </Button> */}
                     <Button
+                        id="sign-in-button"
                         variant="outlined"
                         color="secondary"
                         size="medium"
                         className={classes.button}
                         startIcon={<SmsIcon />}
+                        onClick={phoneSignIn}
                     >
                         Sign in with OTP
                     </Button>
-                    <Typography style={{ color: '#757575', fontSize: 18, margin: 15 }}>OR</Typography>
+                    <SignInOTP />
+
+                     <Typography style={{ color: '#757575', fontSize: 18, margin: 15 }}>OR</Typography>
                     <Typography style={{ color: '#757575', fontSize: 15 }}>Sign in via Credentials</Typography>
 
                     <SignUp />
