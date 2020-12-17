@@ -7,6 +7,8 @@ import PhoneInput from 'react-phone-number-input'
 import 'react-phone-number-input/style.css'
 import PhoneField from '../../assets/components/PhoneField'
 import { auth } from '../../utils/firebase'
+import * as firebaseui from "firebaseui";
+
 const useStyles = makeStyles((theme) => createStyles({
     dialog: {
         width: 500, height: 800, borderRadius: 15,
@@ -40,7 +42,7 @@ const useStyles = makeStyles((theme) => createStyles({
         },
     },
 }));
-export function SignInOTP() {
+export function SignInOTP(props) {
     const classes = useStyles();
     const ref = React.createRef();
 
@@ -49,14 +51,29 @@ export function SignInOTP() {
 
 
     useEffect(() => {
-        window.recaptchaVerifier = new auth.RecaptchaVerifier('sign-in-button', {
-            'size': 'invisible',
-            'callback': function (response) {
-                console.log(response)
-                // reCAPTCHA solved, allow signInWithPhoneNumber.
-                // onSignInSubmit();
-            }
-        });
+        const uiConfig = {
+            //   signInSuccessUrl: "https://netflix-clone-ankur.herokuapp.com/", //This URL is used to return to that page when we got success response for phone authentication.
+            signInOptions: [auth.PhoneAuthProvider.PROVIDER_ID],
+            //   tosUrl: "https://netflix-clone-ankur.herokuapp.com/"
+        };
+
+
+        if (firebaseui.auth.AuthUI.getInstance()) {
+            const ui = firebaseui.auth.AuthUI.getInstance()
+            ui.start('#firebaseui-auth-container', uiConfig)
+        } else {
+            const ui = new firebaseui.auth.AuthUI(auth())
+            ui.start('#firebaseui-auth-container', uiConfig)
+          }
+
+        // window.recaptchaVerifier = new auth.RecaptchaVerifier('sign-in-button', {
+        //     'size': 'invisible',
+        //     'callback': function (response) {
+        //         console.log(response)
+        //         // reCAPTCHA solved, allow signInWithPhoneNumber.
+        //         // onSignInSubmit();
+        //     }
+        // });
 
     }, []);
 
@@ -65,7 +82,6 @@ export function SignInOTP() {
 
 
     async function otpSignIn() {
-
         var appVerifier = window.recaptchaVerifier;
         console.log(appVerifier)
         auth().signInWithPhoneNumber(phone, appVerifier)
@@ -89,8 +105,9 @@ export function SignInOTP() {
 
     ));
     return (
-        <div style={{ height: 50 }}>
-            <PhoneInput
+        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }} >
+            <div id="firebaseui-auth-container"></div>
+            {/* <PhoneInput
                 ref={ref}
                 defaultCountry="IN"
                 className={classes.phoneField}
@@ -101,16 +118,16 @@ export function SignInOTP() {
                 countryCallingCodeEditable={false}
                 placeholder="Enter phone number"
 
-            />
+            /> */}
             <Button
-                variant="outlined"
-                color="secondary"
-                size="medium"
-                className={classes.button}
+                // variant="outlined"
+                // color="secondary"
+                // size="medium"
+                // className={classes.button}
 
-                onClick={otpSignIn}
+                onClick={props.backNavigate}
             >
-                Send
+                {'<'} All Sign in options
                     </Button>
         </div>
     )

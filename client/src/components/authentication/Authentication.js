@@ -50,7 +50,7 @@ export function Authentication(props) {
     const setDialogClose = props.setDialogClose
     const myRef = React.createRef();
     const captchaRef = React.useRef(null);
-    const [recommendsList, setRecommendsList] = useState();
+    const [displayPhoneSignIn, setdisplayPhoneSignIn] = useState(false);
     const [emailError, setEmailError] = useState();
     const [isDialogOpen, setDialogOpen] = useState(false)
     const dispatch = useDispatch();
@@ -77,14 +77,15 @@ export function Authentication(props) {
 
     }
     async function phoneSignIn() {
-        console.log('phoneSignIn')
-        window.recaptchaVerifier = new auth.RecaptchaVerifier('sign-in-button', {
-            'size': 'invisible',
-            'callback': function (response) {
-                // reCAPTCHA solved, allow signInWithPhoneNumber.
-                // onSignInSubmit();
-            }
-        });
+        setdisplayPhoneSignIn(true)
+        // console.log('phoneSignIn')
+        // window.recaptchaVerifier = new auth.RecaptchaVerifier('sign-in-button', {
+        //     'size': 'invisible',
+        //     'callback': function (response) {
+        //         // reCAPTCHA solved, allow signInWithPhoneNumber.
+        //         // onSignInSubmit();
+        //     }
+        // });
     }
     return (
         <div>
@@ -105,54 +106,47 @@ export function Authentication(props) {
                     >
                         <CloseIcon color='secondary' />
                     </IconButton>
+                    {!displayPhoneSignIn ?
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                            <Button
+                                variant="outlined"
+                                color="secondary"
+                                size="medium"
+                                className={classes.button}
+                                startIcon={<GoogleIcon />}
+                                onClick={() => googleSignIn('google')}
+                            >
+                                Sign in with Google
+                            </Button>
+                            <Button
+                                variant="outlined"
+                                color="secondary"
+                                size="medium"
+                                className={classes.button}
+                                startIcon={<FacebookIcon />}
+                                onClick={() => googleSignIn('facebook')}
+                            >
+                                Sign in with Facebook
+                            </Button>
 
-                    <Button
-                        variant="outlined"
-                        color="secondary"
-                        size="medium"
-                        className={classes.button}
-                        startIcon={<GoogleIcon />}
-                        onClick={() => googleSignIn('google')}
-                    >
-                        Sign in with Google
-                    </Button>
-                    <Button
-                        variant="outlined"
-                        color="secondary"
-                        size="medium"
-                        className={classes.button}
-                        startIcon={<FacebookIcon />}
-                        onClick={() => googleSignIn('facebook')}
-                    >
-                        Sign in with Facebook
-                    </Button>
-                    {/* <Button
-                        variant="outlined"
-                        color="secondary"
-                        size="medium"
-                        autoCapitalize='none'
-                        className={classes.button}
-                        startIcon={<TwitterIcon />}
-                    >
-                        Sign in with Twitter
-                    </Button> */}
-                    <Button
-                        id="sign-in-button"
-                        variant="outlined"
-                        color="secondary"
-                        size="medium"
-                        className={classes.button}
-                        startIcon={<SmsIcon />}
-                        onClick={phoneSignIn}
-                    >
-                        Sign in with OTP
-                    </Button>
-                    <SignInOTP />
+                            <Button
+                                id="sign-in-button"
+                                variant="outlined"
+                                color="secondary"
+                                size="medium"
+                                className={classes.button}
+                                startIcon={<SmsIcon />}
+                                onClick={() => { setdisplayPhoneSignIn(true) }}
+                            >
+                                Sign in with OTP
+                            </Button>
+ 
+                            <Typography style={{ color: '#757575', fontSize: 18, margin: 15 }}>OR</Typography>
+                            <Typography style={{ color: '#757575', fontSize: 15 }}>Sign in via Credentials</Typography>
 
-                     <Typography style={{ color: '#757575', fontSize: 18, margin: 15 }}>OR</Typography>
-                    <Typography style={{ color: '#757575', fontSize: 15 }}>Sign in via Credentials</Typography>
-
-                    <SignUp />
+                            <SignUp />
+                        </div>
+                        : <SignInOTP backNavigate={() => setdisplayPhoneSignIn(false)} />}
                 </div>
             </Dialog>
         </div>
