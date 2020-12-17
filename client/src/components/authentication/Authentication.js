@@ -45,16 +45,11 @@ const useStyles = makeStyles((theme) => createStyles({
         color: theme.palette.text.primary,
     }
 }));
-export function Authentication(props) {
-
-    const setDialogClose = props.setDialogClose
-    const myRef = React.createRef();
-    const captchaRef = React.useRef(null);
+export function Authentication(props) { 
+    const setDialogClose = props.setDialogClose 
     const [displayPhoneSignIn, setdisplayPhoneSignIn] = useState(false);
-    const [emailError, setEmailError] = useState();
-    const [isDialogOpen, setDialogOpen] = useState(false)
-    const dispatch = useDispatch();
-
+     const [isDialogOpen, setDialogOpen] = useState(false)
+    const dispatch = useDispatch(); 
     const classes = useStyles();
     useEffect(() => {
         setDialogOpen(props.isDialogOpen)
@@ -75,34 +70,25 @@ export function Authentication(props) {
 
         }).then(setDialogClose);
 
-    }
-    async function phoneSignIn() {
-        setdisplayPhoneSignIn(true)
-        // console.log('phoneSignIn')
-        // window.recaptchaVerifier = new auth.RecaptchaVerifier('sign-in-button', {
-        //     'size': 'invisible',
-        //     'callback': function (response) {
-        //         // reCAPTCHA solved, allow signInWithPhoneNumber.
-        //         // onSignInSubmit();
-        //     }
-        // });
-    }
+    } 
     return (
         <div>
             <Dialog
+                // sm={8} xl={8}
+                // maxWidth='lg'
                 fullScreen
                 disableBackdropClick
                 disableEscapeKeyDown
                 open={isDialogOpen}
-                style={{ width: '75%', height: '75%', margin: 'auto' }}
+                style={{ minWidth: '75%', width: '40%', height: '80%', margin: 'auto' }}
                 className={classes.root}
             >
-                <div className='auth-root' >
+                <div className='auth-root'   >
                     <IconButton
                         size='small'
                         onClick={setDialogClose}
                         aria-label="Close"
-                        style={{ position: 'fixed', zIndex: 1, backgroundColor: 'white', top: '13vh', right: '12.5vw' }}
+                        style={{ position: 'absolute', top: 0, right: 0, zIndex: 1, backgroundColor: 'white' }}
                     >
                         <CloseIcon color='secondary' />
                     </IconButton>
@@ -152,8 +138,5 @@ export function Authentication(props) {
         </div>
     )
 }
-const mapStateToProps = (state) => ({
-})
-const mapDispatchToProps = {
-}
+
 export default Authentication
