@@ -23,7 +23,7 @@ const store =
     initialState,
     compose(
       applyMiddleware(...middleware),
-      // window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()   //comment out on production
+      window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()   //comment out on production
     )
   )
 export default store;

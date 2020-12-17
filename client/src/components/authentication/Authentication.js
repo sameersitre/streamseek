@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { connect } from 'react-redux'
+import { connect, useDispatch } from 'react-redux'
+import './Authentication.css'
 import { makeStyles, createStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
@@ -11,11 +12,11 @@ import FacebookIcon from '../../assets/Icons/facebookIcon'
 import TwitterIcon from '../../assets/Icons/twitterIcon'
 import SmsIcon from '@material-ui/icons/Sms';
 import SignUp from './SignUp'
-import { refreshDashboard, } from '../../containers/actions/userActions';
+import { userProfileAction } from '../../containers/actions/userActions';
 import apiCall from '../../services/apiCall';
 import { getInfo } from '../../services/apiURL'
 import { signin, signInWithGoogle } from "../../utils/auth";
-import { useDispatch } from "react-redux";
+
 const useStyles = makeStyles((theme) => createStyles({
     dialog: {
         width: 500, height: 800, borderRadius: 15,
@@ -44,22 +45,32 @@ const useStyles = makeStyles((theme) => createStyles({
     }
 }));
 export function Authentication(props) {
+
     const setDialogClose = props.setDialogClose
     const myRef = React.createRef();
     const [recommendsList, setRecommendsList] = useState();
     const [emailError, setEmailError] = useState();
 
     const [isDialogOpen, setDialogOpen] = useState(false)
+    const dispatch = useDispatch();
+
     const classes = useStyles();
     useEffect(() => {
         setDialogOpen(props.isDialogOpen)
     }, [props]);
 
-    async function googleSignIn() {
-        await signInWithGoogle().then((data) => {
-            console.log(data)
+    async function googleSignIn(provider) {
+        console.log(provider)
+        await signInWithGoogle(provider).then((data) => {
+            if (data !== null) {
             localStorage.setItem("accessToken", data.accessToken)
-            localStorage.setItem("userInfo", JSON.stringify(data))
+                localStorage.setItem("userProfile", JSON.stringify(data))
+                dispatch(userProfileAction(data))
+            }
+            else {
+                alert("Sign in is not Successfull.")
+            }
+
         }).then(setDialogClose);
 
     }
@@ -73,12 +84,7 @@ export function Authentication(props) {
                 style={{ width: '75%', height: '75%', margin: 'auto' }}
                 className={classes.root}
             >
-                <div style={{
-                    width: '100%', height: '100%', color: '#FFFFFF',
-                    backgroundColor: '#1B1A20',
-                    display: 'flex', flexDirection: 'column', justifyContent: 'center',
-                    alignItems: 'center',
-                }}>
+                <div className='auth-root' >
                     <IconButton
                         size='small'
                         onClick={setDialogClose}
@@ -94,7 +100,7 @@ export function Authentication(props) {
                         size="medium"
                         className={classes.button}
                         startIcon={<GoogleIcon />}
-                        onClick={googleSignIn}
+                        onClick={() => googleSignIn('google')}
                     >
                         Sign in with Google
                     </Button>
@@ -104,10 +110,11 @@ export function Authentication(props) {
                         size="medium"
                         className={classes.button}
                         startIcon={<FacebookIcon />}
+                        onClick={() => googleSignIn('facebook')}
                     >
                         Sign in with Facebook
                     </Button>
-                    <Button
+                    {/* <Button
                         variant="outlined"
                         color="secondary"
                         size="medium"
@@ -116,7 +123,7 @@ export function Authentication(props) {
                         startIcon={<TwitterIcon />}
                     >
                         Sign in with Twitter
-                    </Button>
+                    </Button> */}
                     <Button
                         variant="outlined"
                         color="secondary"

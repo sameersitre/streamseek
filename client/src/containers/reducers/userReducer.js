@@ -6,7 +6,7 @@
  */
 
 import {
-  SEARCH_TEXT_AVAILABLE, SEARCH_TEXT, GENRE_FILTER, USER_INFO
+  SEARCH_TEXT_AVAILABLE, SEARCH_TEXT, GENRE_FILTER, USER_INFO, USER_PROFILE
 } from '../actions/types';
 
 import Genres from '../../utils/Genres';
@@ -36,6 +36,11 @@ export default function (state = initialState, action) {
       return {
         ...state,
         user_info: action.payload,
+      };
+    case USER_PROFILE:
+      return {
+        ...state,
+        user_profile: action.payload,
       };
 
     default:

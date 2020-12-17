@@ -27,7 +27,10 @@ import Authentication from '../authentication/Authentication'
 import MobileMenu from './MobileMenu';
 import Filter from './filter'
 
-import { refreshDashboard, filterMovieData, searchTextAction, userInfoAction } from '../../containers/actions/userActions';
+import {
+  refreshDashboard, filterMovieData, searchTextAction,
+  userInfoAction, userProfileAction
+} from '../../containers/actions/userActions';
 import getGeolocation from '../../services/location'
 import countryCode from '../../services/countryCode'
 import apiCall from '../../services/apiCall';
@@ -135,16 +138,21 @@ class Appbar extends PureComponent {
       }
     }, 15000);
     this.props.userInfoAction(params)
-
-    let userProfile = localStorage.userInfo ? JSON.parse(localStorage.userInfo) : null
-
+    this.props.userProfileAction(localStorage.userProfile ?
+      JSON.parse(localStorage.userProfile) :
+      null)
     this.setState({
       userInfo: locationInfo,
-      userPhotoURL: userProfile?.photoURL
     })
   }
 
-
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (nextProps.user.user_profile) {
+      return {
+        userPhotoURL: nextProps.user.user_profile.photoURL
+      }
+    }
+  }
   handleChange = (event) => {
     this.setState({ searchText: event.target.value })
   }
@@ -183,10 +191,8 @@ class Appbar extends PureComponent {
 
   signUpClick = () => {
     this.setState({ isDialogOpen: true, anchorEl_userMenu: null });
-
-
   }
-
+  //ben awad
   render() {
     const { classes } = this.props;
     const { userInfo, auth, drawerOpen, userPhotoURL, isDialogOpen, anchorEl_userMenu } = this.state
@@ -332,4 +338,4 @@ const mapStateToProps = state => ({
   user: state.user
 });
 
-export default withStyles(styles)(withRouter(connect(mapStateToProps, { refreshDashboard, filterMovieData, searchTextAction, userInfoAction })(Appbar)));
+export default withStyles(styles)(withRouter(connect(mapStateToProps, { refreshDashboard, filterMovieData, searchTextAction, userInfoAction, userProfileAction })(Appbar)));

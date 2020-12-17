@@ -21,7 +21,6 @@ class Dashboard extends Component {
         if (this.props.match?.params.routedFrom) {
             localStorage.setItem("routedFrom", this.props.match.params.routedFrom)
         }
-        console.log('cd mount')
         window.scrollTo(0, 0)
         this.setState({ refresh: true })
         let data = { page: 1, media_type: "all" }
@@ -33,7 +32,6 @@ class Dashboard extends Component {
 
     async componentDidUpdate(prevProps) {
         if (this.props.match.params.pageNumber !== this.state.pageNumber) {
-            console.log('cd updates')
             let data = { page: this.props.match.params.pageNumber, media_type: "all" }
             let apiData = await apiCall(trendingURL, data)
             this.setState({

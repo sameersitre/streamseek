@@ -5,7 +5,6 @@ export default function (ComposedClass) {
     const ClosedRouteForUser = (props) => {
         const dispatch = useDispatch();
         useEffect(() => {
-            console.log(window.location.pathname)
             if (window.location.pathname !== `/search/page1` &&
                 window.location.pathname.includes('details') === false) {
                 dispatch(searchTextAction(''))

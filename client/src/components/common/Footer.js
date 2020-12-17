@@ -49,11 +49,9 @@ class Footer extends Component {
     }
 
     handleChangeEmail = (event) => {
-        console.log(event)
         this.setState({ email: event.target.value })
     }
     handleChangeData = (event) => {
-        console.log(event)
         this.setState({ message: event.target.value })
     }
 

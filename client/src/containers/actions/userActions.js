@@ -6,7 +6,7 @@
  */
 
 import {
-  SEARCH_TEXT_AVAILABLE, SEARCH_TEXT, GENRE_FILTER, USER_INFO
+  SEARCH_TEXT_AVAILABLE, SEARCH_TEXT, GENRE_FILTER, USER_INFO, USER_PROFILE
 } from './types';
   
 export const refreshDashboard = data => (dispatch) => {
@@ -33,6 +33,13 @@ export const filterMovieData = data => async (dispatch) => {
 export const userInfoAction = data => async (dispatch) => {
   dispatch({
     type: USER_INFO,
+    payload: data
+  });
+};
+
+export const userProfileAction = data => async (dispatch) => {
+  dispatch({
+    type: USER_PROFILE,
     payload: data
   });
 };

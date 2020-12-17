@@ -20,13 +20,11 @@ class Search extends Component {
 
     async componentDidMount() {
         window.scrollTo(0, 0)
-        console.log('cdid mount')
         this.getData()
     }
 
     async componentDidUpdate(prevProps) {
         if ((this.props.match.params.pageNumber !== this.state.pageNumber)) {
-            console.log('cdid update')
             this.getData()
         }
     }

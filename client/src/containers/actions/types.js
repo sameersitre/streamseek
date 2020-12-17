@@ -9,3 +9,4 @@ export const SEARCH_TEXT_AVAILABLE = "search_text_available";
 export const SEARCH_TEXT = "search_text";
 export const GENRE_FILTER = "genre_filter";
 export const USER_INFO = "user_info";
+export const USER_PROFILE = "user_profile";
