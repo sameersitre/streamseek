@@ -2,13 +2,16 @@ import React, { useEffect, useState } from 'react'
 import Button from '@material-ui/core/Button';
 import 'react-phone-number-input/style.css'
 import { useSelector } from "react-redux";
+import { Link, Redirect, useHistory } from "react-router-dom";
+
 import { auth } from '../../utils/firebase'
 import * as firebaseui from "firebaseui";
 import { Typography } from '@material-ui/core';
 export function SignInOTP(props) {
     const reduxState = useSelector(state => state.user);
     const [phoneAuthResult, setPhoneAuthResult] = useState(null)
-
+    const closeDialog = props.closeDialog
+    let history = useHistory();
     useEffect(() => {
         setPhoneAuthResult(localStorage.phoneAuth && JSON.parse(localStorage.phoneAuth))
         const uiConfig = {
@@ -37,25 +40,31 @@ export function SignInOTP(props) {
                 // in their favor. In this case, the default country will be 'GB' even
                 // though 'loginHint' specified the country code as '+1'.
                 // loginHint: '+11234567890'
-                signInSuccessUrl: "https://bingefeast.in/all/page1"
-            }],
+             }],
             callbacks: {
-                signInSuccessWithAuthResult: function (authResult, redirectUrl) {
+                signInSuccessWithAuthResult: async function (authResult, redirectUrl) {
                     // User successfully signed in.
                     // Return type determines whether we continue the redirect automatically
                     // or whether we leave that to developer to handle.
                     console.log(authResult)
                     setPhoneAuthResult(authResult)
-                    localStorage.setItem("phoneAuth", JSON.stringify(authResult))
+                    await localStorage.setItem("phoneAuth", JSON.stringify(authResult))
+                    // props.backNavigate
+
+                    // history.replace({ pathname: `/all/page1` })
                     return true;
                 }
             },
+            signInSuccessUrl: "/all/page1"
         };
+        
+
+
 
         if (firebaseui.auth.AuthUI.getInstance()) {
             const ui = firebaseui.auth.AuthUI.getInstance()
             ui.start('#firebaseui-auth-container', uiConfig)
-        } else {
+         } else {
             const ui = new firebaseui.auth.AuthUI(auth())
             ui.start('#firebaseui-auth-container', uiConfig)
         }

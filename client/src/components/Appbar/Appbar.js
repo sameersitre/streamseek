@@ -99,7 +99,7 @@ const styles = theme => ({
 
 class Appbar extends PureComponent {
   state = {
-    isDialogOpen: true,
+    isDialogOpen: false,
     barColor: false,
     searchText: '',
     drawerOpen: false,

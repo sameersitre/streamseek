@@ -45,11 +45,11 @@ const useStyles = makeStyles((theme) => createStyles({
         color: theme.palette.text.primary,
     }
 }));
-export function Authentication(props) { 
-    const setDialogClose = props.setDialogClose 
+export function Authentication(props) {
+    const setDialogClose = props.setDialogClose
     const [displayPhoneSignIn, setdisplayPhoneSignIn] = useState(false);
-     const [isDialogOpen, setDialogOpen] = useState(false)
-    const dispatch = useDispatch(); 
+    const [isDialogOpen, setDialogOpen] = useState(false)
+    const dispatch = useDispatch();
     const classes = useStyles();
     useEffect(() => {
         setDialogOpen(props.isDialogOpen)
@@ -70,7 +70,7 @@ export function Authentication(props) {
 
         }).then(setDialogClose);
 
-    } 
+    }
     return (
         <div>
             <Dialog
@@ -126,13 +126,15 @@ export function Authentication(props) {
                             >
                                 Sign in with OTP
                             </Button>
- 
+
                             <Typography style={{ color: '#757575', fontSize: 18, margin: 15 }}>OR</Typography>
                             <Typography style={{ color: '#757575', fontSize: 15 }}>Sign in via Credentials</Typography>
 
                             <SignUp />
                         </div>
-                        : <SignInOTP backNavigate={() => setdisplayPhoneSignIn(false)} />}
+                        : <SignInOTP
+                            backNavigate={() => setdisplayPhoneSignIn(false)}
+                            closeDialog={() => setDialogClose} />}
                 </div>
             </Dialog>
         </div>
