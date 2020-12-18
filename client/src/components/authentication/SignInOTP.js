@@ -1,13 +1,16 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import Button from '@material-ui/core/Button';
 import 'react-phone-number-input/style.css'
 import { useSelector } from "react-redux";
 import { auth } from '../../utils/firebase'
 import * as firebaseui from "firebaseui";
+import { Typography } from '@material-ui/core';
 export function SignInOTP(props) {
     const reduxState = useSelector(state => state.user);
+    const [phoneAuthResult, setPhoneAuthResult] = useState(null)
 
     useEffect(() => {
+        setPhoneAuthResult(localStorage.phoneAuth && JSON.parse(localStorage.phoneAuth))
         const uiConfig = {
             //   signInSuccessUrl: "https://netflix-clone-ankur.herokuapp.com/", //This URL is used to return to that page when we got success response for phone authentication.
             signInOptions: [{
@@ -34,9 +37,19 @@ export function SignInOTP(props) {
                 // in their favor. In this case, the default country will be 'GB' even
                 // though 'loginHint' specified the country code as '+1'.
                 // loginHint: '+11234567890'
+                signInSuccessUrl: "https://bingefeast.in/all/page1"
             }],
-
-            //   tosUrl: "https://netflix-clone-ankur.herokuapp.com/"
+            callbacks: {
+                signInSuccessWithAuthResult: function (authResult, redirectUrl) {
+                    // User successfully signed in.
+                    // Return type determines whether we continue the redirect automatically
+                    // or whether we leave that to developer to handle.
+                    console.log(authResult)
+                    setPhoneAuthResult(authResult)
+                    localStorage.setItem("phoneAuth", JSON.stringify(authResult))
+                    return true;
+                }
+            },
         };
 
         if (firebaseui.auth.AuthUI.getInstance()) {
@@ -50,10 +63,22 @@ export function SignInOTP(props) {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }} >
-            <div id="firebaseui-auth-container"></div>
-            <Button onClick={props.backNavigate} color='green'   >
-                {'<'} All sign in options
+            {!phoneAuthResult ?
+                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    <div id="firebaseui-auth-container"></div>
+                    <Button onClick={props.backNavigate} color='green'   >
+                        {'<'} All sign in options
                     </Button>
+                </div>
+                :
+                <div>
+
+                    <Typography>You are already signed in.</Typography>
+                    <Button onClick={props.backNavigate} color='green'   >
+                        {'<'} All sign in options
+            </Button>
+                </div>
+            }
         </div>
     )
 }
