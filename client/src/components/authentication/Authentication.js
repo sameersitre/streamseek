@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { connect, useDispatch } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import './Authentication.css'
 import { makeStyles, createStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -13,37 +13,18 @@ import TwitterIcon from '../../assets/Icons/twitterIcon'
 import SmsIcon from '@material-ui/icons/Sms';
 import SignUp from './SignUp'
 import { userProfileAction } from '../../containers/actions/userActions';
-import apiCall from '../../services/apiCall';
-import { getInfo } from '../../services/apiURL'
-import { signin, signInWithGoogle } from "../../utils/auth";
-import { auth } from '../../utils/firebase'
-import SignInOTP from './SignInOTP'
+import { signInWithGoogle } from "../../utils/auth";
+import SignInOTP from './SignInOTPCustom'
 const useStyles = makeStyles((theme) => createStyles({
     dialog: {
         width: 500, height: 800, borderRadius: 15,
     },
-    buttons: {
-        display: 'flex',
-        flexDirection: 'row',
-        alignContent: 'flex-start',
-        marginTop: 10,
-    },
     button: {
         width: 250,
         color: '#FFFFFF',
-
         backgroundColor: '#707070',
         margin: theme.spacing(0.9),
     },
-    popover: {
-        pointerEvents: 'none',
-    },
-    paper: {
-        padding: theme.spacing(1),
-    },
-    closeIconColor: {
-        color: theme.palette.text.primary,
-    }
 }));
 export function Authentication(props) {
     const setDialogClose = props.setDialogClose
@@ -63,19 +44,17 @@ export function Authentication(props) {
                 localStorage.setItem("accessToken", data.accessToken)
                 localStorage.setItem("userProfile", JSON.stringify(data))
                 dispatch(userProfileAction(data))
+
             }
             else {
                 alert("Sign in is not Successfull.")
             }
-
-        }).then(setDialogClose);
-
+        })
+        isDialogOpen()
     }
     return (
         <div>
             <Dialog
-                // sm={8} xl={8}
-                // maxWidth='lg'
                 fullScreen
                 disableBackdropClick
                 disableEscapeKeyDown
@@ -114,6 +93,16 @@ export function Authentication(props) {
                             >
                                 Sign in with Facebook
                             </Button>
+                            <Button
+                                variant="outlined"
+                                color="secondary"
+                                size="medium"
+                                className={classes.button}
+                                startIcon={<TwitterIcon />}
+                                onClick={() => googleSignIn('twitter')}
+                            >
+                                Sign in with Twitter
+                            </Button>
 
                             <Button
                                 id="sign-in-button"
@@ -126,10 +115,8 @@ export function Authentication(props) {
                             >
                                 Sign in with OTP
                             </Button>
-
                             <Typography style={{ color: '#757575', fontSize: 18, margin: 15 }}>OR</Typography>
                             <Typography style={{ color: '#757575', fontSize: 15 }}>Sign in via Credentials</Typography>
-
                             <SignUp />
                         </div>
                         : <SignInOTP

@@ -40,31 +40,41 @@ export function SignInOTP(props) {
                 // in their favor. In this case, the default country will be 'GB' even
                 // though 'loginHint' specified the country code as '+1'.
                 // loginHint: '+11234567890'
-             }],
+            }],
             callbacks: {
-                signInSuccessWithAuthResult: async function (authResult, redirectUrl) {
+                signInSuccessWithAuthResult: function (authResult, redirectUrl) {
                     // User successfully signed in.
                     // Return type determines whether we continue the redirect automatically
                     // or whether we leave that to developer to handle.
                     console.log(authResult)
                     setPhoneAuthResult(authResult)
-                    await localStorage.setItem("phoneAuth", JSON.stringify(authResult))
-                    // props.backNavigate
+                    sendStorage({
+                        accessToken: authResult.user.stsTokenManager.accessToken,
+                        phoneNumber: authResult.user.phoneNumber,
+                        photoURL: authResult.user.photoURL,
+                        displayName: authResult.user.displayName,
+                        userEmail: authResult.user.email,
+                        signInMethod: "phone"
+                    })
 
-                    // history.replace({ pathname: `/all/page1` })
                     return true;
                 }
+
             },
             signInSuccessUrl: "/all/page1"
         };
-        
+
+        function sendStorage(param) {
+            localStorage.setItem("accessToken", param.accessToken)
+            localStorage.setItem("userProfile", JSON.stringify(param))
+        }
 
 
 
         if (firebaseui.auth.AuthUI.getInstance()) {
             const ui = firebaseui.auth.AuthUI.getInstance()
             ui.start('#firebaseui-auth-container', uiConfig)
-         } else {
+        } else {
             const ui = new firebaseui.auth.AuthUI(auth())
             ui.start('#firebaseui-auth-container', uiConfig)
         }
