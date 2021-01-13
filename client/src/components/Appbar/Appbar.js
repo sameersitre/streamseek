@@ -116,10 +116,10 @@ class Appbar extends PureComponent {
 
   async componentDidMount() {
     // await getGeolocation()
-    console.group(
-      "%cGrouped Output",
-      "background-color: #e0005a ; color: #ffffff ; font-weight: bold ; padding: 4px ;"
-    );
+    // console.group(
+    //   "%cWell this is embarassing; You might be getting what you are looking for :) .\nThanks for seeing my work!",
+    //   "background-color: #2937FF ; color: #ffffff ; font-size:14px ; font-weight: bold ; padding: 4px ;"
+    // );
     let locationInfo = await countryCode()
     let params = {
       ip: locationInfo.ip,

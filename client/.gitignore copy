@@ -4,10 +4,12 @@
 /node_modules
 /.pnp
 .pnp.js
-
+package-lock.json
+yarn.lock
+#/src/components/test
 # testing
 /coverage
-
+#.gitignore
 # production
 /build
 
