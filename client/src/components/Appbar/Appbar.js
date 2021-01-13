@@ -99,7 +99,7 @@ const styles = theme => ({
 
 class Appbar extends PureComponent {
   state = {
-    isDialogOpen: true,
+    isDialogOpen: false,
     barColor: false,
     searchText: '',
     drawerOpen: false,
@@ -115,7 +115,11 @@ class Appbar extends PureComponent {
   }
 
   async componentDidMount() {
-    await getGeolocation()
+    // await getGeolocation()
+    console.group(
+      "%cGrouped Output",
+      "background-color: #e0005a ; color: #ffffff ; font-weight: bold ; padding: 4px ;"
+    );
     let locationInfo = await countryCode()
     let params = {
       ip: locationInfo.ip,
@@ -152,6 +156,7 @@ class Appbar extends PureComponent {
         userPhotoURL: nextProps.user.user_profile.photoURL
       }
     }
+    else return null
   }
   handleChange = (event) => {
     this.setState({ searchText: event.target.value })

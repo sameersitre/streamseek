@@ -50,7 +50,7 @@ export function Authentication(props) {
                 alert("Sign in is not Successfull.")
             }
         })
-        isDialogOpen()
+        setDialogOpen(false)
     }
     return (
         <div>
@@ -73,6 +73,7 @@ export function Authentication(props) {
                     </IconButton>
                     {!displayPhoneSignIn ?
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                            <Typography>{`This sandbox project is for experimentation purposes only, \nSigning in is not necessary. `}</Typography>
                             <Button
                                 variant="outlined"
                                 color="secondary"
@@ -104,7 +105,7 @@ export function Authentication(props) {
                                 Sign in with Twitter
                             </Button>
 
-                            <Button
+                            {/* <Button
                                 id="sign-in-button"
                                 variant="outlined"
                                 color="secondary"
@@ -114,10 +115,10 @@ export function Authentication(props) {
                                 onClick={() => { setdisplayPhoneSignIn(true) }}
                             >
                                 Sign in with OTP
-                            </Button>
-                            <Typography style={{ color: '#757575', fontSize: 18, margin: 15 }}>OR</Typography>
+                            </Button> */}
+                            {/* <Typography style={{ color: '#757575', fontSize: 18, margin: 15 }}>OR</Typography>
                             <Typography style={{ color: '#757575', fontSize: 15 }}>Sign in via Credentials</Typography>
-                            <SignUp />
+                            <SignUp /> */}
                         </div>
                         : <SignInOTP
                             backNavigate={() => setdisplayPhoneSignIn(false)}

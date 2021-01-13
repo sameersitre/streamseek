@@ -24,8 +24,8 @@ class Dashboard extends Component {
         window.scrollTo(0, 0)
         this.setState({ refresh: true })
         let data = { page: 1, media_type: "all" }
-        // let apiData = await apiCall(trendingURL, data)
-        // this.setState({ dataList: apiData.results })
+        let apiData = await apiCall(trendingURL, data)
+        this.setState({ dataList: apiData.results })
         this.setState({ refresh: false })
     }
 
