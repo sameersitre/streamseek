@@ -32,6 +32,8 @@ const styles = (theme) => ({
     backdrop: {
         zIndex: theme.zIndex.drawer + 1,
         color: '#fff',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)'
+
     },
     chipView: {
         display: 'flex',
@@ -77,101 +79,100 @@ class MediaDetails extends Component {
         const { detailsData, refresh, videoData, id, media_type } = this.state;
         const apiParams = { id, media_type }
         return (
-            detailsData !== null ?
-
-                <div className={classes.root}  >
-
-                    <Background backdropPath={detailsData?.backdrop_path} />
-                    <Grid style={{
-                        position: 'absolute',
-                        width: '97vw', marginTop: 50, padding: 10
-                    }}
-                    >
-
-                        {/*  TITLE + TAGLINE */}
-                        <Grid
-                            style={{
-                                display: 'flex', flexDirection: 'column',
-                                alignItems: 'flex-start',
-                            }} >
-                            <Typography gutterBottom variant="h6" style={{ color: '#E5CA49', }}  >
-                                {detailsData.title || detailsData.name}
-                            </Typography>
-                            {detailsData.tagline &&
-                                <Typography gutterBottom variant="body2"
-                                    style={{ color: '#E5CA49' }}>
-                                    {detailsData.tagline}
-                                </Typography>
-                            }
-                        </Grid>
-
-                        <div
-                            style={{
-                                display: 'flex', flexDirection: 'row',
-                            }}>
-                            <Poster data={detailsData} />
+            <div className={classes.root}  >
+                {detailsData !== null ?
+                    <>
+                        <Background backdropPath={detailsData?.backdrop_path} />
+                        <Grid style={{
+                            position: 'absolute',
+                            width: '97vw', marginTop: 50, padding: 10
+                        }}
+                        >
+                            {/*  TITLE + TAGLINE */}
                             <Grid
-                                style={{ margin: 5, flexDirection: 'row' }}
-                            >
-                                <a style={{
-                                    display: 'flex', flexDirection: 'row', alignItems: 'center',
-                                    color: '#FFFFFF', textDecoration: 'none',
-                                }}
-                                    href={`https://www.imdb.com/title/${detailsData.imdb_id}`} target="_blank" rel="noopener noreferrer"
-                                >
-                                    <img src={require('../../../assets/Icons/imdb.png')} alt="Smiley face" height="28" width="28" />
-                                    {detailsData.vote_average > 0
-                                        ?
-                                        <Typography variant="body2"   >
-                                            &nbsp;&nbsp;{`${detailsData.vote_average} (${detailsData.vote_count})`}
-                                        </Typography>
-                                        :
-                                        <Typography variant="body2">&nbsp;&nbsp;NA</Typography>
-                                    }
-                                </a>
-                                <Typography variant="body2"   >
-                                    {moment(detailsData.release_date
-                                        ||
-                                        detailsData.first_air_date).format('ll')
-                                    } (USA)
-                                        </Typography>
-                                <Typography variant="body2" style={{ marginTop: 10 }}  >
-                                    {detailsData.runtime || detailsData.episode_run_time} mins
-                                        </Typography>
-                                <div className={classes.chipView} >
-                                    {detailsData.genres && detailsData.genres.map((value, i) =>
-                                        <div key={i}
-                                            style={{
-                                                display: 'flex',
-                                                flexDirection: 'row',
-                                                alignItems: 'baseline'
-                                            }}>
-                                            <Typography variant="body2">{value.name}&nbsp;
-                                            </Typography>
-                                            {i + 1 !== detailsData.genres.length ? (
-                                                <Typography variant="body2"
-                                                    style={{ color: '#757575' }}>
-                                                    |&nbsp;
-                                                </Typography>
-                                            ) : null}
-                                        </div>
-                                    )}
-                                </div>
+                                style={{
+                                    display: 'flex', flexDirection: 'column',
+                                    alignItems: 'flex-start',
+                                }} >
+                                <Typography gutterBottom variant="h6" style={{ color: '#E5CA49', }}  >
+                                    {detailsData.title || detailsData.name}
+                                </Typography>
+                                {detailsData.tagline &&
+                                    <Typography gutterBottom variant="body2"
+                                        style={{ color: '#E5CA49' }}>
+                                        {detailsData.tagline}
+                                    </Typography>
+                                }
                             </Grid>
-                        </div>
 
-                        {apiParams && <Streams parentData={apiParams} />}
-                        {detailsData && <Overview parentData={detailsData} />}
-                        {videoData && <Videos parentData={videoData} />}
-                        {apiParams && <Cast parentData={apiParams} />}
-                        {apiParams && <Recommends parentData={apiParams} history={this.props.history} />}
+                            <div
+                                style={{
+                                    display: 'flex', flexDirection: 'row',
+                                }}>
+                                <Poster data={detailsData} />
+                                <Grid
+                                    style={{ margin: 5, flexDirection: 'row' }}
+                                >
+                                    <a style={{
+                                        display: 'flex', flexDirection: 'row', alignItems: 'center',
+                                        color: '#FFFFFF', textDecoration: 'none',
+                                    }}
+                                        href={`https://www.imdb.com/title/${detailsData.imdb_id}`} target="_blank" rel="noopener noreferrer"
+                                    >
+                                        <img src={require('../../../assets/Icons/imdb.png')} alt="Smiley face" height="28" width="28" />
+                                        {detailsData.vote_average > 0
+                                            ?
+                                            <Typography variant="body2"   >
+                                                &nbsp;&nbsp;{`${detailsData.vote_average} (${detailsData.vote_count})`}
+                                            </Typography>
+                                            :
+                                            <Typography variant="body2">&nbsp;&nbsp;NA</Typography>
+                                        }
+                                    </a>
+                                    <Typography variant="body2"   >
+                                        {moment(detailsData.release_date
+                                            ||
+                                            detailsData.first_air_date).format('ll')
+                                        } (USA)
+                                        </Typography>
+                                    <Typography variant="body2" style={{ marginTop: 10 }}  >
+                                        {detailsData.runtime || detailsData.episode_run_time} mins
+                                        </Typography>
+                                    <div className={classes.chipView} >
+                                        {detailsData.genres && detailsData.genres.map((value, i) =>
+                                            <div key={i}
+                                                style={{
+                                                    display: 'flex',
+                                                    flexDirection: 'row',
+                                                    alignItems: 'baseline'
+                                                }}>
+                                                <Typography variant="body2">{value.name}&nbsp;
+                                            </Typography>
+                                                {i + 1 !== detailsData.genres.length ? (
+                                                    <Typography variant="body2"
+                                                        style={{ color: '#757575' }}>
+                                                        |&nbsp;
+                                                    </Typography>
+                                                ) : null}
+                                            </div>
+                                        )}
+                                    </div>
+                                </Grid>
+                            </div>
 
-                    </Grid>
-                </div>
-                :
-                <Backdrop className={classes.backdrop} open={refresh}  >
-                    <CircularProgress color="inherit" />
-                </Backdrop>
+                            {apiParams && <Streams parentData={apiParams} />}
+                            {detailsData && <Overview parentData={detailsData} />}
+                            {videoData && <Videos parentData={videoData} />}
+                            {apiParams && <Cast parentData={apiParams} />}
+                            {apiParams && <Recommends parentData={apiParams} history={this.props.history} />}
+
+                        </Grid>
+                    </> :
+                    <Backdrop className={classes.backdrop} open={refresh}  >
+                        <CircularProgress color="inherit" />
+                    </Backdrop>}
+            </div>
+
         )
     }
 }

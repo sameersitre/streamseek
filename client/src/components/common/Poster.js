@@ -12,11 +12,11 @@ import CardActionArea from '@material-ui/core/CardActionArea';
 import CardMedia from '@material-ui/core/CardMedia';
 const styles = (theme) => ({
     root: {
-        width: '11rem',
-        height: 280,
+        width: '10rem',
+        height: 250,
     },
     media: {
-        height: 280,
+        height: 250,
     },
 });
 export class Poster extends PureComponent {

@@ -18,13 +18,13 @@ import Poster from "./Poster.js"
 import { event_GAnalytics } from "../../utils/Analytics"
 const styles = (theme) => ({
   root: {
-    width: "11rem",
+    width: "10rem",
     backgroundColor: "#101010",
 
   },
   CardContent: {
     display: "flex",
-    width: 165,
+    width: "9.4rem",
     backgroundColor: 'black',
     flexDirection: "column",
     position: "absolute",

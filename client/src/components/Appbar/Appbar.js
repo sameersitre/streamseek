@@ -110,7 +110,7 @@ class Appbar extends PureComponent {
     updateOnce: true,
     restrictDisplay: false,
     userInfo: [],
-    auth: true,
+    auth: false,
     anchorEl_userMenu: null
   }
 
@@ -303,8 +303,10 @@ class Appbar extends PureComponent {
                 aria-label="account of current user"
                 aria-controls="menu-appbar"
                 aria-haspopup="true"
-                onClick={this.handleuserMenu}
+                // onClick={this.handleuserMenu}
+                onClick={this.signInClick}
                 color="inherit"
+
               >
                 {userPhotoURL ? <Avatar src={userPhotoURL} alt="" /> : <AccountCircle />}
               </IconButton>

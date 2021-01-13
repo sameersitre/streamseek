@@ -16,10 +16,10 @@ ReactDOM.render(
   <React.StrictMode>
     <Provider store={Store} >
       <ThemeProvider theme={theme}>
-        <div style={{ backgroundColor: "#1B1A20", margin: -8, }} >
+        <div style={{ backgroundColor: "#1B1A20", }} >
           <BrowserRouter>
             <Appbar />
-        <App />
+            <App />
           </BrowserRouter>
         </div>
       </ThemeProvider>
