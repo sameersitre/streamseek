@@ -17,9 +17,7 @@ import Search from './components/screens/search/Search'
 import Test from './components/screens/test/Test';
 const Routes = (props) => (
     <Switch style={{ position: 'absolute' }}>
-        {console.log(props)}
         <Route exact path={["/", "/routedFrom=:routedFrom"]} component={Dashboard} />
-
         <Route exact path="/all/page:pageNumber" component={Dashboard} />
         <Route exact path="/movies/page:pageNumber" component={Movies} />
         <Route exact path="/tvshows/page:pageNumber" component={TVShows} />
