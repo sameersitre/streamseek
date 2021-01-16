@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import { withStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
+import Switch from '@material-ui/core/Switch';
 import TextField from '@material-ui/core/TextField';
 import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
@@ -21,6 +22,7 @@ import { getFeedback } from '../../services/apiURL';
 import apiCall from '../../services/apiCall';
 import countryCode from '../../services/countryCode';
 import { validateEmail } from '../../services/validations';
+import { FormControlLabel } from '@material-ui/core';
 const styles = (theme) => ({
 
     buttons: {
@@ -45,7 +47,12 @@ class Footer extends Component {
             messageDialog: false,
             messageDialogTitle: '',
             messageDialogContent: '',
+            isPwaEnabled: localStorage.isPwaEnabled ? localStorage.isPwaEnabled : false
         }
+    }
+    componentDidMount() {
+      
+        // this.setState({ isPwaEnabled: localStorage.isPwaEnabled ? localStorage.isPwaEnabled : false })
     }
 
     handleChangeEmail = (event) => {
@@ -98,6 +105,10 @@ class Footer extends Component {
                 this.handleDialogOpen('Field(s) is Empty.', 'Please add email and message.')
             }
         }
+    }
+    handlePWA = (event) => {
+        this.setState({ ...this.state, isPwaEnabled: event.target.checked });
+        localStorage.setItem('isPwaEnabled', event.target.checked)
     }
 
     render() {
@@ -180,6 +191,20 @@ class Footer extends Component {
                     style={{
                         backgroundColor: '#282828', padding: 20,
                     }}>
+                    <FormControlLabel
+                        control={
+                            <Switch
+                                checked={this.state.isPwaEnabled}
+                                onChange={this.handlePWA}
+                                color="primary"
+                                name="checkedB"
+                                inputProps={{ 'aria-label': 'primary checkbox' }}
+                            />
+                        }
+                        label="SET Progressive Web App"
+                    />
+
+
                     <div style={{
                         display: 'flex',
                         flexDirection: 'column', justifyContent: 'space-between', width: '100%',

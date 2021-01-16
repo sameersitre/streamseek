@@ -30,7 +30,7 @@ class MediaList extends PureComponent {
                     display: 'flex', alignContent: 'center', flexDirection: 'column',
                 }}
             >
-                <Grid container lg={10}
+                <Grid container lg={9} 
                     style={{
                         display: 'flex', alignSelf: 'center',
                         justifyContent: 'center',
