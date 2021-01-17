@@ -83,6 +83,10 @@ const styles = theme => ({
       width: 150,
     },
   },
+  small: {
+    width: theme.spacing(4),
+    height: theme.spacing(4),
+  },
   root: {
     display: 'flex',
     justifyContent: 'flex-end',
@@ -110,16 +114,17 @@ class Appbar extends PureComponent {
     updateOnce: true,
     restrictDisplay: false,
     userInfo: [],
-    auth: false,
+    auth: true,
     anchorEl_userMenu: null
   }
 
   async componentDidMount() {
     // await getGeolocation()
-    // console.group(
-    //   "%cWell this is embarassing; You might be getting what you are looking for :) .\nThanks for seeing my work!",
-    //   "background-color: #2937FF ; color: #ffffff ; font-size:14px ; font-weight: bold ; padding: 4px ;"
-    // );
+    // const spinner = document.getElementById('spinner');
+    // spinner.setAttribute('display', 'none');
+
+    document.getElementById("spinner").style.display = "none";
+
     let locationInfo = await countryCode()
     let params = {
       ip: locationInfo.ip,
@@ -223,7 +228,9 @@ class Appbar extends PureComponent {
           isDialogOpen={isDialogOpen}
           setDialogClose={() => this.setState({ isDialogOpen: false })}
         />
-
+        <div>
+          <Filter />
+        </div>
         <Toolbar>
           <Hidden xsDown>
             <IconButton component={Link} to='/all/page1'
@@ -308,7 +315,7 @@ class Appbar extends PureComponent {
                 color="inherit"
 
               >
-                {userPhotoURL ? <Avatar src={userPhotoURL} alt="" /> : <AccountCircle />}
+                {userPhotoURL ? <Avatar src={userPhotoURL} className={classes.small} alt="" /> : <AccountCircle />}
               </IconButton>
               <Menu
                 id="menu-appbar"
@@ -327,12 +334,11 @@ class Appbar extends PureComponent {
               >
                 <MenuItem onClick={this.signInClick}>Login</MenuItem>
               </Menu>
+
             </div>
           )}
           {/* <div className={classes.grow} /> */}
-          <div>
-            <Filter />
-          </div>
+
         </Toolbar>
       </AppBar>
 

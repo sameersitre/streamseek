@@ -97,7 +97,7 @@ class ChipsArray extends Component {
         return (
             <div style={{
                 display: 'flex', flexDirection: 'column',
-                right: 30, top: 15, position: 'fixed', width: 270,
+                right: 30, top: 55, position: 'fixed', width: 270,
             }} >
                 <Paper className={classes.root}
                     elevation={0}
@@ -156,29 +156,29 @@ class ChipsArray extends Component {
                     </div>
 
                     {allGenresEnabled ?
-                            <Paper variant="outlined"
+                        <Paper variant="outlined"
                             elevation={5}
-                                style={{
-                                    justifyContent: 'space-evenly',
-                                    flexWrap: 'wrap', backgroundColor: 'rgba(192,192,192, 0.5)',
-                                    borderRadius: 12, padding: 5, marginTop: 20 
-                                }} >
+                            style={{
+                                justifyContent: 'space-evenly',
+                                flexWrap: 'wrap', backgroundColor: 'rgba(192,192,192, 0.5)',
+                                borderRadius: 12, padding: 5, marginTop: 20
+                            }} >
                             <Typography variant="subtitle2" color='inherit'  >
                                 Select Genres:
                                 </Typography>
-                                {this.state.allGenres && this.state.allGenres.map(data => {
-                                    let icon;
-                                    return (
-                                        <Chip
-                                            size="small" key={data.id}
-                                            icon={icon} label={data.name}
-                                            onClick={() => this.handleAdd(data)}
-                                            style={{ margin: 3, padding: 0.2, }}
-                                            className={classes.chip}
-                                        />
-                                    );
-                                })}
-                            </Paper>
+                            {this.state.allGenres && this.state.allGenres.map(data => {
+                                let icon;
+                                return (
+                                    <Chip
+                                        size="small" key={data.id}
+                                        icon={icon} label={data.name}
+                                        onClick={() => this.handleAdd(data)}
+                                        style={{ margin: 3, padding: 0.2, }}
+                                        className={classes.chip}
+                                    />
+                                );
+                            })}
+                        </Paper>
                         : null}
                 </Paper>
             </div>

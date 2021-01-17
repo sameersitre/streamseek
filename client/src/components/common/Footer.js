@@ -51,7 +51,7 @@ class Footer extends Component {
         }
     }
     componentDidMount() {
-      
+
         // this.setState({ isPwaEnabled: localStorage.isPwaEnabled ? localStorage.isPwaEnabled : false })
     }
 
@@ -191,7 +191,7 @@ class Footer extends Component {
                     style={{
                         backgroundColor: '#282828', padding: 20,
                     }}>
-                    <FormControlLabel
+                    {/* <FormControlLabel
                         control={
                             <Switch
                                 checked={this.state.isPwaEnabled}
@@ -202,7 +202,7 @@ class Footer extends Component {
                             />
                         }
                         label="SET Progressive Web App"
-                    />
+                    /> */}
 
 
                     <div style={{

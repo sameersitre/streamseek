@@ -22,6 +22,7 @@ import Background from './Background'
 import Streams from './Streams'
 import Overview from './Overview'
 import Videos from './Videos';
+import { imdbicon } from '../../../assets/Icons/imdb'
 
 import Recommends from './Recommends'
 const styles = (theme) => ({
@@ -49,6 +50,7 @@ class MediaDetails extends Component {
         refresh: true,
         id: '',
         media_type: '',
+        imdbicon0: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACyklEQVRYR+2XW0gUYRTH/9/M7OpeXBdX81aRIQRlCBVRQkkm0kMXaqVeukcEPkUQPXh7jqBHwYcs6iWhIqGHLNEQSgkflCCoRBLL0nXX9jJ7mf1mvphv2222QlBct4f93uabmXN+53/OnG8OQZYXMfpnw8XlKmV7NSI4MsElMC0gSmSE7F/4lrSfAqCDrrOMkG4A+ZlwbrAZJYxdkRq89/U9DqBHTlVMrYHzJEdUErFZV4ID0EHXCUbI4wxHnmaeMOaWGrxPOIAyVHKegN1dSwAGcsF8wHMvB5BT4P9UQKEEi7IISWTINzEEIwL/QJw2FdG4gKiS6F9Fdg2+kABRYCiwaPxZfQXCIsIKQaFVhcWc2PtzLfkVjHy04nJ3BTaVKDhVF8DNvmL+fmezBwPvbHj9wcqve1q+4mJXZcp2pYui69Isegad6BtzoMPtwck6/+oBnKv/gVfvbZj2mNIAdKUO1sjon7Dj9D4/ghGSGYD6rTJ0dahKoLHfCpglhs7mebQ+LMXRXUEQMA6wbUMMU3NmVK1T0Ht1BsRw9C07BeVOClkhPL8VRRSzPimVAiPAodoQ8kwaB2jeE0D/uB3BqICB9s8oc9JUOpYNsLs6greTFggE2FEVwdiU5Z8ATbUyLCaVA7S5PbweZhdNeHp9BtVlsZUD6NE8GnXw6De6FIx+sqYBdLjn0dZbisbtIdjyEgrcOLaAB8OFqwNw7bAXt5+5oCshEJYGoBdhY42M5xN2HNkZ5Pd1gJYmH3rfFMIbEvGyfRrlzvjKFWg9voA7Q07UbQnz/BsVSFq15mm4deY7XozbOcD6IoovPok71gGMa8kaiKsE/nCiwejNRY4JXNZonMAsAVQjiFPAYWMIhQkEAbw2CvJVXul60cXiBA6Lhjm/hOIC+ldDyh3HOQVyCqQpkPXf8qwPJr+Gk+yNZskWmdXhdC2nIqOvnz7iDT/XCvbaAAAAAElFTkSuQmCC'
     }
 
     componentDidMount() {
@@ -113,13 +115,14 @@ class MediaDetails extends Component {
                                 <Grid
                                     style={{ margin: 5, flexDirection: 'row' }}
                                 >
+                                    {/* <ImdbIcon /> */}
                                     <a style={{
                                         display: 'flex', flexDirection: 'row', alignItems: 'center',
                                         color: '#FFFFFF', textDecoration: 'none',
                                     }}
                                         href={`https://www.imdb.com/title/${detailsData.imdb_id}`} target="_blank" rel="noopener noreferrer"
                                     >
-                                        <img src={require('../../../assets/Icons/imdb.png')} alt="Smiley face" height="28" width="28" />
+                                        <img src={imdbicon} alt="Smiley face" height="28" width="28" />
                                         {detailsData.vote_average > 0
                                             ?
                                             <Typography variant="body2"   >

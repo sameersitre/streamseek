@@ -2,12 +2,49 @@
 <html lang="en">
 
 <head>
+  <style>
+    .svgLoader {
+      animation: spin 0.7s linear infinite;
+      margin: auto;
+    }
+  
+    .divLoader {
+      width: 100vw;
+      height: 100vh;
+      padding: 0px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      background-color: #1B1A20;
+    }
+  
+    #spinner {
+      display: flex;
+  
+    }
+  
+    #message {
+      color: aliceblue;
+      font: 15px Arial, sans-serif;
+    }
+  
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+  
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
   <meta charset="utf-8" />
   <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#000000" />
   <meta name="description" content="Movies, TV shows available around the world" />
-  
   <!-- FIREBASE -->
   <script src="https://www.gstatic.com/firebasejs/ui/4.5.0/firebase-ui-auth.js"></script>
   <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.5.0/firebase-ui-auth.css" />
@@ -33,10 +70,21 @@
     -->
   <title>Bingefeast</title>
 </head>
-
-<body>
+<body style="margin:0px; padding:0px">
   <noscript>You need to enable JavaScript to run this app.</noscript>
   <div id="root"></div>
+  <div id="spinner" class="divLoader">
+    <svg class="svgLoader" viewBox="0 0 100 100" width="4em" height="4em">
+      <path ng-attr-d="{{config.pathCmd}}" ng-attr-fill="{{config.color}}" stroke="none"
+        d="M10 50A40 40 0 0 0 90 50A40 42 0 0 1 10 50" fill="#51CACC" transform="rotate(179.719 50 51)">
+        <animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 51;360 50 51"
+          keyTimes="0;1" dur="1s" begin="0s" repeatCount="indefinite"></animateTransform>
+      </path>
+    </svg>
+    <h2 id="message">
+      Hi, this is portfolio app made in react.
+    </h2>
+  </div>
   <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.
