@@ -310,8 +310,8 @@ class Appbar extends PureComponent {
                 aria-label="account of current user"
                 aria-controls="menu-appbar"
                 aria-haspopup="true"
-                // onClick={this.handleuserMenu}
-                onClick={this.signInClick}
+                onClick={this.handleuserMenu}
+                // onClick={this.signInClick}
                 color="inherit"
 
               >
