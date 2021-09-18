@@ -1,0 +1,46 @@
+.c_root{
+    display: flex;
+    /* flex-direction: 'row'; */
+    align-items: inherit;
+    width: -webkit-fill-available;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    scrollbar-width:none;
+    flex-wrap: nowrap;
+    scroll-behavior: smooth;
+    background-color: rgba(192,192,192, 0.2);
+}
+
+.c_root::-webkit-scrollbar{
+display: none;
+}
+
+.c_maincard{
+    flex: 0 0 auto;
+    /* width: 125px;
+    height: fit-content; */
+    position: relative;
+    margin: 7px;
+    background-color: rgba(192,192,192, 0.2);
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    border-radius: 5px;
+
+}
+
+.c_poster{
+    width: 150px;
+    /* height: 180px; */
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+.c_castinfo{
+    display: block;
+    position: absolute;
+    bottom: 0px;
+    padding: 5px;
+    background-color:rgba(0, 0, 0, 0.8) ;
+    width: -webkit-fill-available;
+}
+
+
