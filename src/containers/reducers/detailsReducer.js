@@ -6,42 +6,39 @@
  */
 
 import {
-  SEARCH_TEXT_AVAILABLE, SEARCH_TEXT, GENRE_FILTER,
-  USER_INFO, USER_PROFILE
+  CAST, DETAILS, OTT, VIDEOS, RECOMMENDS
 } from '../actions/types';
 
-import Genres from '../../utils/Genres';
 const initialState = {
-  Genres,
-  search_text: '',
+
 };
 
 export default function (state = initialState, action) {
   switch (action.type) {
-    case SEARCH_TEXT_AVAILABLE:
+    case CAST:
       return {
         ...state,
-        search_text_available: action.payload,
+        cast: action.payload,
       };
-    case SEARCH_TEXT:
+    case DETAILS:
       return {
         ...state,
-        search_text: action.payload,
+        details: action.payload,
       };
-    case GENRE_FILTER:
+    case OTT:
       return {
         ...state,
-        genre_filter: action.payload,
+        ottPlatforms: action.payload,
       };
-    case USER_INFO:
+    case VIDEOS:
       return {
         ...state,
-        user_info: action.payload,
+        videos: action.payload,
       };
-    case USER_PROFILE:
+    case RECOMMENDS:
       return {
         ...state,
-        user_profile: action.payload,
+        recommends: action.payload,
       };
 
     default:

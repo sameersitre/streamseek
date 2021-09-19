@@ -1,8 +1,8 @@
-// var API_URL = process.env.NODE_ENV === "development" ?
-//     process.env.REACT_APP_API_URL_DEV :
-//     process.env.REACT_APP_API_URL_PROD
+var API_URL = false ?
+  process.env.REACT_APP_API_URL_DEV :
+  process.env.REACT_APP_API_URL_PROD
 
-var API_URL = process.env.REACT_APP_API_URL_DEV
+// var API_URL = process.env.REACT_APP_API_URL_PROD
 
 export const testURL = `${API_URL}/test`
 

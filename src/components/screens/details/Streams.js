@@ -4,20 +4,12 @@ import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
 import apiCall from '../../../services/apiCall';
 import { getOTTPlatformsURL } from '../../../services/apiURL'
- function Streams(props) {
-     const { id } = props.parentData
-     const [streamsList, setStreamsList] = useState();
 
-     useEffect(() => {
-        async function fetchData() {
-            let streamsList = props.parentData.id && await apiCall(getOTTPlatformsURL, props.parentData)
-            setStreamsList(streamsList.platforms)
-        }
-        fetchData();
-    }, [id]);
+function Streams(props) {
 
 
-    return ((streamsList?.length > 0) ?
+
+  return (
         <Grid
             style={{
                 color: '#FFFFFF', alignItems: 'baseline',
@@ -25,7 +17,7 @@ import { getOTTPlatformsURL } from '../../../services/apiURL'
             }}>
             <Typography variant="subtitle2">Streams:</Typography>
 
-            {streamsList?.map((value, i) =>
+      {props.ottPlatforms?.platforms?.map((value, i) =>
                 <Tooltip
                     title={''}
                     key={i}
@@ -37,7 +29,7 @@ import { getOTTPlatformsURL } from '../../../services/apiURL'
                     </a>
                 </Tooltip>
             )}
-        </Grid> : null
+    </Grid>
     )
 }
 

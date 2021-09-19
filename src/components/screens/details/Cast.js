@@ -11,20 +11,11 @@ import apiCall from '../../../services/apiCall';
 import { getCastDetailsURL } from '../../../services/apiURL'
 
 function Cast(props) {
-    let id = props.parentData.id;
-    const myRef = React.createRef();
-    const [castList, setCastList] = useState();
+  const { cast } = props.parentData;
+  const myRef = React.createRef();
     const [leftBtnHidden, setleftBtnHidden] = useState(true)
-    const [rightBtnHidden, setrightBtnHidden] = useState(false)
-    useEffect(() => {
-        setCastList()
-        const fetchData = async () => {
-            let castList = props.parentData.id && await apiCall(getCastDetailsURL, props.parentData)
-            setCastList(castList.cast)
-        }
+  const [rightBtnHidden, setrightBtnHidden] = useState(false)
 
-        fetchData();
-    }, [id]);
 
     const scroll = (scrollOffset) => {
         myRef.current.scrollLeft += scrollOffset;
@@ -46,9 +37,9 @@ function Cast(props) {
     }
 
     return (
-        castList ?
+      cast ?
             <Grid style={{ marginTop: 15, marginBottom: 15, }}   >
-                {castList.length > 1 &&
+          {cast.length > 1 &&
                     <div>
                         <Typography variant="subtitle2">Cast:</Typography>
                         <div style={{ display: 'flex', alignSelf: 'center', }}>
@@ -62,7 +53,7 @@ function Cast(props) {
                                 }} onClick={() => scroll(-250)}><ArrowBackIos /></Button>
                             </Hidden>
                         <div className='c_root' ref={myRef} onScroll={handleScroll}>
-                                {castList?.map((item, i) =>
+                {cast?.map((item, i) =>
                                     item.profile_path ?
                                         <div key={i} className="c_maincard" >
                                             <img

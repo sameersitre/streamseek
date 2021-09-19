@@ -10,3 +10,10 @@ export const SEARCH_TEXT = "search_text";
 export const GENRE_FILTER = "genre_filter";
 export const USER_INFO = "user_info";
 export const USER_PROFILE = "user_profile";
+
+export const DETAILS = "details/DETAILS";
+export const OTT = "details/OTT";
+export const VIDEOS = "details/VIDEOS";
+export const CAST = "details/CAST";
+export const RECOMMENDS = "details/RECOMMENDS";
+
