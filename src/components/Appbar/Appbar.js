@@ -265,7 +265,7 @@ class Appbar extends PureComponent {
                             <Typography className={classes.title} variant="subtitle2"
                                 style={{ color: window.location.pathname.indexOf(`/upcoming/page`) > -1 && '#E46E36' }}
                                 component={Link}
-                                to={userInfo?.region && `/upcoming/page1&region=${userInfo.region}`}
+                    to={userInfo?.region ? `/upcoming/page1&region=${userInfo.region}` : `/upcoming/page1&region=US`}
                             >
                                 Upcoming Movies
                             </Typography>

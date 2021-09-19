@@ -1,7 +1,8 @@
 import axios from "axios"
 const countryCode = async function () {
     let abc = {}
-    await axios.get(`https://www.cloudflare.com/cdn-cgi/trace`)
+
+  await fetch("https://www.cloudflare.com/cdn-cgi/trace", { mode: "cors" })
         .then(async (res) => {
             let ip = res.data.match(/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/)[0]
             let region = res.data.match(/loc=(.*?)\n/s)
