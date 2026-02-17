@@ -9,7 +9,7 @@ function SearchContent() {
   const searchParams = useSearchParams();
   const query = searchParams.get("q") || "";
   const page = Number(searchParams.get("page")) || 1;
-  const { data, isLoading } = useSearch(query, page);
+  const { data, isLoading, isError } = useSearch(query, page);
 
   return (
     <div className="mx-auto max-w-7xl px-6 py-10">
@@ -20,7 +20,7 @@ function SearchContent() {
         <p className="text-zinc-400">Type something in the search bar to find movies and TV shows.</p>
       ) : (
         <>
-          <MediaGrid items={data?.results} isLoading={isLoading} />
+          <MediaGrid items={data?.results} isLoading={isLoading} isError={isError} />
           {data && <MediaPagination currentPage={page} totalPages={data.total_pages} />}
         </>
       )}

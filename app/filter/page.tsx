@@ -10,7 +10,7 @@ function FilterContent() {
   const searchParams = useSearchParams();
   const genres = searchParams.get("genres") || "";
   const page = Number(searchParams.get("page")) || 1;
-  const { data, isLoading } = useFilter(genres, page);
+  const { data, isLoading, isError } = useFilter(genres, page);
 
   const genreNames = genres
     .split(",")
@@ -30,7 +30,7 @@ function FilterContent() {
         <p className="text-zinc-400">Select genres from the filter icon in the navigation bar.</p>
       ) : (
         <>
-          <MediaGrid items={data?.results} isLoading={isLoading} />
+          <MediaGrid items={data?.results} isLoading={isLoading} isError={isError} />
           {data && <MediaPagination currentPage={page} totalPages={data.total_pages} />}
         </>
       )}

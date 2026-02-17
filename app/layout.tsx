@@ -21,8 +21,17 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "StreamSeek",
+  title: {
+    default: "StreamSeek",
+    template: "%s | StreamSeek",
+  },
   description: "Browse and discover movies, TV shows, and more",
+  robots: { index: true, follow: true },
+  openGraph: {
+    siteName: "StreamSeek",
+    type: "website",
+    locale: "en_US",
+  },
 };
 
 export default function RootLayout({

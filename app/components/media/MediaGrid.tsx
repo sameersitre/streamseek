@@ -5,11 +5,21 @@ import type { MediaItem } from "@/app/types";
 interface MediaGridProps {
   items: MediaItem[] | undefined;
   isLoading: boolean;
+  isError?: boolean;
 }
 
-export default function MediaGrid({ items, isLoading }: MediaGridProps) {
+export default function MediaGrid({ items, isLoading, isError }: MediaGridProps) {
   if (isLoading) {
     return <MediaSkeleton />;
+  }
+
+  if (isError) {
+    return (
+      <div className="flex min-h-[50vh] flex-col items-center justify-center gap-2">
+        <p className="text-zinc-400">Failed to load results.</p>
+        <p className="text-sm text-zinc-600">Please try refreshing the page.</p>
+      </div>
+    );
   }
 
   if (!items || items.length === 0) {

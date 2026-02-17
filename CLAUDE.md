@@ -60,14 +60,29 @@ app/
 │       ├── EpisodesDialog.tsx      # Season episodes in scrollable Dialog
 │       └── DetailSkeleton.tsx      # Loading state skeleton
 ├── details/[mediatype]/[id]/
-│   ├── page.tsx                    # Server component passing params to DetailsClient
-│   └── DetailsClient.tsx           # "use client" orchestrator — fires 5 parallel TanStack queries
-├── filter/page.tsx                 # Filter page (receives ?genres=28,12,16)
-├── movies/page.tsx                 # Movies listing
-├── search/page.tsx                 # Search page (receives ?q=query)
+│   ├── page.tsx                    # Server component with generateMetadata + DetailsClient
+│   ├── DetailsClient.tsx           # "use client" orchestrator — fires 5 parallel TanStack queries
+│   ├── error.tsx                   # Details-level error boundary
+│   └── loading.tsx                 # Details loading skeleton
+├── filter/
+│   ├── page.tsx                    # Filter page (receives ?genres=28,12,16)
+│   └── layout.tsx                  # Static metadata: "Filter"
+├── movies/
+│   ├── page.tsx                    # Movies listing
+│   └── layout.tsx                  # Static metadata: "Movies"
+├── search/
+│   ├── page.tsx                    # Search page (receives ?q=query)
+│   └── layout.tsx                  # Static metadata: "Search"
 ├── test/page.tsx                   # Test/dev page
-├── tvshows/page.tsx                # TV Shows listing
-├── upcoming/page.tsx               # Upcoming releases
+├── tvshows/
+│   ├── page.tsx                    # TV Shows listing
+│   └── layout.tsx                  # Static metadata: "TV Shows"
+├── upcoming/
+│   ├── page.tsx                    # Upcoming releases
+│   └── layout.tsx                  # Static metadata: "Upcoming"
+├── error.tsx                       # Global error boundary ("use client")
+├── not-found.tsx                   # Custom 404 page
+├── loading.tsx                     # Global loading skeleton
 ├── globals.css                     # Global styles (dark theme, shadcn + Tailwind v4)
 ├── layout.tsx                      # Root layout with Appbar + Footer + QueryProvider + TooltipProvider
 └── page.tsx                        # Dashboard (home page)
@@ -175,15 +190,16 @@ All server data fetching uses TanStack Query hooks with structured query keys:
 ## Media Components (`app/components/media/`)
 
 - `MediaCard` — Card with TMDB poster + hover overlay showing title, ★ rating, year, genre badges
-- `MediaGrid` — Responsive grid (2→6 cols) rendering MediaCards, with loading skeleton and empty state
+- `MediaGrid` — Responsive grid (2→6 cols) rendering MediaCards, with loading/error/empty states
 - `MediaPagination` — Prev/Next buttons updating `?page=` URL search param
 - `MediaPoster` — Next.js Image wrapper for TMDB poster URLs with fallback
 - `MediaSkeleton` — Grid of skeleton loading cards (shadcn Skeleton)
 
 ## Details Page (`app/details/[mediatype]/[id]/`)
 
-The details page fires 5 TanStack queries in parallel via `DetailsClient.tsx`:
-- `useMediaDetails(type, id)` → header, poster, overview, genres
+Server component exports `generateMetadata` (fetches details for dynamic title/description/OG image).
+Client component fires 5 TanStack queries in parallel via `DetailsClient.tsx`:
+- `useMediaDetails(type, id)` → header, poster, overview, genres (includes `isError` handling)
 - `useMediaVideos(type, id)` → trailers section with YouTube embed Dialog
 - `useMediaCast(type, id)` → horizontal scroll cast carousel
 - `useOTTPlatforms(type, id)` → streaming platform icons with Tooltip links
@@ -197,6 +213,32 @@ TV shows additionally render `DetailSeasons` → `EpisodesDialog` (fetches episo
 - `backdropUrl(path, size?)` — Returns backdrop URL (w780 | original, defaults to original)
 - `profileUrl(path, size?)` — Returns profile URL (w300 | w500, defaults to w500)
 
+## Error Handling
+
+- `app/error.tsx` — Global error boundary with "Try again" reset button
+- `app/not-found.tsx` — Custom 404 page with link to home
+- `app/loading.tsx` — Global route loading (MediaSkeleton)
+- `app/details/[mediatype]/[id]/error.tsx` — Details-level error boundary
+- `app/details/[mediatype]/[id]/loading.tsx` — Details loading (DetailSkeleton)
+- `MediaGrid` accepts optional `isError` prop — all 6 listing pages pass it from query hooks
+- `DetailsClient` checks `isError` from `useMediaDetails` before rendering
+
+## SEO + Metadata
+
+- Root layout exports metadata with `title.template: "%s | StreamSeek"` for automatic title suffixing
+- Details page exports `generateMetadata` — fetches details server-side for dynamic title, description, OG image
+- Each listing route has a `layout.tsx` with static metadata (e.g., `{ title: "Movies" }` → renders as "Movies | StreamSeek")
+- OpenGraph defaults: `siteName: "StreamSeek"`, `type: "website"`, `locale: "en_US"`
+
+## Security Headers (`next.config.ts`)
+
+- `X-Content-Type-Options: nosniff`
+- `X-Frame-Options: DENY`
+- `X-XSS-Protection: 1; mode=block`
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- `Permissions-Policy: camera=(), microphone=(), geolocation=()`
+- `poweredByHeader: false`
+
 ## Conventions
 
 - Dark theme by default (oklch dark zinc palette, always-dark — no light/dark toggle)
@@ -208,3 +250,14 @@ TV shows additionally render `DetailSeasons` → `EpisodesDialog` (fetches episo
 - Dynamic route params for media details (`mediatype` and `id`)
 - Font Awesome SSR: `config.autoAddCss = false` + explicit CSS import in layout
 - `useSearchParams()` must be wrapped in `<Suspense>` boundary
+
+## Migration Status
+
+- Phase 1: Foundation (Types, API Client, Zustand, TanStack Query) ✅COMPLETE
+- Phase 2: Query Hooks + Common Components (MediaCard, Grid, Pagination) ✅COMPLETE
+- Phase 3: Listing Pages (Dashboard, Movies, TVShows, Upcoming, Search, Filter) ✅COMPLETE
+- Phase 4: Details Page + Sub-components (11 detail components, 5 parallel queries) ✅COMPLETE
+- Phase 5: Footer + Feedback Form ✅COMPLETE
+- Phase 6: Authentication (Firebase) — pending
+- Phase 7: Analytics + Geolocation — pending
+- Phase 8: Error Handling + SEO + Polish ✅COMPLETE

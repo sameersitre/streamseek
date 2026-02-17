@@ -25,14 +25,23 @@ interface DetailsClientProps {
 
 export default function DetailsClient({ mediatype, id }: DetailsClientProps) {
   // 5 parallel queries — TanStack Query handles concurrency natively
-  const { data: details, isLoading: detailsLoading } = useMediaDetails(mediatype, id);
+  const { data: details, isLoading: detailsLoading, isError } = useMediaDetails(mediatype, id);
   const { data: videosData } = useMediaVideos(mediatype, id);
   const { data: castData } = useMediaCast(mediatype, id);
   const { data: ottData } = useOTTPlatforms(mediatype, id);
   const { data: recommendsData } = useRecommendations(mediatype, id);
 
-  if (detailsLoading || !details) {
+  if (detailsLoading) {
     return <DetailSkeleton />;
+  }
+
+  if (isError || !details) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-2 px-6 text-center">
+        <p className="text-lg text-zinc-400">Could not load media details.</p>
+        <p className="text-sm text-zinc-600">Please try refreshing the page.</p>
+      </div>
+    );
   }
 
   const title = details.title || details.name || "Untitled";
