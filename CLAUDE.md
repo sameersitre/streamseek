@@ -90,16 +90,18 @@ lib/
 
 ## Routes
 
-| Route | Page | Type |
-|---|---|---|
-| `/` | Dashboard | Static |
-| `/movies` | Movies | Static |
-| `/tvshows` | TV Shows | Static |
-| `/upcoming` | Upcoming | Static |
-| `/search` | Search | Static |
-| `/details/[mediatype]/[id]` | Media Details | Dynamic |
-| `/filter` | Filter | Static |
-| `/test` | Test | Static |
+| Route | Page | Hook | Params |
+|---|---|---|---|
+| `/` | Dashboard (Trending) | `useTrending("all", page)` | `?page=` |
+| `/movies` | Movies | `useTrending("movie", page)` | `?page=` |
+| `/tvshows` | TV Shows | `useTrending("tv", page)` | `?page=` |
+| `/upcoming` | Upcoming | `useUpcoming(page)` | `?page=` |
+| `/search` | Search | `useSearch(q, page)` | `?q=` + `?page=` |
+| `/filter` | Filter | `useFilter(genres, page)` | `?genres=` + `?page=` |
+| `/details/[mediatype]/[id]` | Media Details | 5 parallel queries | Dynamic route |
+| `/test` | Test | — | — |
+
+**Page pattern**: Each listing page is a `"use client"` component with inner content wrapped in `<Suspense>` (required for `useSearchParams`). Renders `<MediaGrid>` + `<MediaPagination>`.
 
 ## Key Libraries
 

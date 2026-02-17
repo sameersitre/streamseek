@@ -12,27 +12,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { GENRES } from "@/app/constants/genres";
+import { useAppStore } from "@/app/stores/useAppStore";
 
 export default function GenreFilter() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
-
-  const toggleGenre = useCallback((id: number) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
-  }, []);
-
-  const clearAll = useCallback(() => {
-    setSelectedIds(new Set());
-  }, []);
+  const selectedIds = useAppStore((s) => s.selectedGenreIds);
+  const toggleGenre = useAppStore((s) => s.toggleGenre);
+  const clearGenres = useAppStore((s) => s.clearGenres);
 
   const applyFilter = useCallback(() => {
     const genreParam = Array.from(selectedIds).join(",");
@@ -71,7 +58,7 @@ export default function GenreFilter() {
             <Button
               variant="ghost"
               size="xs"
-              onClick={clearAll}
+              onClick={clearGenres}
               className="text-xs text-zinc-400 hover:text-white"
             >
               Clear all
