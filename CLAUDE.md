@@ -8,6 +8,7 @@ A movie and TV show discovery app built with Next.js 16 (App Router), React 19, 
 app/
 ├── components/
 │   ├── Appbar.tsx                  # Main app bar (fixed, gradient, responsive)
+│   ├── Footer.tsx                  # Footer with feedback form + GitHub/LinkedIn links
 │   ├── Header.tsx                  # Legacy simple header (kept as reference)
 │   └── appbar/
 │       ├── DesktopNav.tsx          # Desktop nav links with active state
@@ -68,7 +69,7 @@ app/
 ├── tvshows/page.tsx                # TV Shows listing
 ├── upcoming/page.tsx               # Upcoming releases
 ├── globals.css                     # Global styles (dark theme, shadcn + Tailwind v4)
-├── layout.tsx                      # Root layout with Appbar + QueryProvider + TooltipProvider
+├── layout.tsx                      # Root layout with Appbar + Footer + QueryProvider + TooltipProvider
 └── page.tsx                        # Dashboard (home page)
 
 ├── components/
@@ -84,7 +85,7 @@ app/
 │   └── formatDate.ts              # Date formatting (formatDate, formatYear) using Intl
 ├── ...pages...
 ├── globals.css                     # Global styles (dark theme, shadcn + Tailwind v4)
-├── layout.tsx                      # Root layout with Appbar + QueryProvider + Font Awesome config
+├── layout.tsx                      # Root layout with Appbar + Footer + QueryProvider + Font Awesome config
 └── page.tsx                        # Dashboard (home page)
 
 components/
@@ -94,10 +95,12 @@ components/
     ├── button.tsx
     ├── card.tsx
     ├── dialog.tsx
+    ├── input.tsx
     ├── popover.tsx
     ├── scroll-area.tsx
     ├── separator.tsx
     ├── skeleton.tsx
+    ├── textarea.tsx
     └── tooltip.tsx
 
 docs/
@@ -124,8 +127,8 @@ lib/
 
 ## Key Libraries
 
-- **shadcn/ui** — Avatar, Badge, Button, Card, Dialog, Popover, ScrollArea, Separator, Skeleton, Tooltip (in `components/ui/`)
-- **Font Awesome** — Icons (`@fortawesome/react-fontawesome`)
+- **shadcn/ui** — Avatar, Badge, Button, Card, Dialog, Input, Popover, ScrollArea, Separator, Skeleton, Textarea, Tooltip (in `components/ui/`)
+- **Font Awesome** — Icons (`@fortawesome/react-fontawesome`, `free-solid-svg-icons`, `free-brands-svg-icons`)
 - **Tailwind CSS v4** — Styling with `@theme inline` custom properties
 - **Zustand** — Client state management (search, genres, user profile with localStorage persistence)
 - **TanStack Query** — Server data fetching, caching, dedup (5min staleTime default)

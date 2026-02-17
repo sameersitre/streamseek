@@ -5,6 +5,7 @@ import "@fortawesome/fontawesome-svg-core/styles.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import QueryProvider from "./providers/QueryProvider";
 import Appbar from "./components/Appbar";
+import Footer from "./components/Footer";
 import "./globals.css";
 
 config.autoAddCss = false;
@@ -38,6 +39,7 @@ export default function RootLayout({
           <TooltipProvider>
             <Appbar />
             <main className="pt-20">{children}</main>
+            <Footer />
           </TooltipProvider>
         </QueryProvider>
       </body>
