@@ -129,10 +129,10 @@ Create `app/components/Footer.tsx` — feedback form (email + message + submit u
 
 ---
 
-### PHASE 6: Authentication (Firebase v10+ modular)
-**Install**: `firebase`
+### PHASE 6: Authentication (Auth.js v5 — Google + GitHub SSO) ✅COMPLETE
+**Installed**: `next-auth@beta` (Auth.js v5). Pivoted from Firebase to Auth.js for simplicity — free, lightweight, native Next.js App Router support, JWT sessions (no database).
 
-Create `app/lib/firebase.ts`, `app/lib/auth.ts` (Google/Facebook/Twitter sign-in), `app/components/auth/AuthDialog.tsx` (shadcn Dialog), `app/components/auth/AuthProvider.tsx` (syncs Firebase → Zustand). Modify `UserMenu.tsx` for login/logout/avatar.
+Created `auth.ts` (root config with Google + GitHub providers), `app/api/auth/[...nextauth]/route.ts` (API handler), `app/providers/AuthProvider.tsx` (SessionProvider wrapper), `app/components/auth/AuthDialog.tsx` (shadcn Dialog with Google/GitHub buttons), `app/components/auth/SessionSync.tsx` (bridges Auth.js session → Zustand). Modified `UserMenu.tsx` for avatar/login/logout, `layout.tsx` for AuthProvider + SessionSync, `next.config.ts` for Google/GitHub avatar image domains.
 
 ---
 

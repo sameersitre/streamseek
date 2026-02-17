@@ -15,7 +15,10 @@ app/
 │       ├── GenreFilter.tsx         # Genre filter popover with chip selection (shadcn)
 │       ├── MobileDrawer.tsx        # Slide-over mobile navigation drawer
 │       ├── SearchInput.tsx         # Debounced search input (1300ms)
-│       └── UserMenu.tsx            # User icon with dropdown menu
+│       └── UserMenu.tsx            # User avatar/login with auth dialog + sign out
+│   └── auth/
+│       ├── AuthDialog.tsx          # Login dialog with Google/GitHub SSO buttons (shadcn Dialog)
+│       └── SessionSync.tsx         # Syncs Auth.js session → Zustand userProfile
 ├── constants/
 │   └── genres.ts                   # TMDB genre data (27 genres: 19 movie + 8 TV-specific) + GENRE_MAP
 ├── hooks/
@@ -33,7 +36,10 @@ app/
 │       ├── useRecommendations.ts   # Related media
 │       ├── useSeasonEpisodes.ts    # TV season episodes
 │       └── index.ts                # Barrel export
+├── api/auth/[...nextauth]/
+│   └── route.ts                    # Auth.js API route handler (GET + POST)
 ├── providers/
+│   ├── AuthProvider.tsx            # Auth.js SessionProvider wrapper ("use client")
 │   └── QueryProvider.tsx           # TanStack Query client provider ("use client")
 ├── services/
 │   ├── apiClient.ts                # Typed fetch POST client with 15s timeout (12 endpoint methods)
@@ -84,7 +90,7 @@ app/
 ├── not-found.tsx                   # Custom 404 page
 ├── loading.tsx                     # Global loading skeleton
 ├── globals.css                     # Global styles (dark theme, shadcn + Tailwind v4)
-├── layout.tsx                      # Root layout with Appbar + Footer + QueryProvider + TooltipProvider
+├── layout.tsx                      # Root layout with AuthProvider + QueryProvider + TooltipProvider
 └── page.tsx                        # Dashboard (home page)
 
 ├── components/
@@ -100,7 +106,7 @@ app/
 │   └── formatDate.ts              # Date formatting (formatDate, formatYear) using Intl
 ├── ...pages...
 ├── globals.css                     # Global styles (dark theme, shadcn + Tailwind v4)
-├── layout.tsx                      # Root layout with Appbar + Footer + QueryProvider + Font Awesome config
+├── layout.tsx                      # Root layout with AuthProvider + QueryProvider + Font Awesome config
 └── page.tsx                        # Dashboard (home page)
 
 components/
@@ -117,6 +123,8 @@ components/
     ├── skeleton.tsx
     ├── textarea.tsx
     └── tooltip.tsx
+
+auth.ts                                # Auth.js v5 config (Google + GitHub SSO, JWT sessions)
 
 docs/
 └── migration-plan.md               # Full 8-phase migration plan (BingeFeast → StreamSeek)
@@ -136,6 +144,7 @@ lib/
 | `/search` | Search | `useSearch(q, page)` | `?q=` + `?page=` |
 | `/filter` | Filter | `useFilter(genres, page)` | `?genres=` + `?page=` |
 | `/details/[mediatype]/[id]` | Media Details | 5 parallel queries | Dynamic route |
+| `/api/auth/[...nextauth]` | Auth.js API | — | OAuth callbacks |
 | `/test` | Test | — | — |
 
 **Page pattern**: Each listing page is a `"use client"` component with inner content wrapped in `<Suspense>` (required for `useSearchParams`). Renders `<MediaGrid>` + `<MediaPagination>`.
@@ -147,6 +156,7 @@ lib/
 - **Tailwind CSS v4** — Styling with `@theme inline` custom properties
 - **Zustand** — Client state management (search, genres, user profile with localStorage persistence)
 - **TanStack Query** — Server data fetching, caching, dedup (5min staleTime default)
+- **Auth.js v5** — SSO authentication (Google + GitHub), JWT sessions, no database required
 
 ## API Client (`app/services/apiClient.ts`)
 
@@ -213,6 +223,20 @@ TV shows additionally render `DetailSeasons` → `EpisodesDialog` (fetches episo
 - `backdropUrl(path, size?)` — Returns backdrop URL (w780 | original, defaults to original)
 - `profileUrl(path, size?)` — Returns profile URL (w300 | w500, defaults to w500)
 
+## Authentication (`auth.ts` + Auth.js v5)
+
+- **SSO Providers**: Google + GitHub (auto-detected from `AUTH_GOOGLE_ID`/`AUTH_GITHUB_ID` env vars)
+- **Session Strategy**: JWT (no database required)
+- **Auth Flow**: UserMenu → AuthDialog → `signIn("google"|"github")` → OAuth redirect → JWT session → SessionSync → Zustand `userProfile`
+- `auth.ts` — Root config exporting `handlers`, `signIn`, `signOut`, `auth`
+- `app/api/auth/[...nextauth]/route.ts` — API route handler
+- `app/providers/AuthProvider.tsx` — Wraps app with `<SessionProvider>`
+- `app/components/auth/AuthDialog.tsx` — Login dialog with Google/GitHub buttons
+- `app/components/auth/SessionSync.tsx` — Bridges Auth.js session → Zustand store
+- `app/components/appbar/UserMenu.tsx` — Shows avatar when logged in, sign-in icon when logged out
+- **Avatar domains**: `lh3.googleusercontent.com` (Google), `avatars.githubusercontent.com` (GitHub) in `next.config.ts`
+- **Env vars**: `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET`
+
 ## Error Handling
 
 - `app/error.tsx` — Global error boundary with "Try again" reset button
@@ -258,6 +282,6 @@ TV shows additionally render `DetailSeasons` → `EpisodesDialog` (fetches episo
 - Phase 3: Listing Pages (Dashboard, Movies, TVShows, Upcoming, Search, Filter) ✅COMPLETE
 - Phase 4: Details Page + Sub-components (11 detail components, 5 parallel queries) ✅COMPLETE
 - Phase 5: Footer + Feedback Form ✅COMPLETE
-- Phase 6: Authentication (Firebase) — pending
+- Phase 6: Authentication (Auth.js v5 — Google + GitHub SSO) ✅COMPLETE
 - Phase 7: Analytics + Geolocation — pending
 - Phase 8: Error Handling + SEO + Polish ✅COMPLETE

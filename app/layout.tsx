@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import AuthProvider from "./providers/AuthProvider";
+import SessionSync from "./components/auth/SessionSync";
 import QueryProvider from "./providers/QueryProvider";
 import Appbar from "./components/Appbar";
 import Footer from "./components/Footer";
@@ -44,13 +46,16 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <QueryProvider>
-          <TooltipProvider>
-            <Appbar />
-            <main className="pt-20">{children}</main>
-            <Footer />
-          </TooltipProvider>
-        </QueryProvider>
+        <AuthProvider>
+          <QueryProvider>
+            <TooltipProvider>
+              <SessionSync />
+              <Appbar />
+              <main className="pt-20">{children}</main>
+              <Footer />
+            </TooltipProvider>
+          </QueryProvider>
+        </AuthProvider>
       </body>
     </html>
   );
