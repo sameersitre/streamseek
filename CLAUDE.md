@@ -45,8 +45,22 @@ app/
 │   ├── index.ts                    # Barrel re-export
 │   ├── media.ts                    # MediaItem, MediaType, PaginatedResponse<T>, Genre
 │   └── user.ts                     # UserProfile, UserLocation
+├── components/
+│   └── details/                    # Details page sub-components
+│       ├── DetailBackground.tsx    # Full-viewport TMDB backdrop with gradient overlay
+│       ├── DetailPoster.tsx        # Large poster image
+│       ├── DetailHeader.tsx        # Title, tagline, rating, date, runtime, IMDb link, genre badges
+│       ├── DetailOverview.tsx      # Plot description
+│       ├── DetailCast.tsx          # Horizontal scroll cast carousel (ScrollArea)
+│       ├── DetailStreams.tsx       # OTT platform icons with tooltips and links
+│       ├── DetailVideos.tsx        # Trailer buttons + YouTube embed Dialog
+│       ├── DetailRecommends.tsx    # Recommendation poster carousel
+│       ├── DetailSeasons.tsx       # TV seasons carousel with click-to-expand
+│       ├── EpisodesDialog.tsx      # Season episodes in scrollable Dialog
+│       └── DetailSkeleton.tsx      # Loading state skeleton
 ├── details/[mediatype]/[id]/
-│   └── page.tsx                    # Media details (dynamic route: /details/movie/123)
+│   ├── page.tsx                    # Server component passing params to DetailsClient
+│   └── DetailsClient.tsx           # "use client" orchestrator — fires 5 parallel TanStack queries
 ├── filter/page.tsx                 # Filter page (receives ?genres=28,12,16)
 ├── movies/page.tsx                 # Movies listing
 ├── search/page.tsx                 # Search page (receives ?q=query)
@@ -54,7 +68,7 @@ app/
 ├── tvshows/page.tsx                # TV Shows listing
 ├── upcoming/page.tsx               # Upcoming releases
 ├── globals.css                     # Global styles (dark theme, shadcn + Tailwind v4)
-├── layout.tsx                      # Root layout with Appbar + QueryProvider + Font Awesome config
+├── layout.tsx                      # Root layout with Appbar + QueryProvider + TooltipProvider
 └── page.tsx                        # Dashboard (home page)
 
 ├── components/
@@ -75,11 +89,16 @@ app/
 
 components/
 └── ui/                             # shadcn/ui components (project root)
+    ├── avatar.tsx
     ├── badge.tsx
     ├── button.tsx
     ├── card.tsx
+    ├── dialog.tsx
     ├── popover.tsx
-    └── skeleton.tsx
+    ├── scroll-area.tsx
+    ├── separator.tsx
+    ├── skeleton.tsx
+    └── tooltip.tsx
 
 docs/
 └── migration-plan.md               # Full 8-phase migration plan (BingeFeast → StreamSeek)
@@ -105,7 +124,7 @@ lib/
 
 ## Key Libraries
 
-- **shadcn/ui** — Badge, Button, Card, Popover, Skeleton (Radix-based, in `components/ui/`)
+- **shadcn/ui** — Avatar, Badge, Button, Card, Dialog, Popover, ScrollArea, Separator, Skeleton, Tooltip (in `components/ui/`)
 - **Font Awesome** — Icons (`@fortawesome/react-fontawesome`)
 - **Tailwind CSS v4** — Styling with `@theme inline` custom properties
 - **Zustand** — Client state management (search, genres, user profile with localStorage persistence)
@@ -157,6 +176,17 @@ All server data fetching uses TanStack Query hooks with structured query keys:
 - `MediaPagination` — Prev/Next buttons updating `?page=` URL search param
 - `MediaPoster` — Next.js Image wrapper for TMDB poster URLs with fallback
 - `MediaSkeleton` — Grid of skeleton loading cards (shadcn Skeleton)
+
+## Details Page (`app/details/[mediatype]/[id]/`)
+
+The details page fires 5 TanStack queries in parallel via `DetailsClient.tsx`:
+- `useMediaDetails(type, id)` → header, poster, overview, genres
+- `useMediaVideos(type, id)` → trailers section with YouTube embed Dialog
+- `useMediaCast(type, id)` → horizontal scroll cast carousel
+- `useOTTPlatforms(type, id)` → streaming platform icons with Tooltip links
+- `useRecommendations(type, id)` → recommendation poster carousel
+
+TV shows additionally render `DetailSeasons` → `EpisodesDialog` (fetches episodes on demand).
 
 ## TMDB Image Helpers (`app/lib/tmdb.ts`)
 

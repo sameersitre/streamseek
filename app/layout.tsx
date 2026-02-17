@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import QueryProvider from "./providers/QueryProvider";
 import Appbar from "./components/Appbar";
 import "./globals.css";
@@ -34,8 +35,10 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <QueryProvider>
-          <Appbar />
-          <main className="pt-20">{children}</main>
+          <TooltipProvider>
+            <Appbar />
+            <main className="pt-20">{children}</main>
+          </TooltipProvider>
         </QueryProvider>
       </body>
     </html>
