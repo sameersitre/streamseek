@@ -1,0 +1,55 @@
+services:
+  # ─── Frontend (Next.js dev server) ─────────────────
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      target: deps
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+      - /app/.next
+    env_file:
+      - ./client/.env.local
+    command: npm run dev
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  # ─── Backend (Express dev server) ──────────────────
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+      target: builder
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    env_file:
+      - ./server/.env
+    command: npx nodemon src/server.ts
+    depends_on:
+      - mongodb
+    networks:
+      - app-network
+
+  # ─── MongoDB ───────────────────────────────────────
+  mongodb:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - app-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  app-network:
