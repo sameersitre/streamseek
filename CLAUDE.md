@@ -18,7 +18,20 @@ app/
 ├── constants/
 │   └── genres.ts                   # TMDB genre data (27 genres: 19 movie + 8 TV-specific) + GENRE_MAP
 ├── hooks/
-│   └── useDebounce.ts              # Generic debounce hook
+│   ├── useDebounce.ts              # Generic debounce hook
+│   └── queries/                    # TanStack Query hooks
+│       ├── queryKeys.ts            # Query key factory (mediaKeys, detailKeys)
+│       ├── useTrending.ts          # Trending media by type + page
+│       ├── useSearch.ts            # Text search (enabled when text.length > 1)
+│       ├── useFilter.ts            # Genre filter
+│       ├── useUpcoming.ts          # Upcoming releases
+│       ├── useMediaDetails.ts      # Single media details
+│       ├── useMediaVideos.ts       # Trailers/videos
+│       ├── useMediaCast.ts         # Cast members
+│       ├── useOTTPlatforms.ts      # Streaming platform links
+│       ├── useRecommendations.ts   # Related media
+│       ├── useSeasonEpisodes.ts    # TV season episodes
+│       └── index.ts                # Barrel export
 ├── providers/
 │   └── QueryProvider.tsx           # TanStack Query client provider ("use client")
 ├── services/
@@ -44,11 +57,29 @@ app/
 ├── layout.tsx                      # Root layout with Appbar + QueryProvider + Font Awesome config
 └── page.tsx                        # Dashboard (home page)
 
+├── components/
+│   └── media/                      # Reusable media display components
+│       ├── MediaCard.tsx           # Card with poster + hover overlay (title, rating, year, genres)
+│       ├── MediaGrid.tsx           # Responsive CSS grid with loading/empty states
+│       ├── MediaPagination.tsx     # Prev/Next pagination using URL search params
+│       ├── MediaPoster.tsx         # Next.js Image wrapper for TMDB posters
+│       ├── MediaSkeleton.tsx       # Grid of skeleton loading cards
+│       └── index.ts               # Barrel export
+├── lib/
+│   ├── tmdb.ts                     # TMDB image URL helpers (posterUrl, backdropUrl, profileUrl)
+│   └── formatDate.ts              # Date formatting (formatDate, formatYear) using Intl
+├── ...pages...
+├── globals.css                     # Global styles (dark theme, shadcn + Tailwind v4)
+├── layout.tsx                      # Root layout with Appbar + QueryProvider + Font Awesome config
+└── page.tsx                        # Dashboard (home page)
+
 components/
 └── ui/                             # shadcn/ui components (project root)
     ├── badge.tsx
     ├── button.tsx
-    └── popover.tsx
+    ├── card.tsx
+    ├── popover.tsx
+    └── skeleton.tsx
 
 docs/
 └── migration-plan.md               # Full 8-phase migration plan (BingeFeast → StreamSeek)
@@ -72,7 +103,7 @@ lib/
 
 ## Key Libraries
 
-- **shadcn/ui** — Badge, Button, Popover (Radix-based, in `components/ui/`)
+- **shadcn/ui** — Badge, Button, Card, Popover, Skeleton (Radix-based, in `components/ui/`)
 - **Font Awesome** — Icons (`@fortawesome/react-fontawesome`)
 - **Tailwind CSS v4** — Styling with `@theme inline` custom properties
 - **Zustand** — Client state management (search, genres, user profile with localStorage persistence)
@@ -102,6 +133,34 @@ Base URL configured via `NEXT_PUBLIC_API_URL` env variable (defaults to `https:/
 - `userProfile` / `setUserProfile` — persisted to localStorage via zustand `persist` middleware
 - `userLocation` / `setUserLocation` — geolocation data
 - `isMobileDrawerOpen` / `setMobileDrawerOpen` — UI flag
+
+## Query Hooks (`app/hooks/queries/`)
+
+All server data fetching uses TanStack Query hooks with structured query keys:
+- `useTrending(mediaType, page)` — Trending media by type ("all" | "movie" | "tv")
+- `useSearch(text, page)` — Text search, enabled when text.length > 1
+- `useFilter(genres, page)` — Filter by comma-separated genre IDs
+- `useUpcoming(page)` — Upcoming releases
+- `useMediaDetails(type, id)` — Single media details
+- `useMediaVideos(type, id)` — Trailers and videos
+- `useMediaCast(type, id)` — Cast members
+- `useOTTPlatforms(type, id)` — Streaming platform links
+- `useRecommendations(type, id)` — Related media recommendations
+- `useSeasonEpisodes(id, seasonNumber)` — TV season episodes
+
+## Media Components (`app/components/media/`)
+
+- `MediaCard` — Card with TMDB poster + hover overlay showing title, ★ rating, year, genre badges
+- `MediaGrid` — Responsive grid (2→6 cols) rendering MediaCards, with loading skeleton and empty state
+- `MediaPagination` — Prev/Next buttons updating `?page=` URL search param
+- `MediaPoster` — Next.js Image wrapper for TMDB poster URLs with fallback
+- `MediaSkeleton` — Grid of skeleton loading cards (shadcn Skeleton)
+
+## TMDB Image Helpers (`app/lib/tmdb.ts`)
+
+- `posterUrl(path, size?)` — Returns TMDB poster URL (w300 | w500, defaults to w500)
+- `backdropUrl(path, size?)` — Returns backdrop URL (w780 | original, defaults to original)
+- `profileUrl(path, size?)` — Returns profile URL (w300 | w500, defaults to w500)
 
 ## Conventions
 
