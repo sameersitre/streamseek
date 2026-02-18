@@ -5,14 +5,14 @@ WORKDIR /app
 # ─── Stage 1: Install production dependencies ───────
 FROM base AS deps
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev && npm cache clean --force
+RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
 
 # ─── Stage 2: Build TypeScript ──────────────────────
 FROM base AS builder
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci --ignore-scripts
 
 COPY . .
 
