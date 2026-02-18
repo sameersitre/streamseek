@@ -1,51 +1,37 @@
 import axios from 'axios'
 import logger from '../common/logger'
-import { CastDetailsParams, OttStreamUtellyParams, OttStreamWatchmodeParams } from '../types'
+import { CastDetailsParams } from '../types'
 import { axiosFetch } from './apiCall'
-import { actorDetailsURL, castDetailsURL, ottStreamUtellyURL } from './apiURL'
+import { actorDetailsURL, castDetailsURL } from './apiURL'
 
-export const ottStreams = async function (params: OttStreamUtellyParams) {
-  try {
-    let streamAvailablity = null
-    await axios
-      .get(ottStreamUtellyURL(params), {
-        headers: {
-          'x-rapidapi-key': process.env.RAPIDAPI_UTELLY_API_KEY,
-        },
-      })
-      .then((res) => {
-        streamAvailablity = res.data
-      })
-      .catch((error) => {
-        streamAvailablity = error
-      })
-    return streamAvailablity.collection.locations
-  } catch (error) {
-    logger.error(error)
-    return error
+// Cache source logos from /sources/ reference endpoint (source_id -> logo_100px)
+let sourceLogos: Record<number, string> = {}
+
+const getSourceLogos = async () => {
+  if (Object.keys(sourceLogos).length > 0) return sourceLogos
+  const res = await axios.get(`https://api.watchmode.com/v1/sources/?apiKey=${process.env.WATCHMODE_API_KEY}`)
+  for (const s of res.data) {
+    sourceLogos[s.id] = s.logo_100px
   }
+  logger.info(`Watchmode sources cached: ${Object.keys(sourceLogos).length} providers`)
+  return sourceLogos
 }
 
-export const watchModeFetch = async (params: OttStreamWatchmodeParams) => {
-  const options = {
-    method: 'GET',
-    url: `https://watchmode.p.rapidapi.com/title/${params.media_type}-${params.id}/sources/`,
-    headers: {
-      'x-rapidapi-key': '0bec52a219msh0dbe24887102091p1872c7jsnf4a2acdec991',
-      'x-rapidapi-host': 'watchmode.p.rapidapi.com',
-      'Content-Type': 'application/json',
-      regions: params.region,
-    },
-  }
+export const fetchOTTPlatforms = async (mediaType: string, tmdbId: string | number) => {
+  const titleId = `${mediaType}-${tmdbId}` // e.g. "movie-550" or "tv-1396"
+  const url = `https://api.watchmode.com/v1/title/${titleId}/sources/?apiKey=${process.env.WATCHMODE_API_KEY}`
 
-  try {
-    const response = await axios.request(options)
-    logger.info('watchmode api called.')
-    return response.data
-  } catch (error) {
-    logger.error(error)
-    return error
-  }
+  const [response, logos] = await Promise.all([axios.get(url), getSourceLogos()])
+  logger.info(`Watchmode API called for ${titleId}, got ${response.data?.length ?? 0} sources`)
+
+  return (response.data ?? []).map((s) => ({
+    name: s.name ?? 'Unknown',
+    url: s.web_url ?? '',
+    icon: logos[s.source_id] ?? '',
+    type: s.type,
+    price: s.price,
+    region: s.region,
+  }))
 }
 
 export const castDetailsv2 = async function (params: CastDetailsParams) {

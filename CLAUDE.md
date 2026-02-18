@@ -63,7 +63,7 @@ streamseek/
 │   │   │   ├── logger.ts           # Pino logger
 │   │   │   └── routes.ts           # Route mounting (/api/v2)
 │   │   ├── resources/users/        # Controllers, routes, model, interface
-│   │   ├── apiExternal/            # TMDB + RapidAPI external calls
+│   │   ├── apiExternal/            # TMDB + Watchmode external calls
 │   │   ├── services/
 │   │   │   ├── db.ts               # MongoDB URI config (lazy connection via connectMongo)
 │   │   │   ├── mongo.ts            # MongoDB connection with error handling + 5s timeout
@@ -138,7 +138,8 @@ Docker Network (app-network)
 | `NEXT_PUBLIC_API_URL` | Build-time (client bundle) | Compose `args:` → `https://streamseek.sameersitre.dev/api/v2` |
 | `AUTH_SECRET`, `AUTH_GOOGLE_*`, `AUTH_GITHUB_*` | Runtime (server-only) | Compose `environment:` from `.env` |
 | `MONGO_URI` | Runtime (server-only) | Compose `environment:` → `mongodb://mongodb:27017/bingefeast` |
-| `TMDB_API_KEY`, `RAPIDAPI_*` | Runtime (server-only) | Compose `environment:` from `.env` |
+| `TMDB_API_KEY` | Runtime (server-only) | Compose `environment:` from `.env` |
+| `WATCHMODE_API_KEY` | Runtime (server-only) | Compose `environment:` from `.env` |
 
 ### Quick Start
 
@@ -176,7 +177,7 @@ npm run docker:dev     # Development with hot reload
 - **Mongoose 8** — MongoDB ODM
 - **Pino** — Structured JSON logging
 - **Helmet** — Security headers
-- **Axios** — External API calls (TMDB, RapidAPI)
+- **Axios** — External API calls (TMDB, Watchmode)
 
 ### DevOps
 - **Docker** — Multi-stage builds, Alpine base images
@@ -200,7 +201,7 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
 | `/api/v2/getDetails` | POST | Single media details |
 | `/api/v2/getVideos` | POST | Trailers/videos |
 | `/api/v2/getCastDetails` | POST | Cast members |
-| `/api/v2/getOTTPlatforms` | POST | Streaming platforms |
+| `/api/v2/getOTTPlatforms` | POST | Streaming platforms (via Watchmode API) |
 | `/api/v2/getRecommendations` | POST | Related media |
 | `/api/v2/getSeasons` | POST | TV season episodes |
 | `/api/v2/feedback` | POST | User feedback |
@@ -236,3 +237,14 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
 - Phase 8: Error Handling + SEO + Polish ✅COMPLETE
 - Phase 9: Docker + Monorepo Restructure (client/server split, Docker Compose, concurrently) ✅COMPLETE
 - Phase 10: Server Fixes + Production Deployment (TMDB Bearer auth, lazy MongoDB, Nginx HTTPS proxy, domain config) ✅COMPLETE
+- Phase 11: Watchmode OTT Integration (replace Utelly + RapidAPI with direct Watchmode API, cached source logos, security fix) ✅COMPLETE
+
+## OTT Streaming Platforms (Watchmode API)
+
+- **API**: Watchmode REST API v1 (`https://api.watchmode.com/v1/`)
+- **Auth**: `apiKey` query parameter (free tier: 1,000 calls/month)
+- **Title sources**: `/title/{media_type}-{tmdb_id}/sources/?apiKey=...` — returns streaming availability
+- **Source logos**: `/sources/?apiKey=...` — returns provider reference data with `logo_100px` URLs, cached in-memory on server
+- **Logo CDN**: `cdn.watchmode.com` — requires `referrerPolicy="no-referrer"` on `<img>` tags (blocks Next.js Image optimizer)
+- **MongoDB cache**: `ott_streams` collection caches results per title ID; `counters` collection tracks API usage with upsert
+- **Env var**: `WATCHMODE_API_KEY` (get free key at https://api.watchmode.com/requestApiKey)

@@ -1,15 +1,3 @@
-export enum OTTPlatformEnum {
-  NETFLIX = 'Netflix',
-  HULU = 'Hulu',
-  AMAZON = 'amazon',
-  WINDOWS_STORE = 'Windows Store',
-  APPLETV = 'AppleTV',
-  GOOGLEPLAY = 'Google Play',
-  YOUTUBE = 'YouTube',
-  EDIT_TRANSACTION = 'Prime Video',
-  PEACOCK = 'Peacock',
-}
-
 export interface MediaDetails {
   loading: boolean
   detailsData: DetailsData
@@ -108,16 +96,6 @@ export interface RecommendationsParams {
   id: number | string
   media_type: 'movie' | 'tv'
   page: number
-}
-
-export interface OttStreamUtellyParams {
-  id: string // TMDB ID as string
-}
-
-export interface OttStreamWatchmodeParams {
-  id: number | string
-  media_type: 'movie' | 'tv'
-  region: string
 }
 
 export interface AuthUserInfo {
@@ -314,25 +292,12 @@ export interface Videos {
 
 /* OTT PLATFORMS */
 export interface OTTPlatform {
-  display_name: string
-  id: string
+  name: string
   url: string
-  name: string
   icon: string
-}
-
-export interface Watchmode {
-  source_id: number
-  name: string
-  type: string
-  region: string
-  ios_url: string
-  android_url: string
-  web_url: string
-  format: string
-  price: number
-  seasons: number
-  episodes: number
+  type?: string   // "sub", "rent", "buy", "free", "tve"
+  price?: number
+  region?: string
 }
 
 /* RECOMMENDATIONS */

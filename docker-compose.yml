@@ -67,9 +67,7 @@ services:
       - MONGO_URI=mongodb://mongodb:27017/bingefeast
       - TMDB_URL=${TMDB_URL}
       - TMDB_API_KEY=${TMDB_API_KEY}
-      - RAPIDAPI_UTELLY_API_KEY=${RAPIDAPI_UTELLY_API_KEY}
-      - RAPIDAPI_UTELLY_URL=${RAPIDAPI_UTELLY_URL}
-      - RAPIDAPI_WATCHMODE_URL=${RAPIDAPI_WATCHMODE_URL}
+      - WATCHMODE_API_KEY=${WATCHMODE_API_KEY}
     depends_on:
       mongodb:
         condition: service_healthy

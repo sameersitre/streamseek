@@ -39,9 +39,11 @@ export interface Video {
 }
 
 export interface OTTPlatform {
-  icon: string;
   name: string;
   url: string;
+  icon: string;
+  type?: string; // "sub", "rent", "buy", "free", "tve"
+  price?: number;
 }
 
 export interface Season {

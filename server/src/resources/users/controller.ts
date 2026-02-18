@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { axiosFetch } from '../../apiExternal/apiCall'
-import { ottStreams, watchModeFetch } from '../../apiExternal/apiExternal'
+import { fetchOTTPlatforms } from '../../apiExternal/apiExternal'
 import {
   castDetailsURL,
   detailsURL,
@@ -15,7 +15,6 @@ import {
   videosURL,
 } from '../../apiExternal/apiURL'
 import { connectMongo } from '../../services/mongo'
-import { restruct_watchmode_ott_streams } from '../../utils/utils'
 import logger from '../../common/logger'
 
 export const getAll = async (req: Request, res: Response) => {
@@ -159,17 +158,14 @@ export const getOTTStreams = async (req: Request, res: Response) => {
     const db = await connectMongo()
     const dataFromDB = await db.collection('ott_streams').findOne({ id: req.body.id })
     if (!dataFromDB) {
-      const utellyResponse = await ottStreams(req.body)
-      const watchmodResponse = await watchModeFetch(req.body)
-      const refactoredData = restruct_watchmode_ott_streams(watchmodResponse)
+      const platforms = await fetchOTTPlatforms(req.body.media_type, req.body.id)
 
-      await db.collection('counters').updateOne({ counterName: 'utelly' }, { $inc: { counts: 1 } })
-      await db.collection('counters').updateOne({ counterName: 'watchmode' }, { $inc: { counts: 1 } })
+      await db.collection('counters').updateOne({ counterName: 'watchmode' }, { $inc: { counts: 1 } }, { upsert: true })
 
       const newData = {
         id: req.body.id,
         media_type: req.body.media_type,
-        platforms: [...utellyResponse, ...refactoredData],
+        platforms,
       }
 
       await db.collection('ott_streams').insertOne(newData)
@@ -178,7 +174,7 @@ export const getOTTStreams = async (req: Request, res: Response) => {
       res.status(200).json({ result: 'Doc Selection Successful.', ...dataFromDB })
     }
   } catch (error) {
-  logger.error('Error fetching or storing OTT streams data:', error)
+    logger.error({ error }, 'Error fetching or storing OTT streams data')
     res.status(error?.response?.status || 500).json({
       message: 'Failed to fetch or store data',
       error: error?.response?.data || error.message,

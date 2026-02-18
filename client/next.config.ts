@@ -18,6 +18,11 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "avatars.githubusercontent.com",
       },
+      {
+        protocol: "https",
+        hostname: "cdn.watchmode.com",
+        pathname: "/provider_logos/**",
+      },
     ],
   },
   async headers() {

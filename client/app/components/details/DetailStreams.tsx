@@ -1,4 +1,3 @@
-import Image from "next/image";
 import {
   Tooltip,
   TooltipContent,
@@ -28,12 +27,14 @@ export default function DetailStreams({ platforms }: DetailStreamsProps) {
                 rel="noopener noreferrer"
                 className="overflow-hidden rounded-lg transition-transform hover:scale-110"
               >
-                <Image
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={platform.icon}
                   alt={platform.name}
                   width={60}
                   height={60}
                   className="rounded-lg"
+                  referrerPolicy="no-referrer"
                 />
               </a>
             </TooltipTrigger>

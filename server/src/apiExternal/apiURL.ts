@@ -4,8 +4,6 @@ import {
   DetailsParams,
   ExternalIDParams,
   FilterParams,
-  OttStreamUtellyParams,
-  OttStreamWatchmodeParams,
   RecommendationsParams,
   SearchParams,
   SeasonsParams,
@@ -56,9 +54,3 @@ export const videosURL = (params: VideosParams) =>
 
 export const recommendationsURL = (params: RecommendationsParams) =>
   `${process.env.TMDB_URL}/${params.media_type}/${params.id}/recommendations?language=en-US&page=${params.page}`
-
-export const ottStreamUtellyURL = (params: OttStreamUtellyParams) =>
-  `${process.env.RAPIDAPI_UTELLY_URL}?source_id=${params.id}&source=tmdb`
-
-export const ottStreamFromWatchmodeURL = (params: OttStreamWatchmodeParams) =>
-  `${process.env.RAPIDAPI_WATCHMODE_URL}/title/${params.media_type}-${params.id}/sources/`
