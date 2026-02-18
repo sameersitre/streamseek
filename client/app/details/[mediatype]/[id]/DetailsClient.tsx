@@ -25,7 +25,11 @@ interface DetailsClientProps {
 
 export default function DetailsClient({ mediatype, id }: DetailsClientProps) {
   // 5 parallel queries — TanStack Query handles concurrency natively
-  const { data: details, isLoading: detailsLoading, isError } = useMediaDetails(mediatype, id);
+  const {
+    data: details,
+    isLoading: detailsLoading,
+    isError,
+  } = useMediaDetails(mediatype, id);
   const { data: videosData } = useMediaVideos(mediatype, id);
   const { data: castData } = useMediaCast(mediatype, id);
   const { data: ottData } = useOTTPlatforms(mediatype, id);
@@ -61,14 +65,10 @@ export default function DetailsClient({ mediatype, id }: DetailsClientProps) {
         <DetailOverview overview={details.overview} />
 
         {/* Streams / OTT */}
-        {ottData?.platforms && (
-          <DetailStreams platforms={ottData.platforms} />
-        )}
+        {ottData?.platforms && <DetailStreams platforms={ottData.platforms} />}
 
         {/* Videos / Trailers */}
-        {videosData?.results && (
-          <DetailVideos videos={videosData.results} />
-        )}
+        {videosData?.results && <DetailVideos videos={videosData.results} />}
 
         {/* TV Seasons */}
         {mediatype === "tv" && details.seasons && (

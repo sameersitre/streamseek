@@ -44,6 +44,7 @@ export interface OTTParams {
 export interface RecommendationsParams {
   id: string;
   media_type: string;
+  page?: number;
 }
 
 export interface SeasonsParams {

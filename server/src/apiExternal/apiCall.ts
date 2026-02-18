@@ -7,7 +7,7 @@ export const axiosFetch = async (URL: string) => {
     maxBodyLength: Infinity,
     url: URL,
     headers: {
-      Authorization: process.env.TMDB_API_KEY,
+      Authorization: `Bearer ${process.env.TMDB_API_KEY}`,
       accept: 'application/json',
     },
   }

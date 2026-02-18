@@ -22,8 +22,8 @@ export const detailKeys = {
     [...detailKeys.all, "cast", type, id] as const,
   ott: (type: string, id: string) =>
     [...detailKeys.all, "ott", type, id] as const,
-  recommendations: (type: string, id: string) =>
-    [...detailKeys.all, "recommendations", type, id] as const,
+  recommendations: (type: string, id: string, page: number) =>
+    [...detailKeys.all, "recommendations", type, id, page] as const,
   seasons: (id: string, seasonNumber: number) =>
     [...detailKeys.all, "seasons", id, seasonNumber] as const,
 };

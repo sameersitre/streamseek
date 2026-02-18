@@ -7,8 +7,10 @@ A movie and TV show discovery app built as a monorepo with a Next.js 16 frontend
 ```
 streamseek/
 ├── package.json                    # Root orchestrator (concurrently for parallel dev)
-├── docker-compose.yml              # Production: frontend + backend + MongoDB
+├── docker-compose.yml              # Production: nginx + certbot + frontend + backend + MongoDB
 ├── docker-compose.dev.yml          # Development: volume mounts + hot reload
+├── nginx/
+│   └── nginx.conf                  # Reverse proxy config (HTTPS, domain routing)
 ├── .env.example                    # Template for all required env vars
 ├── .gitignore                      # Root gitignore (covers client + server)
 │
@@ -63,8 +65,8 @@ streamseek/
 │   │   ├── resources/users/        # Controllers, routes, model, interface
 │   │   ├── apiExternal/            # TMDB + RapidAPI external calls
 │   │   ├── services/
-│   │   │   ├── db.ts               # MongoDB connection (supports MONGO_URI env var)
-│   │   │   ├── mongo.ts            # MongoDB native client
+│   │   │   ├── db.ts               # MongoDB URI config (lazy connection via connectMongo)
+│   │   │   ├── mongo.ts            # MongoDB connection with error handling + 5s timeout
 │   │   │   └── checkAuth.ts        # Google auth verification
 │   │   ├── middlewares/            # unknownEndpoint handler
 │   │   ├── types.ts                # TMDB response type definitions
@@ -99,26 +101,41 @@ npm run docker:build  # docker compose build
 
 ```
 Docker Network (app-network)
-├── frontend   (Next.js 16)     → Port 3000
-├── backend    (Express API)    → Port 8000
-└── mongodb    (MongoDB 7)      → Port 27017 (persistent volume)
+├── nginx      (Reverse Proxy)  → Port 80/443 (HTTPS via Let's Encrypt)
+├── certbot    (SSL Renewal)    → Auto-renews certificates every 12h
+├── frontend   (Next.js 16)     → Internal :3000 (exposed via nginx)
+├── backend    (Express API)    → Internal :8000 (exposed via nginx /api/)
+└── mongodb    (MongoDB 7)      → Internal :27017 (persistent volume)
 ```
+
+### Production Domain
+- **URL**: `https://streamseek.sameersitre.dev`
+- Nginx proxies `/api/*` → backend, everything else → frontend
+- Single domain eliminates CORS issues
+- HTTPS via Let's Encrypt + Certbot auto-renewal
 
 ### Dockerfiles
 
 - **`client/Dockerfile`** — 3-stage multi-stage build (deps → builder → runner). Uses `output: "standalone"` for ~150MB final image. Non-root user `nextjs`. `NEXT_PUBLIC_API_URL` passed as build arg.
 - **`server/Dockerfile`** — 3-stage build (deps → builder → runner). Uses `dumb-init` for proper signal handling. Non-root user `appuser`. Production deps only via `npm ci --omit=dev`.
 
+### Nginx Reverse Proxy (`nginx/nginx.conf`)
+- HTTP (:80) redirects to HTTPS (:443)
+- Let's Encrypt ACME challenge served from `/var/www/certbot`
+- `/api/*` proxied to `backend:8000`
+- Everything else proxied to `frontend:3000`
+- Certbot container auto-renews SSL certificates every 12 hours
+
 ### Docker Compose Files
 
-- **`docker-compose.yml`** — Production: all 3 services with health checks, `depends_on` ordering, `restart: unless-stopped`, named volume for MongoDB data.
+- **`docker-compose.yml`** — Production: 5 services (nginx, certbot, frontend, backend, mongodb). Services use `expose` (internal only), nginx handles external ports 80/443. Health checks, `depends_on` ordering, `restart: unless-stopped`, named volume for MongoDB data.
 - **`docker-compose.dev.yml`** — Development: volume mounts for hot reload, `env_file` for local env vars.
 
 ### Environment Variables
 
 | Variable | Type | Where |
 |----------|------|-------|
-| `NEXT_PUBLIC_API_URL` | Build-time (client bundle) | Compose `args:` → `http://localhost:8000/api/v2` |
+| `NEXT_PUBLIC_API_URL` | Build-time (client bundle) | Compose `args:` → `https://streamseek.sameersitre.dev/api/v2` |
 | `AUTH_SECRET`, `AUTH_GOOGLE_*`, `AUTH_GITHUB_*` | Runtime (server-only) | Compose `environment:` from `.env` |
 | `MONGO_URI` | Runtime (server-only) | Compose `environment:` → `mongodb://mongodb:27017/bingefeast` |
 | `TMDB_API_KEY`, `RAPIDAPI_*` | Runtime (server-only) | Compose `environment:` from `.env` |
@@ -170,7 +187,7 @@ npm run docker:dev     # Development with hot reload
 
 ### Client → Backend (`client/app/services/apiClient.ts`)
 
-All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_URL` (defaults to `https://bingee-server.herokuapp.com/api`).
+All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_URL` (defaults to `https://streamseek.sameersitre.dev/api/v2`).
 
 ### Backend Routes (`/api/v2/`)
 
@@ -218,3 +235,4 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
 - Phase 7: Analytics + Geolocation — pending
 - Phase 8: Error Handling + SEO + Polish ✅COMPLETE
 - Phase 9: Docker + Monorepo Restructure (client/server split, Docker Compose, concurrently) ✅COMPLETE
+- Phase 10: Server Fixes + Production Deployment (TMDB Bearer auth, lazy MongoDB, Nginx HTTPS proxy, domain config) ✅COMPLETE

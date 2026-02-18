@@ -6,15 +6,11 @@ import '../common/env'
 
 // MongoDB connection URI
 export const DB_URI = process.env.MONGO_URI ||
-  `mongodb://${process.env.USERNAME}:${process.env.PASSWORD}@${process.env.CLUSTER_URL}:27017/?authSource=${process.env.AUTH_SOURCE}&authMechanism=${process.env.AUTH_MECHANISM}`
-logger.info({DB_URI})
+  `mongodb+srv://${process.env.USERNAME}:${process.env.PASSWORD}@${process.env.CLUSTER_URL}/?authSource=${process.env.AUTH_SOURCE}&authMechanism=${process.env.AUTH_MECHANISM}`
+logger.info(`DB_URI: ${DB_URI}`)
+//mongodb+srv://sameersitre:8lquMzWOT9iaBuSG@cluster0.n4tlpps.mongodb.net/
 
-// Connect to MongoDB
- mongoose.connect(DB_URI, { dbName: 'bingefeast' })
-
-mongoose.Promise = global.Promise
-
-// Get current connected Database
+// Get current connected Database (connection established lazily via connectMongo)
 const db = mongoose.connection
 
 // Notify on error or success
