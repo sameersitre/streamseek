@@ -1,0 +1,29 @@
+# Version control
+.git
+.gitignore
+
+# Dependencies (rebuilt in container)
+node_modules
+
+# Build artifacts (rebuilt in container)
+dist
+coverage
+build
+
+# Environment files (injected via Docker)
+.env
+.env.*
+
+# Docker files
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# IDE / OS
+.vscode
+.idea
+*.swp
+.DS_Store
+
+# Claude
+.claude/
