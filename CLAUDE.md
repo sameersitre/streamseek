@@ -75,7 +75,8 @@ streamseek/
 │
 └── docs/
     ├── docker-setup-guide.md       # Comprehensive Docker documentation
-    └── migration-plan.md           # 8-phase migration plan
+    ├── migration-plan.md           # 8-phase migration plan
+    └── production-deployment-guide.md  # Step-by-step VM deployment guide
 ```
 
 ## Root Scripts (`package.json`)
@@ -110,7 +111,7 @@ Docker Network (app-network)
 
 ### Production Domain
 - **URL**: `https://streamseek.sameersitre.dev`
-- Nginx proxies `/api/*` → backend, everything else → frontend
+- Nginx proxies `/api/v2/*` → backend, everything else (incl. `/api/auth/*`) → frontend
 - Single domain eliminates CORS issues
 - HTTPS via Let's Encrypt + Certbot auto-renewal
 
@@ -122,7 +123,7 @@ Docker Network (app-network)
 ### Nginx Reverse Proxy (`nginx/nginx.conf`)
 - HTTP (:80) redirects to HTTPS (:443)
 - Let's Encrypt ACME challenge served from `/var/www/certbot`
-- `/api/*` proxied to `backend:8000`
+- `/api/v2/*` proxied to `backend:8000` (Auth.js `/api/auth/*` stays on frontend)
 - Everything else proxied to `frontend:3000`
 - Certbot container auto-renews SSL certificates every 12 hours
 
@@ -236,8 +237,19 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
 - Phase 7: Analytics + Geolocation — pending
 - Phase 8: Error Handling + SEO + Polish ✅COMPLETE
 - Phase 9: Docker + Monorepo Restructure (client/server split, Docker Compose, concurrently) ✅COMPLETE
-- Phase 10: Server Fixes + Production Deployment (TMDB Bearer auth, lazy MongoDB, Nginx HTTPS proxy, domain config) ✅COMPLETE
+- Phase 10: Server Fixes + Production Deployment (TMDB Bearer auth, lazy MongoDB, Nginx HTTPS proxy, domain config, VM deployment guide) ✅COMPLETE
 - Phase 11: Watchmode OTT Integration (replace Utelly + RapidAPI with direct Watchmode API, cached source logos, security fix) ✅COMPLETE
+
+## Production Deployment
+
+- **Live URL**: `https://streamseek.sameersitre.dev`
+- **VM**: Debian 12 (bookworm), Google Cloud, 2GB RAM + 2GB swap
+- **Guide**: `docs/production-deployment-guide.md` — full step-by-step instructions
+- **Key deployment fixes applied**:
+  - `server/Dockerfile`: `--ignore-scripts` on `npm ci` to skip husky in Docker builds
+  - `server/src/common/logger.ts`: Conditional pino-pretty (dev only, avoids production crash)
+  - `docker-compose.yml`: `HOSTNAME=0.0.0.0` + `AUTH_TRUST_HOST=true` for frontend, node-based healthcheck, increased timeouts for slow VMs
+  - `nginx/nginx.conf`: Route `/api/v2/` to backend (not `/api/` which caught Auth.js routes)
 
 ## OTT Streaming Platforms (Watchmode API)
 
