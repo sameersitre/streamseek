@@ -239,6 +239,7 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
 - Phase 9: Docker + Monorepo Restructure (client/server split, Docker Compose, concurrently) ✅COMPLETE
 - Phase 10: Server Fixes + Production Deployment (TMDB Bearer auth, lazy MongoDB, Nginx HTTPS proxy, domain config, VM deployment guide) ✅COMPLETE
 - Phase 11: Watchmode OTT Integration (replace Utelly + RapidAPI with direct Watchmode API, cached source logos, security fix) ✅COMPLETE
+- Phase 12: SEO (metadata, JSON-LD, OG images, robots, sitemap, manifest, Twitter cards) + search navigation fix ✅COMPLETE
 
 ## Production Deployment
 
@@ -250,6 +251,18 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
   - `server/src/common/logger.ts`: Conditional pino-pretty (dev only, avoids production crash)
   - `docker-compose.yml`: `HOSTNAME=0.0.0.0` + `AUTH_TRUST_HOST=true` for frontend, node-based healthcheck, increased timeouts for slow VMs
   - `nginx/nginx.conf`: Route `/api/v2/` to backend (not `/api/` which caught Auth.js routes)
+
+## SEO (`client/app/`)
+
+- **Site config**: `lib/siteConfig.ts` — centralized name, URL, description, colors
+- **Metadata**: `layout.tsx` — `metadataBase`, googleBot directives, OG, Twitter cards, theme-color
+- **Sub-page metadata**: movies, tvshows, upcoming get descriptions + OG + canonical; search, filter get `noindex`
+- **JSON-LD**: `components/JsonLd.tsx` — `WebsiteJsonLd` (SearchAction schema) on root, `MediaJsonLd` (Movie/TVSeries + aggregateRating) on details page
+- **OG image**: `opengraph-image.tsx` — Edge Runtime dynamic 1200x630 branded image, re-exported as `twitter-image.tsx`
+- **Details page**: `details/[mediatype]/[id]/page.tsx` — `React.cache()` deduplicates API call between `generateMetadata` and page, adds `MediaJsonLd`, Twitter cards, canonical URL
+- **Crawling**: `robots.ts` — allow all, disallow `/api/`; `sitemap.ts` — 4 static routes
+- **PWA**: `manifest.ts` — standalone display, dark theme
+- **Search fix**: `components/appbar/SearchInput.tsx` — removed `pathname` from debounce effect deps to prevent back-and-forth navigation loop; clear input when leaving `/search`
 
 ## OTT Streaming Platforms (Watchmode API)
 

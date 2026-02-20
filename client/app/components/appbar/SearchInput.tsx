@@ -17,9 +17,12 @@ export default function SearchInput() {
     if (pathname === "/search") {
       const q = searchParams.get("q") || "";
       setSearchText(q);
+    } else {
+      setSearchText("");
     }
   }, [pathname, searchParams]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (debouncedSearch.trim().length > 1) {
       const query = encodeURIComponent(debouncedSearch.trim());
@@ -29,7 +32,7 @@ export default function SearchInput() {
         router.push(`/search?q=${query}`);
       }
     }
-  }, [debouncedSearch, router, pathname]);
+  }, [debouncedSearch, router]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && searchText.trim().length > 1) {

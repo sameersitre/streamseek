@@ -1,9 +1,15 @@
+import { cache } from "react";
 import type { Metadata } from "next";
 import { apiClient } from "@/app/services/apiClient";
 import { posterUrl } from "@/app/lib/tmdb";
+import { MediaJsonLd } from "@/app/components/JsonLd";
 import DetailsClient from "./DetailsClient";
 
 type Params = Promise<{ mediatype: string; id: string }>;
+
+const getDetails = cache((id: string, mediatype: string) =>
+  apiClient.details({ id, media_type: mediatype })
+);
 
 export async function generateMetadata({
   params,
@@ -13,10 +19,7 @@ export async function generateMetadata({
   const { mediatype, id } = await params;
 
   try {
-    const details = await apiClient.details({
-      id,
-      media_type: mediatype,
-    });
+    const details = await getDetails(id, mediatype);
 
     const title = details.title || details.name || "Details";
     const description =
@@ -32,6 +35,15 @@ export async function generateMetadata({
         images: details.poster_path ? [image] : [],
         type: mediatype === "tv" ? "video.tv_show" : "video.movie",
       },
+      twitter: {
+        card: "summary_large_image",
+        title,
+        description,
+        images: details.poster_path ? [image] : [],
+      },
+      alternates: {
+        canonical: `/details/${mediatype}/${id}`,
+      },
     };
   } catch {
     return { title: "Details" };
@@ -41,5 +53,18 @@ export async function generateMetadata({
 export default async function MediaDetails({ params }: { params: Params }) {
   const { mediatype, id } = await params;
 
-  return <DetailsClient mediatype={mediatype} id={id} />;
+  let jsonLd = null;
+  try {
+    const details = await getDetails(id, mediatype);
+    jsonLd = <MediaJsonLd details={details} mediatype={mediatype} />;
+  } catch {
+    // JSON-LD is non-critical; skip on error
+  }
+
+  return (
+    <>
+      {jsonLd}
+      <DetailsClient mediatype={mediatype} id={id} />
+    </>
+  );
 }

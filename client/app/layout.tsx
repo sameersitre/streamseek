@@ -8,6 +8,8 @@ import SessionSync from "./components/auth/SessionSync";
 import QueryProvider from "./providers/QueryProvider";
 import Appbar from "./components/Appbar";
 import Footer from "./components/Footer";
+import { WebsiteJsonLd } from "./components/JsonLd";
+import { siteConfig } from "./lib/siteConfig";
 import "./globals.css";
 
 config.autoAddCss = false;
@@ -23,16 +25,47 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteConfig.url),
   title: {
-    default: "StreamSeek",
-    template: "%s | StreamSeek",
+    default: siteConfig.name,
+    template: `%s | ${siteConfig.name}`,
   },
-  description: "Browse and discover movies, TV shows, and more",
-  robots: { index: true, follow: true },
+  description: siteConfig.description,
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large" as const,
+      "max-snippet": -1,
+    },
+  },
   openGraph: {
-    siteName: "StreamSeek",
+    siteName: siteConfig.name,
     type: "website",
-    locale: "en_US",
+    locale: siteConfig.locale,
+    url: siteConfig.url,
+    title: siteConfig.name,
+    description: siteConfig.description,
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: `${siteConfig.name} — Movie & TV Show Discovery`,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteConfig.name,
+    description: siteConfig.description,
+    images: ["/opengraph-image"],
+  },
+  alternates: {
+    canonical: "/",
   },
 };
 
@@ -43,6 +76,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <meta name="theme-color" content={siteConfig.themeColor} />
+        <meta name="color-scheme" content="dark" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -56,6 +93,7 @@ export default function RootLayout({
             </TooltipProvider>
           </QueryProvider>
         </AuthProvider>
+        <WebsiteJsonLd />
       </body>
     </html>
   );
