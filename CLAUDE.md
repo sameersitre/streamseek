@@ -62,18 +62,20 @@ streamseek/
 │   │   │   ├── logger.ts           # Pino logger
 │   │   │   └── routes.ts           # Route mounting (/api/v2)
 │   │   ├── resources/users/        # Controllers + routes (API endpoint handlers)
+│   │   ├── resources/interactions/ # Watchlist & Likes controllers + routes
 │   │   ├── apiExternal/            # TMDB + Watchmode external calls
 │   │   ├── services/
 │   │   │   ├── db.ts               # MongoDB URI config (lazy connection via connectMongo)
 │   │   │   └── mongo.ts            # MongoDB connection with error handling + 5s timeout
-│   │   ├── middlewares/            # unknownEndpoint handler
+│   │   ├── middlewares/            # unknownEndpoint, authMiddleware, rateLimiter
 │   │   └── types.ts                # TMDB response type definitions
 │   └── tests/                      # Jest test suite
 │
 └── docs/
     ├── docker-setup-guide.md       # Comprehensive Docker documentation
     ├── migration-plan.md           # 8-phase migration plan
-    └── production-deployment-guide.md  # Step-by-step VM deployment guide
+    ├── production-deployment-guide.md  # Step-by-step VM deployment guide
+    └── prd-watchlist-likes.md      # PRD for Watchlist & Likes feature
 ```
 
 ## Root Scripts (`package.json`)
@@ -139,6 +141,7 @@ Docker Network (app-network)
 | `TMDB_API_KEY` | Runtime (server-only) | Compose `environment:` from `.env` |
 | `WATCHMODE_API_URL` | Runtime (server-only) | Compose `environment:` → `https://api.watchmode.com/v1` |
 | `WATCHMODE_API_KEY` | Runtime (server-only) | Compose `environment:` from `.env` |
+| `CLIENT_URL` | Runtime (server-only) | CORS origin for credentialed requests (defaults to `http://localhost:3000`) |
 
 ### Quick Start
 
@@ -177,6 +180,9 @@ npm run docker:dev     # Development with hot reload
 - **Pino** — Structured JSON logging
 - **Helmet** — Security headers
 - **Axios** — External API calls (TMDB, Watchmode)
+- **@auth/core** — Decode Auth.js JWE tokens for server-side auth
+- **cookie-parser** — Parse cookies from requests
+- **express-rate-limit** — Rate limiting (30 req/min on toggle endpoints)
 
 ### DevOps
 - **Docker** — Multi-stage builds, Alpine base images
@@ -204,6 +210,11 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
 | `/api/v2/getRecommendations` | POST | Related media |
 | `/api/v2/getSeasons` | POST | TV season episodes |
 | `/api/v2/feedback` | POST | User feedback |
+| `/api/v2/interactions/all` | POST | Get all user interactions (auth required) |
+| `/api/v2/interactions/toggle-like` | POST | Toggle like on/off (auth + rate limited) |
+| `/api/v2/interactions/toggle-watchlist` | POST | Toggle watchlist on/off (auth + rate limited) |
+| `/api/v2/interactions/watchlist` | POST | Get user's watchlist, paginated (auth required) |
+| `/api/v2/interactions/likes` | POST | Get user's likes, paginated (auth required) |
 | `/` | GET | Health check |
 
 ## Authentication (`client/auth.ts` + Auth.js v5)
@@ -239,6 +250,7 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
 - Phase 11: Watchmode OTT Integration (replace Utelly + RapidAPI with direct Watchmode API, cached source logos, security fix) ✅COMPLETE
 - Phase 12: SEO (metadata, JSON-LD, OG images, robots, sitemap, manifest, Twitter cards) + search navigation fix ✅COMPLETE
 - Phase 13: Codebase cleanup (remove legacy code, unused deps, dead routes, hardcoded URLs, fix indentation) ✅COMPLETE
+- Phase 14: Watchlist & Likes — Server Backend (PRD, auth middleware, interaction endpoints, rate limiting, MongoDB indexes) ✅COMPLETE
 
 ## Production Deployment
 
@@ -262,6 +274,17 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
 - **Crawling**: `robots.ts` — allow all, disallow `/api/`; `sitemap.ts` — 4 static routes
 - **PWA**: `manifest.ts` — standalone display, dark theme
 - **Search fix**: `components/appbar/SearchInput.tsx` — removed `pathname` from debounce effect deps to prevent back-and-forth navigation loop; clear input when leaving `/search`
+
+## User Interactions (Watchlist & Likes)
+
+- **PRD**: `docs/prd-watchlist-likes.md` — full architecture, API design, implementation roadmap
+- **Auth middleware**: `server/src/middlewares/authMiddleware.ts` — decodes Auth.js JWE cookies via `@auth/core/jwt` using shared `AUTH_SECRET`
+- **Cookie names**: `authjs.session-token` (dev), `__Secure-authjs.session-token` (prod)
+- **Rate limiter**: `server/src/middlewares/rateLimiter.ts` — 30 req/min per IP on toggle endpoints
+- **MongoDB collection**: `user_interactions` — one document per user-media pair with `liked`/`watchlisted` boolean flags + denormalized title/posterPath/voteAverage
+- **Indexes**: unique `{ userId, mediaId, mediaType }`, plus compound indexes for watchlist/likes listing queries
+- **CORS**: Express configured with `credentials: true` and explicit `origin` to allow cookie-based auth
+- **Next steps**: Client-side implementation (hooks, UI components, watchlist/likes pages) — see PRD Phases 4-8
 
 ## OTT Streaming Platforms (Watchmode API)
 
