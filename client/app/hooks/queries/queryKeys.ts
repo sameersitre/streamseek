@@ -1,5 +1,9 @@
 import type { MediaType } from "@/app/types";
 
+/** Detail queries cache config — shared across all detail hooks */
+export const DETAIL_STALE_TIME = 30 * 60 * 1000; // 30 min — skip refetch on revisit
+export const DETAIL_GC_TIME = 60 * 60 * 1000;    // 60 min — keep in cache after unmount
+
 export const mediaKeys = {
   all: ["media"] as const,
   trending: (type: MediaType, page: number) =>
