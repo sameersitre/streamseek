@@ -1,14 +1,12 @@
-import { Router } from 'express'
+import { Router, Request, Response } from 'express'
 import {
   filterList,
-  getAll,
   getCastDetails,
   getDetails,
   getFeedback,
   getOTTStreams,
   getRecommends,
   getSeasons,
-  getTest,
   getVideos,
   searchList,
   trendingList,
@@ -17,12 +15,12 @@ import {
 
 const router = Router()
 
-// define routes
-router.route('/').get(getAll)
+// health check
+router.route('/').get((_req: Request, res: Response) => {
+  res.status(200).json({ 'health-check': 'OK: api v2 working' })
+})
 
-router.route('/test').post(getTest)
-
-//  TRENDING ALL/TV/MOVIE DAY
+// TRENDING ALL/TV/MOVIE DAY
 router.route('/trending').post(trendingList)
 
 router.route('/search').post(searchList)
@@ -43,12 +41,6 @@ router.route('/getOTTPlatforms').post(getOTTStreams)
 
 router.route('/getCastDetails').post(getCastDetails)
 
-router.route('/info').post(getAll)
-
 router.route('/feedback').post(getFeedback)
-
-// router.route('/login').post(verifyAuthentication)
-
-// router.route('/profile').post(verifyAuthentication)
 
 export default router

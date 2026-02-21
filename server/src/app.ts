@@ -22,10 +22,9 @@ app.use(
   }),
 )
 app.use(express.json())
-// app.use(cookieParser())
 
 // health check
-app.get('/', (req: Request, res: Response) => {
+app.get('/', (_req: Request, res: Response) => {
   res.status(200).json({
     'health-check': 'OK: top level api working',
   })

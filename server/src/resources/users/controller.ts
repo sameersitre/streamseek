@@ -9,7 +9,6 @@ import {
   recommendationsURL,
   searchURL,
   seasonsURL,
-  testURL,
   trendingURL,
   upcomingURL,
   videosURL,
@@ -17,48 +16,12 @@ import {
 import { connectMongo } from '../../services/mongo'
 import logger from '../../common/logger'
 
-export const getAll = async (req: Request, res: Response) => {
-  try {
-    const users = ['John Doe', 'Jane Doe', 'John Smith', 'Jane Smith']
-    res.status(200).json(users)
-  } catch (error) {
-    res.status(500).json({ message: 'Internal Server Error', error: error.message })
-  }
-}
-
-export const getTest = async (req: Request, res: Response) => {
-  try {
-    const data = await axiosFetch(testURL())
-    res.status(200).json(data)
-  } catch (error) {
-    logger.error('Error fetching test data:', error)
-    // If the error has a response, use its status and data, otherwise default to 500
-    res.status(error?.response?.status || 500).json({
-      message: 'Failed to fetch from external API',
-      error: error?.response?.data || error.message,
-    })
-  }
-}
-
 export const trendingList = async (req: Request, res: Response) => {
   try {
     const data = await axiosFetch(trendingURL(req.body))
     res.status(200).json(data)
   } catch (error) {
     logger.error('Error fetching trending data:', error)
-    res.status(error?.response?.status || 500).json({
-      message: 'Failed to fetch from external API',
-      error: error?.response?.data || error.message,
-    })
-  }
-}
-
-export const getVideosExt = async (req: Request, res: Response) => {
-  try {
-    const data = await axiosFetch(videosURL(req.body))
-    res.status(200).json(data)
-  } catch (error) {
-    logger.error('Error fetching videos data:', error)
     res.status(error?.response?.status || 500).json({
       message: 'Failed to fetch from external API',
       error: error?.response?.data || error.message,
@@ -197,7 +160,7 @@ export const getCastDetails = async (req: Request, res: Response) => {
       res.status(200).json({ result: 'Doc Selection Successful.', ...dataFromDB })
     }
   } catch (error) {
-  logger.error('Error fetching or storing cast details data:', error)
+    logger.error('Error fetching or storing cast details data:', error)
     res.status(error?.response?.status || 500).json({
       message: 'Failed to fetch or store data',
       error: error?.response?.data || error.message,
@@ -230,7 +193,7 @@ export const getDetails = async (req: Request, res: Response) => {
       res.status(200).json({ result: 'Doc Selection Successful.', ...dbSearch })
     }
   } catch (error) {
-  logger.error('Error fetching or storing details data:', error)
+    logger.error('Error fetching or storing details data:', error)
     res.status(error?.response?.status || 500).json({
       message: 'Failed to fetch or store data',
       error: error?.response?.data || error.message,
@@ -244,7 +207,7 @@ export const getFeedback = async (req: Request, res: Response) => {
     await db.collection('feedbacks').insertOne(req.body)
     res.status(200).json(req.body)
   } catch (error) {
-  logger.error('Error storing feedback:', error)
+    logger.error('Error storing feedback:', error)
     res.status(500).json({
       message: 'Failed to store feedback',
       error: error?.response?.data || error.message,

@@ -1,43 +1,3 @@
-export interface MediaDetails {
-  loading: boolean
-  detailsData: DetailsData
-  castDetails: Cast[]
-  videos: Videos[]
-  ottStreams: OTTPlatform[]
-  recommends: Recommendations[]
-  seasonEpisodes?: Season
-}
-
-export interface FilterSettings {
-  allGenres: Genre[]
-  selectedGenres: Genre[]
-}
-
-export interface UserInfo {
-  ip: string
-  region: string
-  colocation: string
-  platform: string
-}
-
-// export interface RequestParams {
-//   id?: string
-//   media_type?: string
-//   adult?: boolean
-//   region?: string
-//   page?: number
-//   searchText?: string
-//   seasonNumber?: number
-//   genres?: string
-//   actor_id?: string
-//   imdb_id?: string
-//   titleId?: string
-// }
-
-// src/types/specialRequestParams.ts
-
-export interface TestParams {}
-
 export interface TrendingParams {
   media_type: 'all' | 'movie' | 'tv'
   page: number
@@ -73,10 +33,6 @@ export interface CastDetailsParams {
   media_type: 'movie' | 'tv'
 }
 
-export interface ActorDetailsParams {
-  actor_id: string
-}
-
 export interface SeasonsParams {
   id: number | string
   seasonNumber: number
@@ -96,30 +52,6 @@ export interface RecommendationsParams {
   id: number | string
   media_type: 'movie' | 'tv'
   page: number
-}
-
-export interface AuthUserInfo {
-  idToken: string
-  serverAuthCode: unknown
-  scopes: string[]
-  user: AuthUser
-}
-
-export interface AuthUser {
-  photo: string
-  givenName: string
-  familyName: string
-  name: string
-  email: string
-  id: string
-}
-
-export interface MediaSliceState {
-  result: RootObject
-  loading: boolean
-  trending: Result[]
-  upcoming: Result[]
-  search: Result[]
 }
 
 export interface RootObject {
@@ -298,25 +230,6 @@ export interface OTTPlatform {
   type?: string   // "sub", "rent", "buy", "free", "tve"
   price?: number
   region?: string
-}
-
-/* RECOMMENDATIONS */
-interface Recommendations {
-  adult: boolean
-  backdrop_path: string
-  id: number
-  name: string
-  original_language: string
-  original_name: string
-  overview: string
-  poster_path: string
-  media_type: string
-  genre_ids: number[]
-  popularity: number
-  first_air_date: string
-  vote_average: number
-  vote_count: number
-  origin_country: string[]
 }
 
 export interface Crew {

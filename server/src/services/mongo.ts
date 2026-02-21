@@ -20,17 +20,3 @@ export const connectMongo = async () => {
   }
   return mongoose.connection
 }
-export const disconnectMongo = async () => {
-  if (isConnected) {
-    await mongoose.disconnect()
-    isConnected = false
-    logger.error('MongoDB Disconnected ❌')
-  }
-}
-export const getMongoConnection = () => {
-  if (isConnected) {
-    return mongoose.connection
-  } else {
-    throw new Error('MongoDB is not connected')
-  }
-}

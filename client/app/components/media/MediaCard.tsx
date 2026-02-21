@@ -23,7 +23,7 @@ export default function MediaCard({ item }: MediaCardProps) {
 
   return (
     <Link href={`/details/${mediaType}/${item.id}`}>
-      <Card className="group relative h-[270px] w-[170px] overflow-hidden border-transparent bg-zinc-900 transition-transform duration-300 hover:scale-105 hover:shadow-lg hover:shadow-black/40 sm:h-[300px] sm:w-[190px]">
+      <Card className="group relative h-[270px] w-[170px] gap-0 overflow-hidden border-transparent bg-zinc-900 p-0 transition-transform duration-300 hover:scale-105 hover:shadow-lg hover:shadow-black/40 sm:h-[300px] sm:w-[190px]">
         {/* Poster */}
         <div className="relative h-full w-full">
           <MediaPoster path={item.poster_path} alt={title} size="w300" fill />

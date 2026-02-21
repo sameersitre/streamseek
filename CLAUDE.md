@@ -24,7 +24,6 @@ streamseek/
 │   │   ├── components/
 │   │   │   ├── Appbar.tsx          # Main app bar (fixed, gradient, responsive)
 │   │   │   ├── Footer.tsx          # Footer with feedback form + GitHub/LinkedIn links
-│   │   │   ├── Header.tsx          # Legacy simple header
 │   │   │   ├── appbar/
 │   │   │   │   ├── DesktopNav.tsx
 │   │   │   │   ├── GenreFilter.tsx
@@ -62,15 +61,13 @@ streamseek/
 │   │   │   ├── env.ts              # dotenv.config()
 │   │   │   ├── logger.ts           # Pino logger
 │   │   │   └── routes.ts           # Route mounting (/api/v2)
-│   │   ├── resources/users/        # Controllers, routes, model, interface
+│   │   ├── resources/users/        # Controllers + routes (API endpoint handlers)
 │   │   ├── apiExternal/            # TMDB + Watchmode external calls
 │   │   ├── services/
 │   │   │   ├── db.ts               # MongoDB URI config (lazy connection via connectMongo)
-│   │   │   ├── mongo.ts            # MongoDB connection with error handling + 5s timeout
-│   │   │   └── checkAuth.ts        # Google auth verification
+│   │   │   └── mongo.ts            # MongoDB connection with error handling + 5s timeout
 │   │   ├── middlewares/            # unknownEndpoint handler
-│   │   ├── types.ts                # TMDB response type definitions
-│   │   └── utils/utils.ts          # Utility functions
+│   │   └── types.ts                # TMDB response type definitions
 │   └── tests/                      # Jest test suite
 │
 └── docs/
@@ -140,6 +137,7 @@ Docker Network (app-network)
 | `AUTH_SECRET`, `AUTH_GOOGLE_*`, `AUTH_GITHUB_*` | Runtime (server-only) | Compose `environment:` from `.env` |
 | `MONGO_URI` | Runtime (server-only) | Compose `environment:` → `mongodb://mongodb:27017/bingefeast` |
 | `TMDB_API_KEY` | Runtime (server-only) | Compose `environment:` from `.env` |
+| `WATCHMODE_API_URL` | Runtime (server-only) | Compose `environment:` → `https://api.watchmode.com/v1` |
 | `WATCHMODE_API_KEY` | Runtime (server-only) | Compose `environment:` from `.env` |
 
 ### Quick Start
@@ -240,6 +238,7 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
 - Phase 10: Server Fixes + Production Deployment (TMDB Bearer auth, lazy MongoDB, Nginx HTTPS proxy, domain config, VM deployment guide) ✅COMPLETE
 - Phase 11: Watchmode OTT Integration (replace Utelly + RapidAPI with direct Watchmode API, cached source logos, security fix) ✅COMPLETE
 - Phase 12: SEO (metadata, JSON-LD, OG images, robots, sitemap, manifest, Twitter cards) + search navigation fix ✅COMPLETE
+- Phase 13: Codebase cleanup (remove legacy code, unused deps, dead routes, hardcoded URLs, fix indentation) ✅COMPLETE
 
 ## Production Deployment
 
@@ -272,4 +271,4 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
 - **Source logos**: `/sources/?apiKey=...` — returns provider reference data with `logo_100px` URLs, cached in-memory on server
 - **Logo CDN**: `cdn.watchmode.com` — requires `referrerPolicy="no-referrer"` on `<img>` tags (blocks Next.js Image optimizer)
 - **MongoDB cache**: `ott_streams` collection caches results per title ID; `counters` collection tracks API usage with upsert
-- **Env var**: `WATCHMODE_API_KEY` (get free key at https://api.watchmode.com/requestApiKey)
+- **Env vars**: `WATCHMODE_API_URL` (base URL, defaults to `https://api.watchmode.com/v1`), `WATCHMODE_API_KEY` (get free key at https://api.watchmode.com/requestApiKey)

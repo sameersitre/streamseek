@@ -8,7 +8,6 @@ import '../common/env'
 export const DB_URI = process.env.MONGO_URI ||
   `mongodb+srv://${process.env.USERNAME}:${process.env.PASSWORD}@${process.env.CLUSTER_URL}/?authSource=${process.env.AUTH_SOURCE}&authMechanism=${process.env.AUTH_MECHANISM}`
 logger.info(`DB_URI: ${DB_URI}`)
-//mongodb+srv://sameersitre:8lquMzWOT9iaBuSG@cluster0.n4tlpps.mongodb.net/
 
 // Get current connected Database (connection established lazily via connectMongo)
 const db = mongoose.connection
