@@ -58,7 +58,7 @@ export default function DetailsClient({ mediatype, id }: DetailsClientProps) {
         {/* Top section: Poster + Header */}
         <div className="flex flex-col gap-6 sm:flex-row">
           <DetailPoster path={details.poster_path} title={title} />
-          <DetailHeader details={details} />
+          <DetailHeader details={details} mediaType={mediatype} mediaId={id} />
         </div>
 
         {/* Overview */}

@@ -252,6 +252,7 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
 - Phase 13: Codebase cleanup (remove legacy code, unused deps, dead routes, hardcoded URLs, fix indentation) ✅COMPLETE
 - Phase 14: Watchlist & Likes — Server Backend (PRD, auth middleware, interaction endpoints, rate limiting, MongoDB indexes) ✅COMPLETE
 - Phase 15: Watchlist & Likes — Client Data Layer (types, endpoints, apiClient, TanStack Query hooks with optimistic updates) ✅COMPLETE
+- Phase 16: Watchlist & Likes — UI Components (DetailActions, MediaCard like/watchlist buttons, persistent status indicators) ✅COMPLETE
 
 ## Production Deployment
 
@@ -292,7 +293,12 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
   - `useUserInteractions` — fetches all user interactions, provides `isLiked()`/`isWatchlisted()` helpers, 10min staleTime, session-gated
   - `useToggleLike` / `useToggleWatchlist` — mutations with optimistic cache updates + rollback on error
   - `useUserWatchlist` / `useUserLikes` — paginated list queries for dedicated pages, session-gated
-- **Next steps**: UI components (DetailActions, MediaCard overlay, watchlist/likes pages, nav links) — see PRD Phases 6-8
+- **UI components**:
+  - `DetailActions` — Like + Watchlist buttons below genre badges on details page, opens AuthDialog if unauthenticated
+  - `MediaCard` — Hover overlay with like/watchlist circular buttons (top-right), persistent status indicators (top-left) when liked/watchlisted, uses `e.preventDefault()`/`e.stopPropagation()` to prevent navigation
+  - `DetailHeader` — Accepts `mediaType`/`mediaId` props, renders `DetailActions`
+- **Dependency**: `@fortawesome/free-regular-svg-icons` — outline heart/bookmark icons for untoggled state
+- **Next steps**: Dedicated watchlist/likes pages + nav links — see PRD Phases 7-8
 
 ## OTT Streaming Platforms (Watchmode API)
 

@@ -1,13 +1,16 @@
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { formatDate } from "@/app/lib/formatDate";
+import DetailActions from "./DetailActions";
 import type { MediaDetails } from "@/app/types";
 
 interface DetailHeaderProps {
   details: MediaDetails;
+  mediaType: string;
+  mediaId: string;
 }
 
-export default function DetailHeader({ details }: DetailHeaderProps) {
+export default function DetailHeader({ details, mediaType, mediaId }: DetailHeaderProps) {
   const title = details.title || details.name || "Untitled";
   const date = details.release_date || details.first_air_date;
   const runtime =
@@ -66,6 +69,15 @@ export default function DetailHeader({ details }: DetailHeaderProps) {
           ))}
         </div>
       )}
+
+      {/* Like + Watchlist actions */}
+      <DetailActions
+        mediaId={Number(mediaId)}
+        mediaType={mediaType}
+        title={title}
+        posterPath={details.poster_path}
+        voteAverage={details.vote_average}
+      />
     </div>
   );
 }
