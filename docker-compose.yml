@@ -70,6 +70,8 @@ services:
       - TMDB_URL=${TMDB_URL}
       - TMDB_API_KEY=${TMDB_API_KEY}
       - WATCHMODE_API_KEY=${WATCHMODE_API_KEY}
+      - AUTH_SECRET=${AUTH_SECRET}
+      - CLIENT_URL=http://frontend:3000
     depends_on:
       mongodb:
         condition: service_healthy

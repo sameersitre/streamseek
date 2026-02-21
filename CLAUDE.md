@@ -162,7 +162,10 @@ npm run docker:dev     # Development with hot reload
 | `/search` | Search | `useSearch(q, page)` | `?q=` + `?page=` |
 | `/filter` | Filter | `useFilter(genres, page)` | `?genres=` + `?page=` |
 | `/details/[mediatype]/[id]` | Media Details | 5 parallel queries | Dynamic route |
+| `/watchlist` | Watchlist | `useUserWatchlist(page)` | `?page=` |
+| `/likes` | Likes | `useUserLikes(page)` | `?page=` |
 | `/api/auth/[...nextauth]` | Auth.js API | — | OAuth callbacks |
+| `/api/interactions/[...path]` | Interaction Proxy | — | Proxies to backend |
 
 ## Key Libraries
 
@@ -253,6 +256,7 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
 - Phase 14: Watchlist & Likes — Server Backend (PRD, auth middleware, interaction endpoints, rate limiting, MongoDB indexes) ✅COMPLETE
 - Phase 15: Watchlist & Likes — Client Data Layer (types, endpoints, apiClient, TanStack Query hooks with optimistic updates) ✅COMPLETE
 - Phase 16: Watchlist & Likes — UI Components (DetailActions, MediaCard like/watchlist buttons, persistent status indicators) ✅COMPLETE
+- Phase 17: Watchlist & Likes — Pages, API Proxy, Nav & Docker (watchlist/likes pages, Next.js API proxy, nav link, Docker env vars) ✅COMPLETE
 
 ## Production Deployment
 
@@ -298,7 +302,13 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
   - `MediaCard` — Hover overlay with like/watchlist circular buttons (top-right), persistent status indicators (top-left) when liked/watchlisted, uses `e.preventDefault()`/`e.stopPropagation()` to prevent navigation
   - `DetailHeader` — Accepts `mediaType`/`mediaId` props, renders `DetailActions`
 - **Dependency**: `@fortawesome/free-regular-svg-icons` — outline heart/bookmark icons for untoggled state
-- **Next steps**: Dedicated watchlist/likes pages + nav links — see PRD Phases 7-8
+- **API proxy**: `client/app/api/interactions/[...path]/route.ts` — Next.js API route that proxies interaction requests to backend server-side; authenticates via `auth()` session, forwards `X-User-Id` + `X-Internal-Secret` headers (avoids cross-origin cookie issues)
+- **Auth middleware trusted headers**: `X-Internal-Secret` (matches `AUTH_SECRET`) + `X-User-Id` — trusted internal path for Next.js proxy (skips cookie decoding)
+- **Interaction endpoints**: Client now calls same-origin `/api/interactions/*` (not direct backend), proxied through Next.js
+- **Lazy MongoDB**: Controller uses async `connectMongo()` for collection access (fixes cold start crashes)
+- **Pages**: `/watchlist` + `/likes` — grid layout with `MediaPoster`, pagination, empty states, sign-in prompt for unauthenticated users, SEO metadata via layout.tsx
+- **Nav**: "Watchlist" link added to Appbar nav links (visible to all users, shows sign-in prompt if unauthenticated)
+- **Docker**: `AUTH_SECRET` + `CLIENT_URL` env vars passed to backend service in `docker-compose.yml`
 
 ## OTT Streaming Platforms (Watchmode API)
 

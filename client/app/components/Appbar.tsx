@@ -15,6 +15,7 @@ const navLinks = [
   { href: "/movies", label: "Movies" },
   { href: "/tvshows", label: "TV Shows" },
   { href: "/upcoming", label: "Upcoming" },
+  { href: "/watchlist", label: "Watchlist" },
 ];
 
 export default function Appbar() {

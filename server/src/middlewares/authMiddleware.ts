@@ -20,6 +20,16 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
     return
   }
 
+  // Trusted internal header from Next.js API proxy (validated via shared AUTH_SECRET)
+  const internalSecret = req.headers['x-internal-secret'] as string
+  const internalUserId = req.headers['x-user-id'] as string
+
+  if (internalSecret === AUTH_SECRET && internalUserId) {
+    req.userId = internalUserId
+    next()
+    return
+  }
+
   try {
     // Auth.js v5 cookie names differ by environment
     const cookieName =

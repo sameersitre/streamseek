@@ -12,10 +12,10 @@ export const ENDPOINTS = {
   RECOMMENDATIONS: `${API_BASE}/getRecommendations`,
   SEASONS: `${API_BASE}/getSeasons`,
   FEEDBACK: `${API_BASE}/feedback`,
-  // Interaction endpoints
-  ALL_INTERACTIONS: `${API_BASE}/interactions/all`,
-  TOGGLE_LIKE: `${API_BASE}/interactions/toggle-like`,
-  TOGGLE_WATCHLIST: `${API_BASE}/interactions/toggle-watchlist`,
-  WATCHLIST: `${API_BASE}/interactions/watchlist`,
-  LIKES: `${API_BASE}/interactions/likes`,
+  // Interaction endpoints — routed through Next.js API proxy (same-origin for cookies)
+  ALL_INTERACTIONS: "/api/interactions/all",
+  TOGGLE_LIKE: "/api/interactions/toggle-like",
+  TOGGLE_WATCHLIST: "/api/interactions/toggle-watchlist",
+  WATCHLIST: "/api/interactions/watchlist",
+  LIKES: "/api/interactions/likes",
 } as const;

@@ -1,14 +1,17 @@
 import { Request, Response } from 'express'
-import mongoose from 'mongoose'
 import logger from '../../common/logger'
+import { connectMongo } from '../../services/mongo'
 
-const getCollection = () => mongoose.connection.db!.collection('user_interactions')
+const getCollection = async () => {
+  const connection = await connectMongo()
+  return connection.db!.collection('user_interactions')
+}
 
 // Get ALL user interactions at once (powers client-side checks)
 export const getAllInteractions = async (req: Request, res: Response) => {
   try {
     const userId = req.userId!
-    const collection = getCollection()
+    const collection = await getCollection()
 
     const docs = await collection
       .find({
@@ -36,7 +39,7 @@ export const toggleLike = async (req: Request, res: Response) => {
       return
     }
 
-    const collection = getCollection()
+    const collection = await getCollection()
     const now = new Date()
 
     // Find existing doc to determine current state
@@ -82,7 +85,7 @@ export const toggleWatchlist = async (req: Request, res: Response) => {
       return
     }
 
-    const collection = getCollection()
+    const collection = await getCollection()
     const now = new Date()
 
     const existing = await collection.findOne({ userId, mediaId, mediaType })
@@ -123,7 +126,7 @@ export const getWatchlist = async (req: Request, res: Response) => {
     const page = Math.max(1, Number(req.body.page) || 1)
     const limit = 20
 
-    const collection = getCollection()
+    const collection = await getCollection()
 
     const [docs, total] = await Promise.all([
       collection
@@ -155,7 +158,7 @@ export const getLikes = async (req: Request, res: Response) => {
     const page = Math.max(1, Number(req.body.page) || 1)
     const limit = 20
 
-    const collection = getCollection()
+    const collection = await getCollection()
 
     const [docs, total] = await Promise.all([
       collection
