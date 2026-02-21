@@ -21,3 +21,11 @@ export type {
   SeasonsParams,
   FeedbackParams,
 } from "./api";
+export type {
+  InteractionItem,
+  InteractionStatus,
+  ToggleParams,
+  AllInteractionsResponse,
+  WatchlistItem,
+  PaginatedListResponse,
+} from "./interaction";

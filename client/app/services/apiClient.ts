@@ -18,6 +18,10 @@ import type {
   RecommendationsParams,
   SeasonsParams,
   FeedbackParams,
+  ToggleParams,
+  InteractionStatus,
+  AllInteractionsResponse,
+  PaginatedListResponse,
 } from "@/app/types";
 
 const TIMEOUT_MS = 15_000;
@@ -32,6 +36,7 @@ async function post<T>(url: string, body: object): Promise<T> {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
       signal: controller.signal,
+      credentials: "include",
     });
 
     if (!response.ok) {
@@ -87,5 +92,26 @@ export const apiClient = {
 
   feedback(params: FeedbackParams) {
     return post<{ status: number }>(ENDPOINTS.FEEDBACK, params);
+  },
+
+  // Interaction endpoints
+  allInteractions() {
+    return post<AllInteractionsResponse>(ENDPOINTS.ALL_INTERACTIONS, {});
+  },
+
+  toggleLike(params: ToggleParams) {
+    return post<InteractionStatus>(ENDPOINTS.TOGGLE_LIKE, params);
+  },
+
+  toggleWatchlist(params: ToggleParams) {
+    return post<InteractionStatus>(ENDPOINTS.TOGGLE_WATCHLIST, params);
+  },
+
+  watchlist(params: { page: number }) {
+    return post<PaginatedListResponse>(ENDPOINTS.WATCHLIST, params);
+  },
+
+  likes(params: { page: number }) {
+    return post<PaginatedListResponse>(ENDPOINTS.LIKES, params);
   },
 };

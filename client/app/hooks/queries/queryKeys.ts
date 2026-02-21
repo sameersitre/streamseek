@@ -31,3 +31,10 @@ export const detailKeys = {
   seasons: (id: string, seasonNumber: number) =>
     [...detailKeys.all, "seasons", id, seasonNumber] as const,
 };
+
+export const interactionKeys = {
+  all: ["interactions"] as const,
+  userAll: () => [...interactionKeys.all, "all"] as const,
+  watchlist: (page: number) => [...interactionKeys.all, "watchlist", page] as const,
+  likes: (page: number) => [...interactionKeys.all, "likes", page] as const,
+};

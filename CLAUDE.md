@@ -251,6 +251,7 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
 - Phase 12: SEO (metadata, JSON-LD, OG images, robots, sitemap, manifest, Twitter cards) + search navigation fix ✅COMPLETE
 - Phase 13: Codebase cleanup (remove legacy code, unused deps, dead routes, hardcoded URLs, fix indentation) ✅COMPLETE
 - Phase 14: Watchlist & Likes — Server Backend (PRD, auth middleware, interaction endpoints, rate limiting, MongoDB indexes) ✅COMPLETE
+- Phase 15: Watchlist & Likes — Client Data Layer (types, endpoints, apiClient, TanStack Query hooks with optimistic updates) ✅COMPLETE
 
 ## Production Deployment
 
@@ -284,7 +285,14 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
 - **MongoDB collection**: `user_interactions` — one document per user-media pair with `liked`/`watchlisted` boolean flags + denormalized title/posterPath/voteAverage
 - **Indexes**: unique `{ userId, mediaId, mediaType }`, plus compound indexes for watchlist/likes listing queries
 - **CORS**: Express configured with `credentials: true` and explicit `origin` to allow cookie-based auth
-- **Next steps**: Client-side implementation (hooks, UI components, watchlist/likes pages) — see PRD Phases 4-8
+- **Client types**: `client/app/types/interaction.ts` — `InteractionItem`, `InteractionStatus`, `ToggleParams`, `AllInteractionsResponse`, `WatchlistItem`, `PaginatedListResponse`
+- **Client endpoints**: `client/app/services/endpoints.ts` — 5 interaction endpoints; `apiClient.ts` — 5 methods + `credentials: "include"` on all fetch calls
+- **Query keys**: `interactionKeys` in `queryKeys.ts` — `all`, `userAll`, `watchlist(page)`, `likes(page)`
+- **TanStack Query hooks** (5 hooks):
+  - `useUserInteractions` — fetches all user interactions, provides `isLiked()`/`isWatchlisted()` helpers, 10min staleTime, session-gated
+  - `useToggleLike` / `useToggleWatchlist` — mutations with optimistic cache updates + rollback on error
+  - `useUserWatchlist` / `useUserLikes` — paginated list queries for dedicated pages, session-gated
+- **Next steps**: UI components (DetailActions, MediaCard overlay, watchlist/likes pages, nav links) — see PRD Phases 6-8
 
 ## OTT Streaming Platforms (Watchmode API)
 

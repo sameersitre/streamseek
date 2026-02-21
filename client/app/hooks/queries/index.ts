@@ -8,3 +8,8 @@ export { useMediaCast } from "./useMediaCast";
 export { useOTTPlatforms } from "./useOTTPlatforms";
 export { useRecommendations } from "./useRecommendations";
 export { useSeasonEpisodes } from "./useSeasonEpisodes";
+export { useUserInteractions } from "./useUserInteractions";
+export { useToggleLike } from "./useToggleLike";
+export { useToggleWatchlist } from "./useToggleWatchlist";
+export { useUserWatchlist } from "./useUserWatchlist";
+export { useUserLikes } from "./useUserLikes";
