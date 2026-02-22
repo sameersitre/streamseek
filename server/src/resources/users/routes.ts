@@ -12,6 +12,8 @@ import {
   trendingList,
   upcomingList,
 } from './controller'
+import { syncProfile } from './profileController'
+import { requireInternalAuth } from '../../middlewares/authMiddleware'
 
 const router = Router()
 
@@ -42,5 +44,8 @@ router.route('/getOTTPlatforms').post(getOTTStreams)
 router.route('/getCastDetails').post(getCastDetails)
 
 router.route('/feedback').post(getFeedback)
+
+// User profile sync — internal server-to-server only (from Next.js events.signIn)
+router.route('/users/sync-profile').post(requireInternalAuth, syncProfile)
 
 export default router

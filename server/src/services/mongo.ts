@@ -26,6 +26,20 @@ export const connectMongo = async () => {
         collection.createIndex({ userId: 1, liked: 1, updatedAt: -1 }),
       ])
       logger.info('user_interactions indexes created ✅')
+
+      // Create indexes for users collection (idempotent)
+      const usersCollection = db.collection('users')
+      await Promise.all([
+        usersCollection.createIndex(
+          { userId: 1, provider: 1 },
+          { unique: true },
+        ),
+        usersCollection.createIndex(
+          { email: 1 },
+          { sparse: true },
+        ),
+      ])
+      logger.info('users indexes created ✅')
     } catch (err) {
       logger.error({ err }, `MongoDB connection failed: ${(err as Error).message}`)
       throw err

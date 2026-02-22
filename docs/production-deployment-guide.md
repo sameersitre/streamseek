@@ -326,6 +326,23 @@ This will:
 
 > First build takes 3–5 minutes depending on VM specs and network speed.
 
+### 6.1.1 Build services one at a time (slow or unreliable networks)
+
+On VMs with limited bandwidth (e.g., 2GB RAM free-tier instances), building both frontend and backend simultaneously can cause `npm ci` to fail with `ECONNRESET` or TLS timeout errors due to network congestion. Build them sequentially instead:
+
+```bash
+# Step 1: Build backend first
+docker compose build backend
+
+# Step 2: Build frontend after backend succeeds
+docker compose build frontend
+
+# Step 3: Start all services
+docker compose up -d
+```
+
+> **Tip**: The Dockerfiles include npm retry configuration (`fetch-retries 5`, timeouts up to 5 min) to handle transient network failures. If builds still fail, retry the failing service individually.
+
 ### 6.2 Check all services are running
 
 ```bash
@@ -530,6 +547,7 @@ show collections
 | Images not loading | TMDB API key expired or wrong | Check `TMDB_API_KEY` in `.env`, restart backend |
 | OTT platforms not showing | Watchmode API key issue or stale cache | Check API key, clear cache: `docker compose exec mongodb mongosh --eval "db.getSiblingDB('bingefeast').ott_streams.drop()"` |
 | Build fails (out of memory) | VM doesn't have enough RAM | Use a VM with 4GB+ RAM, or add swap: `sudo fallocate -l 2G /swapfile && sudo chmod 600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile` |
+| Build fails (`ECONNRESET` / TLS timeout) | Slow or unreliable VM network | Build one service at a time: `docker compose build backend` then `docker compose build frontend`, then `docker compose up -d` |
 | Certbot renewal fails | Port 80 not accessible | Ensure UFW allows port 80 and no other service is using it |
 
 ---
@@ -539,6 +557,9 @@ show collections
 ```bash
 # ─── Deployment ─────────────────────────────────────
 docker compose up --build -d          # Build and start all
+docker compose build backend          # Build backend only (slow networks)
+docker compose build frontend         # Build frontend only (slow networks)
+docker compose up -d                  # Start all (after individual builds)
 docker compose down                   # Stop all
 docker compose restart                # Restart all
 

@@ -70,3 +70,22 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
     res.status(401).json({ error: 'Authentication failed' })
   }
 }
+
+// Lightweight auth for internal server-to-server calls (e.g., Next.js events.signIn).
+// Validates only the shared secret header — no user session cookie required.
+export const requireInternalAuth = (req: Request, res: Response, next: NextFunction) => {
+  if (!AUTH_SECRET) {
+    logger.error('AUTH_SECRET not configured')
+    res.status(500).json({ error: 'Server auth not configured' })
+    return
+  }
+
+  const internalSecret = req.headers['x-internal-secret'] as string
+
+  if (internalSecret === AUTH_SECRET) {
+    next()
+    return
+  }
+
+  res.status(401).json({ error: 'Unauthorized: invalid internal secret' })
+}
