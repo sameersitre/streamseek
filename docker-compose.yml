@@ -70,6 +70,7 @@ services:
       - MONGO_URI=mongodb://mongodb:27017/bingefeast
       - TMDB_URL=${TMDB_URL}
       - TMDB_API_KEY=${TMDB_API_KEY}
+      - WATCHMODE_API_URL=${WATCHMODE_API_URL}
       - WATCHMODE_API_KEY=${WATCHMODE_API_KEY}
       - AUTH_SECRET=${AUTH_SECRET}
       - CLIENT_URL=http://frontend:3000

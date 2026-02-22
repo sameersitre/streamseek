@@ -17,6 +17,9 @@ export interface FilterParams {
 }
 
 export interface UpcomingParams {
+  media_type: "movie" | "tv";
+  region: string;
+  adult: boolean;
   page: number;
 }
 

@@ -137,10 +137,13 @@ export const getOTTStreams = async (req: Request, res: Response) => {
       res.status(200).json({ result: 'Doc Selection Successful.', ...dataFromDB })
     }
   } catch (error) {
-    logger.error({ error }, 'Error fetching or storing OTT streams data')
-    res.status(error?.response?.status || 500).json({
+    const errMsg = error instanceof Error ? error.message : String(error)
+    const axiosStatus = (error as any)?.response?.status
+    const axiosData = (error as any)?.response?.data
+    logger.error({ error: errMsg, status: axiosStatus, data: axiosData }, 'Error fetching or storing OTT streams data')
+    res.status(axiosStatus || 500).json({
       message: 'Failed to fetch or store data',
-      error: error?.response?.data || error.message,
+      error: axiosData || errMsg,
     })
   }
 }
