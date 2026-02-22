@@ -1,10 +1,9 @@
 # ─── Base ────────────────────────────────────────────
-FROM node:20-alpine AS base
+FROM node:20-slim AS base
 WORKDIR /app
 
 # ─── Stage 1: Install dependencies ──────────────────
 FROM base AS deps
-RUN apk add --no-cache libc6-compat
 
 COPY package.json package-lock.json* ./
 RUN npm config set fetch-retries 5 && \
@@ -31,8 +30,8 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nextjs
+RUN groupadd --system --gid 1001 nodejs && \
+    useradd --system --uid 1001 nextjs
 
 # Copy only what's needed for production
 COPY --from=builder /app/public ./public
