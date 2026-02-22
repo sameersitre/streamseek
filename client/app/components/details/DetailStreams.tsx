@@ -3,6 +3,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { REGION_MAP } from "@/app/types/details";
 import type { OTTPlatform } from "@/app/types";
 
 interface DetailStreamsProps {
@@ -39,7 +40,7 @@ export default function DetailStreams({ platforms }: DetailStreamsProps) {
               </a>
             </TooltipTrigger>
             <TooltipContent>
-              <p>{platform.name}</p>
+              <p>{platform.name} in {REGION_MAP[platform.region] ?? platform.region}</p>
             </TooltipContent>
           </Tooltip>
         ))}

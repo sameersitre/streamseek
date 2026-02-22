@@ -7,7 +7,10 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat
 
 COPY package.json package-lock.json* ./
-RUN npm ci
+RUN npm config set fetch-retries 5 && \
+    npm config set fetch-retry-mintimeout 60000 && \
+    npm config set fetch-retry-maxtimeout 300000 && \
+    npm ci
 
 # ─── Stage 2: Build the application ─────────────────
 FROM base AS builder

@@ -5,14 +5,20 @@ WORKDIR /app
 # ─── Stage 1: Install production dependencies ───────
 FROM base AS deps
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
+RUN npm config set fetch-retries 5 && \
+    npm config set fetch-retry-mintimeout 60000 && \
+    npm config set fetch-retry-maxtimeout 300000 && \
+    npm ci --omit=dev --ignore-scripts && npm cache clean --force
 
 # ─── Stage 2: Build TypeScript ──────────────────────
 FROM base AS builder
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm ci --ignore-scripts
+RUN npm config set fetch-retries 5 && \
+    npm config set fetch-retry-mintimeout 60000 && \
+    npm config set fetch-retry-maxtimeout 300000 && \
+    npm ci --ignore-scripts
 
 COPY . .
 

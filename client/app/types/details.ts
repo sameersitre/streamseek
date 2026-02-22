@@ -38,7 +38,46 @@ export interface Video {
   site: string;
 }
 
+// Watchmode API supported regions (51 countries)
+// Docs: https://api.watchmode.com — full list via /v1/regions/ endpoint
+export type RegionCode =
+  // North America
+  | "US" | "CA" | "MX"
+  // South America
+  | "BR" | "AR" | "CO" | "CL" | "EC" | "PE" | "PA"
+  // Europe
+  | "GB" | "IE" | "FR" | "DE" | "AT" | "CH" | "IT" | "ES" | "PT"
+  | "NL" | "BE" | "DK" | "FI" | "NO" | "SE" | "IS" | "PL" | "CZ"
+  | "HU" | "RO" | "BG" | "HR" | "RS" | "UA" | "GR" | "EE" | "LT"
+  // Asia-Pacific
+  | "AU" | "NZ" | "JP" | "KR" | "SG" | "HK" | "IN" | "ID" | "MY"
+  | "PH" | "TH" | "VN"
+  // Middle East / Africa
+  | "AE" | "IL" | "ZA" | "TR";
+
+export const REGION_MAP: Record<RegionCode, string> = {
+  // North America
+  US: "USA", CA: "Canada", MX: "Mexico",
+  // South America
+  BR: "Brazil", AR: "Argentina", CO: "Colombia", CL: "Chile",
+  EC: "Ecuador", PE: "Peru", PA: "Panama",
+  // Europe
+  GB: "United Kingdom", IE: "Ireland", FR: "France", DE: "Germany",
+  AT: "Austria", CH: "Switzerland", IT: "Italy", ES: "Spain", PT: "Portugal",
+  NL: "Netherlands", BE: "Belgium", DK: "Denmark", FI: "Finland",
+  NO: "Norway", SE: "Sweden", IS: "Iceland", PL: "Poland", CZ: "Czech Republic",
+  HU: "Hungary", RO: "Romania", BG: "Bulgaria", HR: "Croatia",
+  RS: "Serbia", UA: "Ukraine", GR: "Greece", EE: "Estonia", LT: "Lithuania",
+  // Asia-Pacific
+  AU: "Australia", NZ: "New Zealand", JP: "Japan", KR: "South Korea",
+  SG: "Singapore", HK: "Hong Kong", IN: "India", ID: "Indonesia",
+  MY: "Malaysia", PH: "Philippines", TH: "Thailand", VN: "Vietnam",
+  // Middle East / Africa
+  AE: "UAE", IL: "Israel", ZA: "South Africa", TR: "Turkey",
+};
+
 export interface OTTPlatform {
+  region: RegionCode;
   name: string;
   url: string;
   icon: string;
