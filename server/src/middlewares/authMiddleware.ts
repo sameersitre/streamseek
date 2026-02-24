@@ -30,6 +30,41 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
     return
   }
 
+  // Mobile app: Google idToken via Bearer header
+  const authHeader = req.headers.authorization
+  if (authHeader?.startsWith('Bearer ')) {
+    const idToken = authHeader.slice(7)
+    try {
+      const googleRes = await fetch(
+        `https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`
+      )
+      if (!googleRes.ok) {
+        res.status(401).json({ error: 'Invalid Google token' })
+        return
+      }
+      const payload = await googleRes.json() as { sub?: string; aud?: string }
+
+      const validAudiences = [
+        process.env.GOOGLE_WEB_CLIENT_ID,
+        process.env.GOOGLE_CLIENT_ID_IOS,
+        process.env.GOOGLE_CLIENT_ID_ANDROID,
+      ].filter(Boolean)
+
+      if (!payload.sub || !validAudiences.includes(payload.aud)) {
+        res.status(401).json({ error: 'Token audience mismatch' })
+        return
+      }
+
+      req.userId = payload.sub
+      next()
+      return
+    } catch (err) {
+      logger.error({ err }, 'Bearer token verification failed')
+      res.status(401).json({ error: 'Bearer token verification failed' })
+      return
+    }
+  }
+
   try {
     // Auth.js v5 cookie names differ by environment
     const cookieName =

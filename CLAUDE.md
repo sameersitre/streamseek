@@ -128,7 +128,7 @@ Docker Network (app-network)
 
 ### Docker Compose Files
 
-- **`docker-compose.yml`** — Production: 5 services (nginx, certbot, frontend, backend, mongodb). Services use `expose` (internal only), nginx handles external ports 80/443. Health checks, `depends_on` ordering, `restart: unless-stopped`, named volume for MongoDB data.
+- **`docker-compose.yml`** — Production: 5 services (nginx, certbot, frontend, backend, mongodb). Services use `expose` (internal only), nginx handles external ports 80/443. Health checks, `depends_on` ordering, `restart: unless-stopped`, named volume for MongoDB data. MongoDB port `27017` also exposed to host for local dev/debugging.
 - **`docker-compose.dev.yml`** — Development: volume mounts for hot reload, `env_file` for local env vars.
 
 ### Environment Variables
@@ -142,6 +142,9 @@ Docker Network (app-network)
 | `WATCHMODE_API_URL` | Runtime (server-only) | Compose `environment:` → `https://api.watchmode.com/v1` |
 | `WATCHMODE_API_KEY` | Runtime (server-only) | Compose `environment:` from `.env` |
 | `CLIENT_URL` | Runtime (server-only) | CORS origin for credentialed requests (defaults to `http://localhost:3000`) |
+| `GOOGLE_WEB_CLIENT_ID` | Runtime (server-only) | Google OAuth audience for web (Bearer token auth path) |
+| `GOOGLE_CLIENT_ID_IOS` | Runtime (server-only) | Google OAuth audience for iOS (Bearer token auth path) |
+| `GOOGLE_CLIENT_ID_ANDROID` | Runtime (server-only) | Google OAuth audience for Android (Bearer token auth path) |
 
 ### Quick Start
 
@@ -218,12 +221,15 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
 | `/api/v2/interactions/toggle-watchlist` | POST | Toggle watchlist on/off (auth + rate limited) |
 | `/api/v2/interactions/watchlist` | POST | Get user's watchlist, paginated (auth required) |
 | `/api/v2/interactions/likes` | POST | Get user's likes, paginated (auth required) |
+| `/api/v2/users/sync-profile` | POST | Sync user profile on sign-in (internal auth only) |
 | `/` | GET | Health check |
 
 ## Authentication (`client/auth.ts` + Auth.js v5)
 
 - **SSO Providers**: Google + GitHub
 - **Session Strategy**: JWT (no database required)
+- **Profile sync**: `events.signIn` callback fires POST to `/api/v2/users/sync-profile` on every login (fire-and-forget, never blocks auth)
+- **Mobile auth**: Express accepts `Authorization: Bearer <googleIdToken>` — validates via Google tokeninfo endpoint, checks audience against configured client IDs
 - **Auth Flow**: UserMenu → AuthDialog → `signIn("google"|"github")` → OAuth → JWT → SessionSync → Zustand
 - **Env vars**: `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET`
 
@@ -257,6 +263,7 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
 - Phase 15: Watchlist & Likes — Client Data Layer (types, endpoints, apiClient, TanStack Query hooks with optimistic updates) ✅COMPLETE
 - Phase 16: Watchlist & Likes — UI Components (DetailActions, MediaCard like/watchlist buttons, persistent status indicators) ✅COMPLETE
 - Phase 17: Watchlist & Likes — Pages, API Proxy, Nav & Docker (watchlist/likes pages, Next.js API proxy, nav link, Docker env vars) ✅COMPLETE
+- Phase 18: Mobile Auth + Profile Sync (Google Bearer token auth path, user profile sync on sign-in, internal auth middleware, MongoDB port exposure for dev) ✅COMPLETE
 
 ## Production Deployment
 
@@ -284,8 +291,13 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
 ## User Interactions (Watchlist & Likes)
 
 - **PRD**: `docs/prd-watchlist-likes.md` — full architecture, API design, implementation roadmap
-- **Auth middleware**: `server/src/middlewares/authMiddleware.ts` — decodes Auth.js JWE cookies via `@auth/core/jwt` using shared `AUTH_SECRET`
+- **Auth middleware**: `server/src/middlewares/authMiddleware.ts` — 3-path authentication:
+  1. **Trusted internal header** (`X-Internal-Secret` + `X-User-Id`) — for Next.js API proxy
+  2. **Google Bearer token** (`Authorization: Bearer <idToken>`) — for mobile app, validates via `googleapis.com/tokeninfo`, checks audience against `GOOGLE_WEB_CLIENT_ID` / `GOOGLE_CLIENT_ID_IOS` / `GOOGLE_CLIENT_ID_ANDROID`
+  3. **Auth.js JWE cookie** — decodes via `@auth/core/jwt` using shared `AUTH_SECRET`
+- **Internal-only middleware**: `requireInternalAuth` — lightweight secret-only validation for server-to-server calls (e.g., profile sync)
 - **Cookie names**: `authjs.session-token` (dev), `__Secure-authjs.session-token` (prod)
+- **User profile sync**: `client/auth.ts` `events.signIn` fires fire-and-forget POST to `POST /api/v2/users/sync-profile` with `X-Internal-Secret` header, persisting user profile (name, email, image, provider) to MongoDB on every sign-in
 - **Rate limiter**: `server/src/middlewares/rateLimiter.ts` — 30 req/min per IP on toggle endpoints
 - **MongoDB collection**: `user_interactions` — one document per user-media pair with `liked`/`watchlisted` boolean flags + denormalized title/posterPath/voteAverage
 - **Indexes**: unique `{ userId, mediaId, mediaType }`, plus compound indexes for watchlist/likes listing queries
@@ -304,6 +316,7 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
 - **Dependency**: `@fortawesome/free-regular-svg-icons` — outline heart/bookmark icons for untoggled state
 - **API proxy**: `client/app/api/interactions/[...path]/route.ts` — Next.js API route that proxies interaction requests to backend server-side; authenticates via `auth()` session, forwards `X-User-Id` + `X-Internal-Secret` headers (avoids cross-origin cookie issues)
 - **Auth middleware trusted headers**: `X-Internal-Secret` (matches `AUTH_SECRET`) + `X-User-Id` — trusted internal path for Next.js proxy (skips cookie decoding)
+- **Mobile auth env vars**: `GOOGLE_WEB_CLIENT_ID`, `GOOGLE_CLIENT_ID_IOS`, `GOOGLE_CLIENT_ID_ANDROID` — audience validation for Google Bearer tokens
 - **Interaction endpoints**: Client now calls same-origin `/api/interactions/*` (not direct backend), proxied through Next.js
 - **Lazy MongoDB**: Controller uses async `connectMongo()` for collection access (fixes cold start crashes)
 - **Pages**: `/watchlist` + `/likes` — grid layout with `MediaPoster`, pagination, empty states, sign-in prompt for unauthenticated users, SEO metadata via layout.tsx
