@@ -23,7 +23,7 @@ streamseek/
 │   ├── app/
 │   │   ├── components/
 │   │   │   ├── Appbar.tsx          # Main app bar (fixed, gradient, responsive)
-│   │   │   ├── Footer.tsx          # Footer with feedback form + GitHub/LinkedIn links
+│   │   │   ├── Footer.tsx          # Footer with feedback form + GitHub/LinkedIn/Privacy links
 │   │   │   ├── appbar/
 │   │   │   │   ├── DesktopNav.tsx
 │   │   │   │   ├── GenreFilter.tsx
@@ -43,6 +43,7 @@ streamseek/
 │   │   ├── stores/useAppStore.ts   # Zustand store
 │   │   ├── types/                  # TypeScript interfaces
 │   │   ├── details/[mediatype]/[id]/
+│   │   ├── privacy/                # Privacy Policy page (static, server-rendered)
 │   │   ├── filter/ movies/ search/ tvshows/ upcoming/
 │   │   ├── error.tsx not-found.tsx loading.tsx
 │   │   ├── globals.css layout.tsx page.tsx
@@ -167,6 +168,7 @@ npm run docker:dev     # Development with hot reload
 | `/details/[mediatype]/[id]` | Media Details | 5 parallel queries | Dynamic route |
 | `/watchlist` | Watchlist | `useUserWatchlist(page)` | `?page=` |
 | `/likes` | Likes | `useUserLikes(page)` | `?page=` |
+| `/privacy` | Privacy Policy | — | Static page |
 | `/api/auth/[...nextauth]` | Auth.js API | — | OAuth callbacks |
 | `/api/interactions/[...path]` | Interaction Proxy | — | Proxies to backend |
 
@@ -264,6 +266,7 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
 - Phase 16: Watchlist & Likes — UI Components (DetailActions, MediaCard like/watchlist buttons, persistent status indicators) ✅COMPLETE
 - Phase 17: Watchlist & Likes — Pages, API Proxy, Nav & Docker (watchlist/likes pages, Next.js API proxy, nav link, Docker env vars) ✅COMPLETE
 - Phase 18: Mobile Auth + Profile Sync (Google Bearer token auth path, user profile sync on sign-in, internal auth middleware, MongoDB port exposure for dev) ✅COMPLETE
+- Phase 19: Privacy Policy Page (Google Play Store compliant, covers StreamSeek web + Trovie mobile, 11-section policy, footer link) ✅COMPLETE
 
 ## Production Deployment
 
@@ -332,3 +335,15 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
 - **Logo CDN**: `cdn.watchmode.com` — requires `referrerPolicy="no-referrer"` on `<img>` tags (blocks Next.js Image optimizer)
 - **MongoDB cache**: `ott_streams` collection caches results per title ID; `counters` collection tracks API usage with upsert
 - **Env vars**: `WATCHMODE_API_URL` (base URL, defaults to `https://api.watchmode.com/v1`), `WATCHMODE_API_KEY` (get free key at https://api.watchmode.com/requestApiKey)
+
+## Privacy Policy
+
+- **Route**: `/privacy` — static, server-rendered page (no "use client")
+- **Platforms covered**: StreamSeek (web) + Trovie (mobile app on Google Play Store)
+- **Layout**: `client/app/privacy/layout.tsx` — SEO metadata, OpenGraph, canonical URL
+- **Page**: `client/app/privacy/page.tsx` — 11-section privacy policy with dark theme styling
+- **Footer link**: Shield icon + "Privacy Policy" link in Footer.tsx Links section
+- **Sections**: Information We Collect, How We Use It, Third-Party Services (Google/GitHub OAuth, TMDB, Watchmode), Cookies & Sessions, Data Sharing, Data Security, Data Retention, Children's Privacy, Your Rights, Changes, Contact
+- **Contact**: sameersitre@gmail.com
+- **Google Play compliance**: Publicly accessible URL, plain language, effective date, no paywall, children's privacy (COPPA), data collection disclosures, third-party links
+- **TMDB attribution**: Required notice included ("uses the TMDB API but is not endorsed or certified by TMDB")

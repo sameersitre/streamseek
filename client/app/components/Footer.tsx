@@ -6,8 +6,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
+import { faPaperPlane, faShieldHalved } from "@fortawesome/free-solid-svg-icons";
 import { faGithub, faLinkedin } from "@fortawesome/free-brands-svg-icons";
+import Link from "next/link";
 import { apiClient } from "@/app/services/apiClient";
 
 export default function Footer() {
@@ -100,6 +101,13 @@ export default function Footer() {
               <FontAwesomeIcon icon={faLinkedin} className="h-4 w-4" />
               LinkedIn
             </a>
+            <Link
+              href="/privacy"
+              className="flex items-center gap-2 text-sm text-zinc-400 transition-colors hover:text-white"
+            >
+              <FontAwesomeIcon icon={faShieldHalved} className="h-4 w-4" />
+              Privacy Policy
+            </Link>
           </div>
 
           <Separator className="my-4 bg-white/10" />
