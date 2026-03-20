@@ -3,6 +3,32 @@ export interface TrendingParams {
   page: number
 }
 
+export interface PopularParams {
+  media_type: 'movie' | 'tv'
+  page: number
+}
+
+export interface TopRatedParams {
+  media_type: 'movie' | 'tv'
+  page: number
+}
+
+/** Shared by single-page-param endpoints: nowPlaying, airingToday, onTheAir, trendingPeople */
+export interface PageParams {
+  page: number
+}
+
+// Aliases for readability in route-specific contexts
+export type NowPlayingParams = PageParams
+export type AiringTodayParams = PageParams
+export type OnTheAirParams = PageParams
+export type TrendingPeopleParams = PageParams
+
+export interface DiscoverByGenreParams {
+  genre: number
+  page: number
+}
+
 export interface SearchParams {
   searchText: string
   page: number

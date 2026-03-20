@@ -2,6 +2,7 @@ import { ENDPOINTS } from "./endpoints";
 import type {
   PaginatedResponse,
   MediaItem,
+  PersonItem,
   MediaDetails,
   CastMember,
   Video,
@@ -18,6 +19,13 @@ import type {
   RecommendationsParams,
   SeasonsParams,
   FeedbackParams,
+  PopularParams,
+  TopRatedParams,
+  NowPlayingParams,
+  AiringTodayParams,
+  OnTheAirParams,
+  TrendingPeopleParams,
+  DiscoverByGenreParams,
   ToggleParams,
   InteractionStatus,
   AllInteractionsResponse,
@@ -92,6 +100,34 @@ export const apiClient = {
 
   feedback(params: FeedbackParams) {
     return post<{ status: number }>(ENDPOINTS.FEEDBACK, params);
+  },
+
+  popular(params: PopularParams) {
+    return post<PaginatedResponse<MediaItem>>(ENDPOINTS.POPULAR, params);
+  },
+
+  topRated(params: TopRatedParams) {
+    return post<PaginatedResponse<MediaItem>>(ENDPOINTS.TOP_RATED, params);
+  },
+
+  nowPlaying(params: NowPlayingParams) {
+    return post<PaginatedResponse<MediaItem>>(ENDPOINTS.NOW_PLAYING, params);
+  },
+
+  airingToday(params: AiringTodayParams) {
+    return post<PaginatedResponse<MediaItem>>(ENDPOINTS.AIRING_TODAY, params);
+  },
+
+  onTheAir(params: OnTheAirParams) {
+    return post<PaginatedResponse<MediaItem>>(ENDPOINTS.ON_THE_AIR, params);
+  },
+
+  trendingPeople(params: TrendingPeopleParams) {
+    return post<PaginatedResponse<PersonItem>>(ENDPOINTS.TRENDING_PEOPLE, params);
+  },
+
+  discoverByGenre(params: DiscoverByGenreParams) {
+    return post<PaginatedResponse<MediaItem>>(ENDPOINTS.DISCOVER_BY_GENRE, params);
   },
 
   // Interaction endpoints

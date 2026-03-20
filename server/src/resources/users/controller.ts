@@ -2,17 +2,25 @@ import { Request, Response } from 'express'
 import { axiosFetch } from '../../apiExternal/apiCall'
 import { fetchOTTPlatforms } from '../../apiExternal/apiExternal'
 import {
+  airingTodayURL,
   castDetailsURL,
   detailsURL,
+  discoverByGenreURL,
   externalIDURL,
   filterURL,
+  nowPlayingURL,
+  onTheAirURL,
+  popularURL,
   recommendationsURL,
   searchURL,
   seasonsURL,
+  topRatedURL,
+  trendingPeopleURL,
   trendingURL,
   upcomingURL,
   videosURL,
 } from '../../apiExternal/apiURL'
+import { cacheGet, cacheSet } from '../../services/cache'
 import { connectMongo } from '../../services/mongo'
 import logger from '../../common/logger'
 
@@ -203,6 +211,90 @@ export const getDetails = async (req: Request, res: Response) => {
     })
   }
 }
+
+/**
+ * Factory for cached TMDB list endpoints. Handles cache lookup, TMDB fetch,
+ * optional media_type injection (TMDB omits it on curated endpoints), and error response.
+ */
+function createCachedListHandler(config: {
+  name: string
+  urlBuilder: (body: any) => string
+  cacheKeyBuilder: (body: any) => string
+  injectMediaType?: string | ((body: any) => string)
+}) {
+  return async (req: Request, res: Response) => {
+    const cacheKey = config.cacheKeyBuilder(req.body)
+    const cached = cacheGet(cacheKey)
+    if (cached) return res.status(200).json(cached)
+    try {
+      const data = await axiosFetch(config.urlBuilder(req.body))
+      if (config.injectMediaType) {
+        const mt = typeof config.injectMediaType === 'function'
+          ? config.injectMediaType(req.body)
+          : config.injectMediaType
+        data.results = data.results.map((item: any) => ({ ...item, media_type: mt }))
+      }
+      cacheSet(cacheKey, data)
+      res.status(200).json(data)
+    } catch (error) {
+      logger.error(`Error fetching ${config.name} data:`, error)
+      res.status(error?.response?.status || 500).json({
+        message: 'Failed to fetch from external API',
+        error: error?.response?.data || error.message,
+      })
+    }
+  }
+}
+
+// --- Dashboard cached list endpoints ---
+
+export const popularList = createCachedListHandler({
+  name: 'popular',
+  urlBuilder: popularURL,
+  cacheKeyBuilder: (b) => `popular:${b.media_type}:${b.page}`,
+  injectMediaType: (b) => b.media_type,
+})
+
+export const topRatedList = createCachedListHandler({
+  name: 'topRated',
+  urlBuilder: topRatedURL,
+  cacheKeyBuilder: (b) => `topRated:${b.media_type}:${b.page}`,
+  injectMediaType: (b) => b.media_type,
+})
+
+export const nowPlayingList = createCachedListHandler({
+  name: 'nowPlaying',
+  urlBuilder: nowPlayingURL,
+  cacheKeyBuilder: (b) => `nowPlaying:${b.page}`,
+  injectMediaType: 'movie',
+})
+
+export const airingTodayList = createCachedListHandler({
+  name: 'airingToday',
+  urlBuilder: airingTodayURL,
+  cacheKeyBuilder: (b) => `airingToday:${b.page}`,
+  injectMediaType: 'tv',
+})
+
+export const onTheAirList = createCachedListHandler({
+  name: 'onTheAir',
+  urlBuilder: onTheAirURL,
+  cacheKeyBuilder: (b) => `onTheAir:${b.page}`,
+  injectMediaType: 'tv',
+})
+
+export const trendingPeopleList = createCachedListHandler({
+  name: 'trendingPeople',
+  urlBuilder: trendingPeopleURL,
+  cacheKeyBuilder: (b) => `trendingPeople:${b.page}`,
+})
+
+export const discoverByGenreList = createCachedListHandler({
+  name: 'discoverByGenre',
+  urlBuilder: discoverByGenreURL,
+  cacheKeyBuilder: (b) => `discoverByGenre:${b.genre}:${b.page}`,
+  injectMediaType: 'movie',
+})
 
 export const getFeedback = async (req: Request, res: Response) => {
   try {

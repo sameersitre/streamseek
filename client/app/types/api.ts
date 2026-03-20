@@ -59,3 +59,34 @@ export interface FeedbackParams {
   email: string;
   message: string;
 }
+
+export interface PopularParams {
+  media_type: "movie" | "tv";
+  page: number;
+}
+
+export interface TopRatedParams {
+  media_type: "movie" | "tv";
+  page: number;
+}
+
+export interface NowPlayingParams {
+  page: number;
+}
+
+export interface AiringTodayParams {
+  page: number;
+}
+
+export interface OnTheAirParams {
+  page: number;
+}
+
+export interface TrendingPeopleParams {
+  page: number;
+}
+
+export interface DiscoverByGenreParams {
+  genre: number;
+  page: number;
+}

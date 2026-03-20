@@ -1,12 +1,19 @@
 import {
+  AiringTodayParams,
   CastDetailsParams,
   DetailsParams,
+  DiscoverByGenreParams,
   ExternalIDParams,
   FilterParams,
+  NowPlayingParams,
+  OnTheAirParams,
+  PopularParams,
   RecommendationsParams,
   SearchParams,
   SeasonsParams,
+  TopRatedParams,
   TrendingParams,
+  TrendingPeopleParams,
   UpcomingParams,
   VideosParams,
 } from '../types'
@@ -42,3 +49,24 @@ export const videosURL = (params: VideosParams) =>
 
 export const recommendationsURL = (params: RecommendationsParams) =>
   `${process.env.TMDB_URL}/${params.media_type}/${params.id}/recommendations?language=en-US&page=${params.page}`
+
+export const popularURL = (params: PopularParams) =>
+  `${process.env.TMDB_URL}/${params.media_type}/popular?language=en-US&page=${params.page}`
+
+export const topRatedURL = (params: TopRatedParams) =>
+  `${process.env.TMDB_URL}/${params.media_type}/top_rated?language=en-US&page=${params.page}`
+
+export const nowPlayingURL = (params: NowPlayingParams) =>
+  `${process.env.TMDB_URL}/movie/now_playing?language=en-US&page=${params.page}&region=US`
+
+export const airingTodayURL = (params: AiringTodayParams) =>
+  `${process.env.TMDB_URL}/tv/airing_today?language=en-US&page=${params.page}`
+
+export const onTheAirURL = (params: OnTheAirParams) =>
+  `${process.env.TMDB_URL}/tv/on_the_air?language=en-US&page=${params.page}`
+
+export const trendingPeopleURL = (params: TrendingPeopleParams) =>
+  `${process.env.TMDB_URL}/trending/person/day?page=${params.page}`
+
+export const discoverByGenreURL = (params: DiscoverByGenreParams) =>
+  `${process.env.TMDB_URL}/discover/movie?language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=${params.page}&with_genres=${params.genre}`

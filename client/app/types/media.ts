@@ -22,6 +22,17 @@ export interface MediaItem {
   overview?: string;
 }
 
+export interface PersonItem {
+  id: number;
+  name: string;
+  profile_path: string | null;
+  known_for_department: string;
+  known_for: MediaItem[];
+  media_type: "person";
+  popularity: number;
+  gender?: number;
+}
+
 export interface PaginatedResponse<T> {
   status: number;
   results: T[];

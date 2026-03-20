@@ -14,6 +14,20 @@ export const mediaKeys = {
     [...mediaKeys.all, "filter", genres, page] as const,
   upcoming: (page: number) =>
     [...mediaKeys.all, "upcoming", page] as const,
+  popular: (type: "movie" | "tv", page: number) =>
+    [...mediaKeys.all, "popular", type, page] as const,
+  topRated: (type: "movie" | "tv", page: number) =>
+    [...mediaKeys.all, "topRated", type, page] as const,
+  nowPlaying: (page: number) =>
+    [...mediaKeys.all, "nowPlaying", page] as const,
+  airingToday: (page: number) =>
+    [...mediaKeys.all, "airingToday", page] as const,
+  onTheAir: (page: number) =>
+    [...mediaKeys.all, "onTheAir", page] as const,
+  trendingPeople: (page: number) =>
+    [...mediaKeys.all, "trendingPeople", page] as const,
+  discoverByGenre: (genre: number, page: number) =>
+    [...mediaKeys.all, "discoverByGenre", genre, page] as const,
 };
 
 export const detailKeys = {
