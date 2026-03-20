@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { signIn } from "next-auth/react";
 import {
   Dialog,
@@ -21,19 +21,29 @@ interface AuthDialogProps {
 export default function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
   const [loading, setLoading] = useState<"google" | "github" | null>(null);
 
-  const handleSignIn = (provider: "google" | "github") => {
+  const handleSignIn = useCallback((provider: "google" | "github") => {
     setLoading(provider);
     signIn(provider);
-  };
+  }, []);
+
+  const handleOpenChange = useCallback(
+    (v: boolean) => {
+      if (!v) setLoading(null);
+      onOpenChange(v);
+    },
+    [onOpenChange]
+  );
+
+  const buttons = useMemo(
+    () => [
+      { provider: "google" as const, label: "Google", icon: faGoogle },
+      { provider: "github" as const, label: "GitHub", icon: faGithub },
+    ],
+    []
+  );
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(v) => {
-        if (!v) setLoading(null);
-        onOpenChange(v);
-      }}
-    >
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="border-white/10 bg-zinc-900 sm:max-w-sm">
         <DialogHeader>
           <DialogTitle className="text-center text-white">
@@ -42,33 +52,22 @@ export default function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
         </DialogHeader>
 
         <div className="flex flex-col gap-3 pt-2">
-          <Button
-            variant="outline"
-            className="w-full border-white/10 bg-zinc-800 text-white hover:bg-zinc-700"
-            disabled={loading !== null}
-            onClick={() => handleSignIn("google")}
-          >
-            <FontAwesomeIcon
-              icon={loading === "google" ? faSpinner : faGoogle}
-              className="mr-2 h-4 w-4"
-              spin={loading === "google"}
-            />
-            {loading === "google" ? "Redirecting..." : "Continue with Google"}
-          </Button>
-
-          <Button
-            variant="outline"
-            className="w-full border-white/10 bg-zinc-800 text-white hover:bg-zinc-700"
-            disabled={loading !== null}
-            onClick={() => handleSignIn("github")}
-          >
-            <FontAwesomeIcon
-              icon={loading === "github" ? faSpinner : faGithub}
-              className="mr-2 h-4 w-4"
-              spin={loading === "github"}
-            />
-            {loading === "github" ? "Redirecting..." : "Continue with GitHub"}
-          </Button>
+          {buttons.map(({ provider, label, icon }) => (
+            <Button
+              key={provider}
+              variant="outline"
+              className="w-full border-white/10 bg-zinc-800 text-white hover:bg-zinc-700"
+              disabled={loading !== null}
+              onClick={() => handleSignIn(provider)}
+            >
+              <FontAwesomeIcon
+                icon={loading === provider ? faSpinner : icon}
+                className="mr-2 h-4 w-4"
+                spin={loading === provider}
+              />
+              {loading === provider ? "Redirecting..." : `Continue with ${label}`}
+            </Button>
+          ))}
         </div>
 
         <p className="pt-2 text-center text-xs text-zinc-500">

@@ -33,6 +33,7 @@ streamseek/
 │   │   │   ├── auth/
 │   │   │   │   ├── AuthDialog.tsx
 │   │   │   │   └── SessionSync.tsx
+│   │   │   ├── dashboard/           # Netflix-style dashboard (8 components)
 │   │   │   ├── details/            # 11 detail sub-components
 │   │   │   └── media/              # Reusable media display components
 │   │   ├── constants/genres.ts
@@ -159,7 +160,7 @@ npm run docker:dev     # Development with hot reload
 
 | Route | Page | Hook | Params |
 |---|---|---|---|
-| `/` | Dashboard (Trending) | `useTrending("all", page)` | `?page=` |
+| `/` | Dashboard (Netflix-style) | `useTrending`, `usePopular`, `useTopRated`, `useNowPlaying`, `useAiringToday`, `useOnTheAir`, `useTrendingPeople`, `useUpcoming` | Filter tabs + genre dropdown |
 | `/movies` | Movies | `useTrending("movie", page)` | `?page=` |
 | `/tvshows` | TV Shows | `useTrending("tv", page)` | `?page=` |
 | `/upcoming` | Upcoming | `useUpcoming(page)` | `?page=` |
@@ -218,6 +219,13 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
 | `/api/v2/getRecommendations` | POST | Related media |
 | `/api/v2/getSeasons` | POST | TV season episodes |
 | `/api/v2/feedback` | POST | User feedback |
+| `/api/v2/popular` | POST | Popular movies/TV by type + page (cached) |
+| `/api/v2/topRated` | POST | Top rated movies/TV by type + page (cached) |
+| `/api/v2/nowPlaying` | POST | Now playing in theaters (cached) |
+| `/api/v2/airingToday` | POST | TV airing today (cached) |
+| `/api/v2/onTheAir` | POST | TV on the air this week (cached) |
+| `/api/v2/trendingPeople` | POST | Trending people (cached) |
+| `/api/v2/discoverByGenre` | POST | Discover movies by genre (cached) |
 | `/api/v2/interactions/all` | POST | Get all user interactions (auth required) |
 | `/api/v2/interactions/toggle-like` | POST | Toggle like on/off (auth + rate limited) |
 | `/api/v2/interactions/toggle-watchlist` | POST | Toggle watchlist on/off (auth + rate limited) |
@@ -267,6 +275,7 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
 - Phase 17: Watchlist & Likes — Pages, API Proxy, Nav & Docker (watchlist/likes pages, Next.js API proxy, nav link, Docker env vars) ✅COMPLETE
 - Phase 18: Mobile Auth + Profile Sync (Google Bearer token auth path, user profile sync on sign-in, internal auth middleware, MongoDB port exposure for dev) ✅COMPLETE
 - Phase 19: Privacy Policy Page (Google Play Store compliant, covers StreamSeek web + Trovie mobile, 11-section policy, footer link) ✅COMPLETE
+- Phase 20: Netflix-style Dashboard (hero carousel, filter tabs, horizontal scroll rows, Top 10, trending people, lazy genre rows, in-memory TTL cache, 7 new TMDB endpoints) ✅COMPLETE
 
 ## Production Deployment
 

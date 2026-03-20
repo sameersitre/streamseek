@@ -12,6 +12,13 @@ export const ENDPOINTS = {
   RECOMMENDATIONS: `${API_BASE}/getRecommendations`,
   SEASONS: `${API_BASE}/getSeasons`,
   FEEDBACK: `${API_BASE}/feedback`,
+  POPULAR: `${API_BASE}/popular`,
+  TOP_RATED: `${API_BASE}/topRated`,
+  NOW_PLAYING: `${API_BASE}/nowPlaying`,
+  AIRING_TODAY: `${API_BASE}/airingToday`,
+  ON_THE_AIR: `${API_BASE}/onTheAir`,
+  TRENDING_PEOPLE: `${API_BASE}/trendingPeople`,
+  DISCOVER_BY_GENRE: `${API_BASE}/discoverByGenre`,
   // Interaction endpoints — routed through Next.js API proxy (same-origin for cookies)
   ALL_INTERACTIONS: "/api/interactions/all",
   TOGGLE_LIKE: "/api/interactions/toggle-like",

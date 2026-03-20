@@ -1,4 +1,4 @@
-export type { MediaType, Genre, MediaItem, PaginatedResponse } from "./media";
+export type { MediaType, Genre, MediaItem, PersonItem, PaginatedResponse } from "./media";
 export type {
   MediaDetails,
   CastMember,
@@ -20,6 +20,13 @@ export type {
   RecommendationsParams,
   SeasonsParams,
   FeedbackParams,
+  PopularParams,
+  TopRatedParams,
+  NowPlayingParams,
+  AiringTodayParams,
+  OnTheAirParams,
+  TrendingPeopleParams,
+  DiscoverByGenreParams,
 } from "./api";
 export type {
   InteractionItem,
