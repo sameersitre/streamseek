@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s \"https://developer.themoviedb.org/reference/trending-movies\")",
+      "WebFetch(domain:developer.themoviedb.org)"
+    ]
+  }
+}
