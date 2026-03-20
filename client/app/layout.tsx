@@ -9,7 +9,6 @@ import QueryProvider from "./providers/QueryProvider";
 import Appbar from "./components/Appbar";
 import Footer from "./components/Footer";
 import { WebsiteJsonLd } from "./components/JsonLd";
-import FloTraceDevProvider from "./providers/FloTraceProvider";
 import { siteConfig } from "./lib/siteConfig";
 import "./globals.css";
 
@@ -94,14 +93,12 @@ export default function RootLayout({
       >
         <AuthProvider>
           <QueryProvider>
-            <FloTraceDevProvider>
-              <TooltipProvider>
-                <SessionSync />
-                <Appbar />
-                <main className="pt-20">{children}</main>
-                <Footer />
-              </TooltipProvider>
-            </FloTraceDevProvider>
+            <TooltipProvider>
+              <SessionSync />
+              <Appbar />
+              <main className="pt-20">{children}</main>
+              <Footer />
+            </TooltipProvider>
           </QueryProvider>
         </AuthProvider>
         <WebsiteJsonLd />
