@@ -1,5 +1,7 @@
 import { Router, Request, Response } from 'express'
 import {
+  airingTodayList,
+  discoverByGenreList,
   filterList,
   getCastDetails,
   getDetails,
@@ -8,8 +10,13 @@ import {
   getRecommends,
   getSeasons,
   getVideos,
+  nowPlayingList,
+  onTheAirList,
+  popularList,
   searchList,
+  topRatedList,
   trendingList,
+  trendingPeopleList,
   upcomingList,
 } from './controller'
 import { syncProfile } from './profileController'
@@ -44,6 +51,15 @@ router.route('/getOTTPlatforms').post(getOTTStreams)
 router.route('/getCastDetails').post(getCastDetails)
 
 router.route('/feedback').post(getFeedback)
+
+// Dashboard endpoints
+router.route('/popular').post(popularList)
+router.route('/topRated').post(topRatedList)
+router.route('/nowPlaying').post(nowPlayingList)
+router.route('/airingToday').post(airingTodayList)
+router.route('/onTheAir').post(onTheAirList)
+router.route('/trendingPeople').post(trendingPeopleList)
+router.route('/discoverByGenre').post(discoverByGenreList)
 
 // User profile sync — internal server-to-server only (from Next.js events.signIn)
 router.route('/users/sync-profile').post(requireInternalAuth, syncProfile)
