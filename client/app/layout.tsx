@@ -11,6 +11,7 @@ import Footer from "./components/Footer";
 import { WebsiteJsonLd } from "./components/JsonLd";
 import { siteConfig } from "./lib/siteConfig";
 import "./globals.css";
+import FloTraceDevProvider from "./providers/FloTraceProvider";
 
 config.autoAddCss = false;
 
@@ -77,14 +78,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* FloTrace: buffer hydration errors before FloTraceProvider mounts.
-            Must be the first script in <head> so it fires before React hydration. */}
-        {/* eslint-disable-next-line @next/next/no-before-interactive-script-outside-document */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){if(typeof window==='undefined')return;window.__flotrace_hydration_buffer=[];var _o=console.error;console.error=function(){_o.apply(console,arguments);var m=Array.prototype.slice.call(arguments).map(function(a){return typeof a==='string'?a:String(a);}).join(' ');if(/[Hh]ydrat|Text content does not match|Did not expect server HTML|Expected server HTML|error while hydrating|error occurred during hydration|Minified React error #(?:418|419|422|423|425)|Prop .* did not match\\. Server:|Hydration Mismatch/.test(m)){window.__flotrace_hydration_buffer.push({msg:m,ts:Date.now()});}};})();`,
-          }}
-        />
         <meta name="theme-color" content={siteConfig.themeColor} />
         <meta name="color-scheme" content="dark" />
       </head>
@@ -93,12 +86,14 @@ export default function RootLayout({
       >
         <AuthProvider>
           <QueryProvider>
+            <FloTraceDevProvider>
             <TooltipProvider>
               <SessionSync />
               <Appbar />
               <main className="pt-20">{children}</main>
               <Footer />
             </TooltipProvider>
+            </FloTraceDevProvider>
           </QueryProvider>
         </AuthProvider>
         <WebsiteJsonLd />

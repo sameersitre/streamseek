@@ -19,8 +19,7 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"],
-      "@flotrace/runtime": ["./lib/flotrace-runtime/index.mjs"]
+      "@/*": ["./*"]
     }
   },
   "include": [

@@ -1,11 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  turbopack: {
-    resolveAlias: {
-      "@flotrace/runtime": "./lib/flotrace-runtime/index.mjs",
-    },
-  },
   output: "standalone",
   poweredByHeader: false,
   images: {
