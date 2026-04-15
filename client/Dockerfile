@@ -5,11 +5,14 @@ WORKDIR /app
 # ─── Stage 1: Install dependencies ──────────────────
 FROM base AS deps
 
-COPY package.json package-lock.json* ./
+COPY package.json ./
+# Drop any macOS-generated lockfile — it omits linux/x64 optional native binaries
+# (lightningcss-linux-x64-gnu, @tailwindcss/oxide-linux-x64-gnu, @next/swc-linux-x64-gnu).
+# A fresh npm install inside the linux/amd64 container resolves the correct binaries.
 RUN npm config set fetch-retries 5 && \
     npm config set fetch-retry-mintimeout 60000 && \
     npm config set fetch-retry-maxtimeout 300000 && \
-    npm ci
+    npm install --no-audit
 
 # ─── Stage 2: Build the application ─────────────────
 FROM base AS builder

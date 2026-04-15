@@ -17,7 +17,13 @@
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
     "docker:dev": "docker compose -f docker-compose.dev.yml up",
-    "docker:build": "docker compose build"
+    "docker:build": "docker compose build",
+    "deploy": "./deploy.sh",
+    "deploy:all": "./deploy.sh all",
+    "deploy:frontend": "./deploy.sh frontend",
+    "deploy:backend": "./deploy.sh backend",
+    "deploy:nginx": "./deploy.sh nginx",
+    "deploy:init": "./deploy.sh init"
   },
   "devDependencies": {
     "@flotrace/runtime": "^0.1.0",

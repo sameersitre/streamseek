@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(curl -s \"https://developer.themoviedb.org/reference/trending-movies\")",
-      "WebFetch(domain:developer.themoviedb.org)"
+      "WebFetch(domain:developer.themoviedb.org)",
+      "Read(//Users/codercouple/Documents/**)",
+      "Bash(ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new -i ~/.ssh/trovie-key-nopass sameersitre@34.45.33.206 \"echo '=== Docker containers \\(all\\) ===' && docker ps -a 2>&1 && echo '' && echo '=== Docker images ===' && docker images 2>&1 && echo '' && echo '=== Docker volumes ===' && docker volume ls 2>&1 && echo '' && echo '=== Nginx config on VM ===' && cat ~/streamseek/nginx/nginx.conf 2>/dev/null && echo '' && echo '=== Existing docker-compose ===' && cat ~/streamseek/docker-compose.yml 2>/dev/null && echo '' && echo '=== Old bingee-server ===' && ls ~/bingee-server/ 2>/dev/null && echo '' && echo '=== Disk ===' && df -h / | tail -1 && echo '' && echo '=== Swap ===' && free -m | grep Swap\")",
+      "Bash(ssh -o ConnectTimeout=10 -o StrictHostKeyChecking=accept-new -i '~/.ssh/trovie-key-nopass' sameersitre@34.45.33.206 ':*)"
     ]
   }
 }

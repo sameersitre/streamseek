@@ -40,10 +40,22 @@ export const connectMongo = async () => {
         ),
       ])
       logger.info('users indexes created ✅')
+
+      // Create indexes for portfolio_content collection (idempotent)
+      const portfolioCollection = db.collection('portfolio_content')
+      await portfolioCollection.createIndex({ type: 1 }, { unique: true })
+      logger.info('portfolio_content indexes created ✅')
     } catch (err) {
       logger.error({ err }, `MongoDB connection failed: ${(err as Error).message}`)
       throw err
     }
   }
   return mongoose.connection
+}
+
+// Lazy helper that ensures a live connection before returning the collection.
+// Mirrors the inline getCollection() pattern used in interactions/controller.ts.
+export const getPortfolioCollection = async () => {
+  const connection = await connectMongo()
+  return connection.db!.collection('portfolio_content')
 }

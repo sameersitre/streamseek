@@ -11,8 +11,6 @@ import Footer from "./components/Footer";
 import { WebsiteJsonLd } from "./components/JsonLd";
 import { siteConfig } from "./lib/siteConfig";
 import "./globals.css";
-import FloTraceDevProvider from "./providers/FloTraceProvider";
-
 config.autoAddCss = false;
 
 const geistSans = Geist({
@@ -86,14 +84,12 @@ export default function RootLayout({
       >
         <AuthProvider>
           <QueryProvider>
-            <FloTraceDevProvider>
             <TooltipProvider>
               <SessionSync />
               <Appbar />
               <main className="pt-20">{children}</main>
               <Footer />
             </TooltipProvider>
-            </FloTraceDevProvider>
           </QueryProvider>
         </AuthProvider>
         <WebsiteJsonLd />

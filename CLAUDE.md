@@ -7,8 +7,10 @@ A movie and TV show discovery app built as a monorepo with a Next.js 16 frontend
 ```
 streamseek/
 ├── package.json                    # Root orchestrator (concurrently for parallel dev)
-├── docker-compose.yml              # Production: nginx + certbot + frontend + backend + MongoDB
+├── docker-compose.yml              # Development: builds images locally on VM
+├── docker-compose.prod.yml         # Production: pre-built images (pushed via deploy.sh)
 ├── docker-compose.dev.yml          # Development: volume mounts + hot reload
+├── deploy.sh                       # Build locally & deploy to VM (interactive + CLI)
 ├── nginx/
 │   └── nginx.conf                  # Reverse proxy config (HTTPS, domain routing)
 ├── .env.example                    # Template for all required env vars
@@ -95,7 +97,70 @@ npm run docker:up     # docker compose up -d (production)
 npm run docker:down   # docker compose down
 npm run docker:dev    # docker compose -f docker-compose.dev.yml up
 npm run docker:build  # docker compose build
+npm run deploy        # Interactive deploy menu (./deploy.sh)
+npm run deploy:all    # Build + push + restart all services
+npm run deploy:frontend  # Build + push + restart frontend only
+npm run deploy:backend   # Build + push + restart backend only
+npm run deploy:nginx     # Sync nginx config + restart
+npm run deploy:init      # First-time VM setup (dirs, Docker, swap)
 ```
+
+## Deploy Script (`deploy.sh`)
+
+### Strategy: Build Locally → Push to VM
+
+Instead of building Docker images on the VM (which consumes RAM/CPU/disk), images are built locally and shipped as tarballs:
+
+1. `docker build` on local machine (platform: `linux/amd64`)
+2. `docker save | gzip` → `/tmp/streamseek-{frontend,backend}.tar.gz`
+3. `scp` tarballs to VM
+4. `docker load` on VM + remove tarballs
+
+### VM Configuration
+
+- **IP**: `34.45.33.206`
+- **User**: `sameersitre`
+- **SSH Key**: `~/.ssh/trovie-key-nopass`
+- **Deploy Dir**: `~/streamseek`
+- **Domain**: `streamseek.sameersitre.dev`
+
+### Usage
+
+```bash
+# Non-interactive (CI-friendly)
+./deploy.sh all        # Full build & deploy
+./deploy.sh frontend   # Frontend only
+./deploy.sh backend    # Backend only
+./deploy.sh nginx      # Nginx config sync + restart
+./deploy.sh init       # First-time VM setup
+
+# Interactive menu
+./deploy.sh            # Shows numbered menu with all options
+```
+
+### Interactive Menu Options
+
+| Option | Action |
+|--------|--------|
+| 1 | Deploy everything (full rebuild) |
+| 2 | Deploy frontend only |
+| 3 | Deploy backend only |
+| 4 | Sync configs (docker-compose, nginx) |
+| 5 | Sync env files (.env) |
+| 6 | Restart services on VM |
+| 7 | Health check (containers, API, HTTPS, disk) |
+| 8 | View VM logs |
+| 9 | SSH into VM |
+| n | Restart nginx |
+| d | MongoDB SSH tunnel (localhost:27018) |
+| s | Setup SSL (first time, via certbot) |
+| r | Renew SSL certificate |
+| i | Init VM (dirs, Docker, 10GB swap) |
+| c | Clean up unused Docker images on VM |
+
+### Production Compose (`docker-compose.prod.yml`)
+
+Uses `image:` references instead of `build:` — the deploy script uploads this as `docker-compose.yml` on the VM. Frontend/backend images are `streamseek-frontend:latest` and `streamseek-backend:latest`, loaded via `docker load` from tarballs. The original `docker-compose.yml` (with `build:` directives) is kept for local `docker compose build` workflows.
 
 ## Docker Setup
 
@@ -125,8 +190,9 @@ Docker Network (app-network)
 - HTTP (:80) redirects to HTTPS (:443)
 - Let's Encrypt ACME challenge served from `/var/www/certbot`
 - `/api/v2/*` proxied to `backend:8000` (Auth.js `/api/auth/*` stays on frontend)
-- Everything else proxied to `frontend:3000`
+- Everything else proxied to `frontend:3000`; `sameersitre.dev` proxied to `portfolio:3001`
 - Certbot container auto-renews SSL certificates every 12 hours
+- `resolver 127.0.0.11 valid=30s` + upstream hostname variables (`set $upstream_X hostname`) — required so nginx resolves Docker service names at request time, not at startup (avoids crash-loop when nginx starts before other services are in the network)
 
 ### Docker Compose Files
 
@@ -276,10 +342,12 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
 - Phase 18: Mobile Auth + Profile Sync (Google Bearer token auth path, user profile sync on sign-in, internal auth middleware, MongoDB port exposure for dev) ✅COMPLETE
 - Phase 19: Privacy Policy Page (Google Play Store compliant, covers StreamSeek web + Trovie mobile, 11-section policy, footer link) ✅COMPLETE
 - Phase 20: Netflix-style Dashboard (hero carousel, filter tabs, horizontal scroll rows, Top 10, trending people, lazy genre rows, in-memory TTL cache, 7 new TMDB endpoints) ✅COMPLETE
+- Phase 21: Dynamic Portfolio Data (MongoDB-backed portfolio content via StreamSeek backend, ISR 5min, `/api/v2/portfolio/content` + `/seed` endpoints, nginx resolver fix) ✅COMPLETE
 
 ## Production Deployment
 
 - **Live URL**: `https://streamseek.sameersitre.dev`
+- **Portfolio URL**: `https://sameersitre.dev`
 - **VM**: Debian 12 (bookworm), Google Cloud, 2GB RAM + 2GB swap
 - **Guide**: `docs/production-deployment-guide.md` — full step-by-step instructions
 - **Key deployment fixes applied**:
@@ -287,6 +355,15 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
   - `server/src/common/logger.ts`: Conditional pino-pretty (dev only, avoids production crash)
   - `docker-compose.yml`: `HOSTNAME=0.0.0.0` + `AUTH_TRUST_HOST=true` for frontend, node-based healthcheck, increased timeouts for slow VMs
   - `nginx/nginx.conf`: Route `/api/v2/` to backend (not `/api/` which caught Auth.js routes)
+  - `nginx/nginx.conf`: Added `resolver 127.0.0.11` + upstream hostname variables so nginx resolves Docker service names at request time, not at startup (prevents crash-loop when nginx starts before other containers)
+  - `deploy.sh` `renew_ssl()`: Must use `docker run certbot/certbot` with volume mounts — running host `certbot --standalone` writes to `/etc/letsencrypt` (not the Docker volume), nginx won't pick up the new cert
+
+## SSL Certificate Renewal
+
+- **Cert paths (Docker volume)**: `~/streamseek/nginx/certbot/conf/live/{domain}/`
+- **Renew via deploy script**: `./deploy.sh` → option `r` — stops nginx, runs certbot inside Docker with correct volume mounts, restarts nginx
+- **Never run** `sudo certbot renew --standalone` directly on the host — it writes to `/etc/letsencrypt` which is not the Docker volume nginx reads from
+- If cert was accidentally renewed on host: `sudo cp -rL /etc/letsencrypt/live/{domain}/. ~/streamseek/nginx/certbot/conf/live/{domain}/` then `docker compose restart nginx`
 
 ## SEO (`client/app/`)
 
@@ -356,3 +433,24 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
 - **Contact**: sameersitre@gmail.com
 - **Google Play compliance**: Publicly accessible URL, plain language, effective date, no paywall, children's privacy (COPPA), data collection disclosures, third-party links
 - **TMDB attribution**: Required notice included ("uses the TMDB API but is not endorsed or certified by TMDB")
+
+## Portfolio (`../portfolio-web/` — `sameersitre.dev`)
+
+- **Repo**: `/Users/codercouple/Documents/sameer/portfolio-web/` — separate Next.js app, deployed as `streamseek-portfolio` Docker image on same VM
+- **Dynamic content**: Experiences, skill categories, and projects are stored in MongoDB `portfolio_content` collection, fetched via StreamSeek backend
+- **Backend endpoint**: `POST /api/v2/portfolio/content` — public, returns `{ experiences, skillCategories, projects }`
+- **Seed endpoint**: `POST /api/v2/portfolio/seed` — `X-Internal-Secret` required, upserts one content type `{ type, data[] }`
+- **Fetch**: `portfolio-web/lib/portfolio.ts` — fetches `http://backend:8000/api/v2/portfolio/content` at runtime, falls back to `lib/data.ts` on error or empty DB
+- **ISR**: `export const revalidate = 300` in `app/page.tsx` — page refreshes from MongoDB every 5 minutes after first request
+- **Build-time**: Backend unreachable during `docker build` (not in network yet) — build always uses static fallback; ISR kicks in at runtime
+- **Backend URL**: Must include `/api` prefix — `http://backend:8000/api/v2/...` (Express mounts routes at `/api/`)
+- **Docker env**: `BACKEND_INTERNAL_URL=http://backend:8000` passed to portfolio service in `docker-compose.prod.yml`
+- **Seed command** (run after deploy to populate/update content):
+  ```bash
+  curl -X POST https://streamseek.sameersitre.dev/api/v2/portfolio/seed \
+    -H "Content-Type: application/json" \
+    -H "X-Internal-Secret: <AUTH_SECRET>" \
+    -d '{"type":"experiences","data":[...]}'
+  # Repeat for skillCategories and projects
+  ```
+- **DNS**: `sameersitre.dev` + `www.sameersitre.dev` → A record `34.45.33.206` (Squarespace DNS). Was previously pointing to Vercel — caused stale cached content.
