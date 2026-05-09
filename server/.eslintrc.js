@@ -17,6 +17,7 @@ module.exports = {
     ecmaVersion: 2021,
     sourceType: 'module',
     project: './tsconfig.json',
+    tsconfigRootDir: __dirname,
   },
   rules: {
     '@typescript-eslint/no-unused-vars': 'error', 
