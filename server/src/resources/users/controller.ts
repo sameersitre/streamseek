@@ -1,6 +1,8 @@
 import { Request, Response } from 'express'
 import { axiosFetch } from '../../apiExternal/apiCall'
 import { fetchOTTPlatforms } from '../../apiExternal/apiExternal'
+import { attachSourceIds } from '../../apiExternal/watchmodeIndex'
+import type { Result } from '../../types'
 import {
   airingTodayURL,
   castDetailsURL,
@@ -24,68 +26,66 @@ import { cacheGet, cacheSet } from '../../services/cache'
 import { connectMongo } from '../../services/mongo'
 import logger from '../../common/logger'
 
-export const trendingList = async (req: Request, res: Response) => {
-  try {
-    const data = await axiosFetch(trendingURL(req.body))
-    res.status(200).json(data)
-  } catch (error) {
-    logger.error('Error fetching trending data:', error)
-    res.status(error?.response?.status || 500).json({
-      message: 'Failed to fetch from external API',
-      error: error?.response?.data || error.message,
-    })
-  }
+interface HttpErrorShape {
+  response?: { status?: number; data?: unknown }
+}
+
+/** Safely extract HTTP status, response body, and message from an unknown catch value. */
+function extractError(e: unknown) {
+  const err = e as HttpErrorShape
+  const status = err.response?.status
+  const data = err.response?.data
+  const message = e instanceof Error ? e.message : String(e)
+  return { status, data, message }
 }
 
 export const searchList = async (req: Request, res: Response) => {
   try {
     const data = await axiosFetch(searchURL(req.body))
+    // /search/multi returns mixed media_type (movie/tv/person); the index lookup
+    // skips persons automatically (no source_id mapping for media_type='person').
+    await attachSourceIds(data.results, req.body.region)
     res.status(200).json(data)
   } catch (error) {
     logger.error('Error fetching search data:', error)
-    res.status(error?.response?.status || 500).json({
-      message: 'Failed to fetch from external API',
-      error: error?.response?.data || error.message,
-    })
+    const { status, data, message } = extractError(error)
+    res.status(status || 500).json({ message: 'Failed to fetch from external API', error: data || message })
   }
 }
 
 export const filterList = async (req: Request, res: Response) => {
   try {
     const data = await axiosFetch(filterURL(req.body))
+    await attachSourceIds(data.results, req.body.region, req.body.media_type)
     res.status(200).json(data)
   } catch (error) {
     logger.error('Error fetching filter data:', error)
-    res.status(error?.response?.status || 500).json({
-      message: 'Failed to fetch from external API',
-      error: error?.response?.data || error.message,
-    })
+    const { status, data, message } = extractError(error)
+    res.status(status || 500).json({ message: 'Failed to fetch from external API', error: data || message })
   }
 }
 
 export const upcomingList = async (req: Request, res: Response) => {
   try {
     const data = await axiosFetch(upcomingURL(req.body))
+    await attachSourceIds(data.results, req.body.region, req.body.media_type)
     res.status(200).json(data)
   } catch (error) {
     logger.error('Error fetching upcoming data:', error)
-    res.status(error?.response?.status || 500).json({
-      message: 'Failed to fetch from external API',
-      error: error?.response?.data || error.message,
-    })
+    const { status, data, message } = extractError(error)
+    res.status(status || 500).json({ message: 'Failed to fetch from external API', error: data || message })
   }
 }
 
 export const getRecommends = async (req: Request, res: Response) => {
   try {
     const data = await axiosFetch(recommendationsURL(req.body))
+    await attachSourceIds(data.results, req.body.region, req.body.media_type)
     res.status(200).json(data)
   } catch (error) {
     logger.error('Error fetching recommendations data:', error)
-    res.status(error?.response?.status || 500).json({
-      message: 'Failed to fetch from external API',
-      error: error?.response?.data || error.message,
-    })
+    const { status, data, message } = extractError(error)
+    res.status(status || 500).json({ message: 'Failed to fetch from external API', error: data || message })
   }
 }
 
@@ -95,10 +95,8 @@ export const getSeasons = async (req: Request, res: Response) => {
     res.status(200).json(data)
   } catch (error) {
     logger.error('Error fetching seasons data:', error)
-    res.status(error?.response?.status || 500).json({
-      message: 'Failed to fetch from external API',
-      error: error?.response?.data || error.message,
-    })
+    const { status, data, message } = extractError(error)
+    res.status(status || 500).json({ message: 'Failed to fetch from external API', error: data || message })
   }
 }
 
@@ -117,10 +115,8 @@ export const getVideos = async (req: Request, res: Response) => {
     }
   } catch (error) {
     logger.error('Error fetching or storing videos data:', error)
-    res.status(error?.response?.status || 500).json({
-      message: 'Failed to fetch or store data',
-      error: error?.response?.data || error.message,
-    })
+    const { status, data, message } = extractError(error)
+    res.status(status || 500).json({ message: 'Failed to fetch or store data', error: data || message })
   }
 }
 
@@ -145,14 +141,9 @@ export const getOTTStreams = async (req: Request, res: Response) => {
       res.status(200).json({ result: 'Doc Selection Successful.', ...dataFromDB })
     }
   } catch (error) {
-    const errMsg = error instanceof Error ? error.message : String(error)
-    const axiosStatus = (error as any)?.response?.status
-    const axiosData = (error as any)?.response?.data
-    logger.error({ error: errMsg, status: axiosStatus, data: axiosData }, 'Error fetching or storing OTT streams data')
-    res.status(axiosStatus || 500).json({
-      message: 'Failed to fetch or store data',
-      error: axiosData || errMsg,
-    })
+    const { status, data, message } = extractError(error)
+    logger.error({ error: message, status, data }, 'Error fetching or storing OTT streams data')
+    res.status(status || 500).json({ message: 'Failed to fetch or store data', error: data || message })
   }
 }
 
@@ -172,10 +163,8 @@ export const getCastDetails = async (req: Request, res: Response) => {
     }
   } catch (error) {
     logger.error('Error fetching or storing cast details data:', error)
-    res.status(error?.response?.status || 500).json({
-      message: 'Failed to fetch or store data',
-      error: error?.response?.data || error.message,
-    })
+    const { status, data, message } = extractError(error)
+    res.status(status || 500).json({ message: 'Failed to fetch or store data', error: data || message })
   }
 }
 
@@ -185,6 +174,10 @@ export const getDetails = async (req: Request, res: Response) => {
 
     const collectionSelect =
       req.body.media_type === 'movie' ? 'details_movie' : req.body.media_type === 'tv' ? 'details_tv' : null
+
+    if (!collectionSelect) {
+      return res.status(400).json({ message: 'Invalid media_type — must be movie or tv' })
+    }
 
     const dbSearch = await db.collection(collectionSelect).findOne({ id: req.body.id })
     if (!dbSearch) {
@@ -205,81 +198,105 @@ export const getDetails = async (req: Request, res: Response) => {
     }
   } catch (error) {
     logger.error('Error fetching or storing details data:', error)
-    res.status(error?.response?.status || 500).json({
-      message: 'Failed to fetch or store data',
-      error: error?.response?.data || error.message,
-    })
+    const { status, data, message } = extractError(error)
+    res.status(status || 500).json({ message: 'Failed to fetch or store data', error: data || message })
   }
 }
 
 /**
  * Factory for cached TMDB list endpoints. Handles cache lookup, TMDB fetch,
- * optional media_type injection (TMDB omits it on curated endpoints), and error response.
+ * optional media_type injection (TMDB omits it on curated endpoints), source_ids
+ * enrichment via the Watchmode reverse-source index, and error response.
+ *
+ * The cache key is region-scoped so US/GB/IN responses don't collide; each cached
+ * payload already has source_ids attached, so cache hits are zero-cost on the
+ * Watchmode side.
  */
-function createCachedListHandler(config: {
+function createCachedListHandler<TBody extends { region?: string }>(config: {
   name: string
-  urlBuilder: (body: any) => string
-  cacheKeyBuilder: (body: any) => string
-  injectMediaType?: string | ((body: any) => string)
+  urlBuilder: (body: TBody) => string
+  cacheKeyBuilder: (body: TBody) => string
+  /**
+   * When set, overwrites `media_type` on every result. Used by curated TMDB
+   * endpoints that omit it (nowPlaying, airingToday, …). For trending-`all`
+   * (which already returns a per-item `media_type`), the function form may
+   * return `undefined` to skip the overwrite.
+   */
+  injectMediaType?: string | ((body: TBody) => string | undefined)
 }) {
   return async (req: Request, res: Response) => {
-    const cacheKey = config.cacheKeyBuilder(req.body)
+    const body = req.body as TBody
+    const cacheKey = config.cacheKeyBuilder(body)
     const cached = cacheGet(cacheKey)
     if (cached) return res.status(200).json(cached)
     try {
-      const data = await axiosFetch(config.urlBuilder(req.body))
-      if (config.injectMediaType) {
-        const mt = typeof config.injectMediaType === 'function'
-          ? config.injectMediaType(req.body)
+      const data = await axiosFetch(config.urlBuilder(body))
+      const fallbackMediaType = config.injectMediaType
+        ? typeof config.injectMediaType === 'function'
+          ? config.injectMediaType(body)
           : config.injectMediaType
-        data.results = data.results.map((item: any) => ({ ...item, media_type: mt }))
+        : undefined
+      if (fallbackMediaType) {
+        data.results = (data.results as Result[]).map((item) => ({ ...item, media_type: fallbackMediaType }))
       }
+      await attachSourceIds(data.results, body.region, fallbackMediaType)
       cacheSet(cacheKey, data)
       res.status(200).json(data)
     } catch (error) {
       logger.error(`Error fetching ${config.name} data:`, error)
-      res.status(error?.response?.status || 500).json({
-        message: 'Failed to fetch from external API',
-        error: error?.response?.data || error.message,
-      })
+      const { status, data, message } = extractError(error)
+      res.status(status || 500).json({ message: 'Failed to fetch from external API', error: data || message })
     }
   }
 }
 
 // --- Dashboard cached list endpoints ---
 
+/** Default region used in cache keys when the client didn't specify one. */
+const regionPart = (b: { region?: string }) => (b.region || 'US').toUpperCase()
+
+export const trendingList = createCachedListHandler({
+  name: 'trending',
+  urlBuilder: trendingURL,
+  cacheKeyBuilder: (b) => `trending:${regionPart(b)}:${b.media_type}:${b.page}`,
+  // /trending/all returns mixed media_type per item — must NOT overwrite. For
+  // /trending/movie | /trending/tv, fall back to the requested media_type so
+  // the index lookup succeeds even when TMDB omits it on the item.
+  injectMediaType: (b) => (b.media_type !== 'all' ? b.media_type : undefined),
+})
+
 export const popularList = createCachedListHandler({
   name: 'popular',
   urlBuilder: popularURL,
-  cacheKeyBuilder: (b) => `popular:${b.media_type}:${b.page}`,
+  cacheKeyBuilder: (b) => `popular:${regionPart(b)}:${b.media_type}:${b.page}`,
   injectMediaType: (b) => b.media_type,
 })
 
 export const topRatedList = createCachedListHandler({
   name: 'topRated',
   urlBuilder: topRatedURL,
-  cacheKeyBuilder: (b) => `topRated:${b.media_type}:${b.page}`,
+  cacheKeyBuilder: (b) => `topRated:${regionPart(b)}:${b.media_type}:${b.page}`,
   injectMediaType: (b) => b.media_type,
 })
 
 export const nowPlayingList = createCachedListHandler({
   name: 'nowPlaying',
   urlBuilder: nowPlayingURL,
-  cacheKeyBuilder: (b) => `nowPlaying:${b.page}`,
+  cacheKeyBuilder: (b) => `nowPlaying:${regionPart(b)}:${b.page}`,
   injectMediaType: 'movie',
 })
 
 export const airingTodayList = createCachedListHandler({
   name: 'airingToday',
   urlBuilder: airingTodayURL,
-  cacheKeyBuilder: (b) => `airingToday:${b.page}`,
+  cacheKeyBuilder: (b) => `airingToday:${regionPart(b)}:${b.page}`,
   injectMediaType: 'tv',
 })
 
 export const onTheAirList = createCachedListHandler({
   name: 'onTheAir',
   urlBuilder: onTheAirURL,
-  cacheKeyBuilder: (b) => `onTheAir:${b.page}`,
+  cacheKeyBuilder: (b) => `onTheAir:${regionPart(b)}:${b.page}`,
   injectMediaType: 'tv',
 })
 
@@ -292,7 +309,7 @@ export const trendingPeopleList = createCachedListHandler({
 export const discoverByGenreList = createCachedListHandler({
   name: 'discoverByGenre',
   urlBuilder: discoverByGenreURL,
-  cacheKeyBuilder: (b) => `discoverByGenre:${b.genre}:${b.page}`,
+  cacheKeyBuilder: (b) => `discoverByGenre:${regionPart(b)}:${b.genre}:${b.page}`,
   injectMediaType: 'movie',
 })
 
@@ -303,9 +320,7 @@ export const getFeedback = async (req: Request, res: Response) => {
     res.status(200).json(req.body)
   } catch (error) {
     logger.error('Error storing feedback:', error)
-    res.status(500).json({
-      message: 'Failed to store feedback',
-      error: error?.response?.data || error.message,
-    })
+    const { message } = extractError(error)
+    res.status(500).json({ message: 'Failed to store feedback', error: message })
   }
 }
