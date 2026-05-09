@@ -1,7 +1,7 @@
 import axios from 'axios'
 import logger from '../common/logger'
 
-export const axiosFetch = async (URL: string) => {
+export const axiosFetch = async <T = any>(URL: string): Promise<T> => {
   const config = {
     method: 'get',
     maxBodyLength: Infinity,
@@ -13,7 +13,7 @@ export const axiosFetch = async (URL: string) => {
   }
 
   try {
-    const response = await axios.request(config)
+    const response = await axios.request<T>(config)
     return response.data
   } catch (error) {
     logger.fatal(URL, error)

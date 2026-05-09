@@ -11,7 +11,7 @@ import { GENRE_MAP } from "@/app/constants/genres";
 import { formatYear } from "@/app/lib/formatDate";
 import { useUserInteractions, useToggleLike, useToggleWatchlist } from "@/app/hooks/queries";
 import AuthDialog from "@/app/components/auth/AuthDialog";
-import type { MediaItem } from "@/app/types";
+import type { MediaItem, ContentMediaType } from "@/app/types";
 
 interface MediaCardProps {
   item: MediaItem;
@@ -21,7 +21,7 @@ export default function MediaCard({ item }: MediaCardProps) {
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const title = item.title || item.name || "Untitled";
   const year = formatYear(item.release_date || item.first_air_date);
-  const mediaType = item.media_type || "movie";
+  const mediaType = (item.media_type || "movie") as ContentMediaType;
   const rating = item.vote_average?.toFixed(1);
   const genres = item.genre_ids
     ?.slice(0, 2)

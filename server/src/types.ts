@@ -1,21 +1,25 @@
 export interface TrendingParams {
   media_type: 'all' | 'movie' | 'tv'
   page: number
+  region?: string
 }
 
 export interface PopularParams {
   media_type: 'movie' | 'tv'
   page: number
+  region?: string
 }
 
 export interface TopRatedParams {
   media_type: 'movie' | 'tv'
   page: number
+  region?: string
 }
 
 /** Shared by single-page-param endpoints: nowPlaying, airingToday, onTheAir, trendingPeople */
 export interface PageParams {
   page: number
+  region?: string
 }
 
 // Aliases for readability in route-specific contexts
@@ -27,12 +31,14 @@ export type TrendingPeopleParams = PageParams
 export interface DiscoverByGenreParams {
   genre: number
   page: number
+  region?: string
 }
 
 export interface SearchParams {
   searchText: string
   page: number
   adult: boolean
+  region?: string
 }
 
 export interface FilterParams {
@@ -40,6 +46,7 @@ export interface FilterParams {
   page: number
   genres: string // comma-separated genre IDs
   adult: boolean
+  region?: string
 }
 
 export interface UpcomingParams {
@@ -78,6 +85,7 @@ export interface RecommendationsParams {
   id: number | string
   media_type: 'movie' | 'tv'
   page: number
+  region?: string
 }
 
 export interface RootObject {
@@ -111,6 +119,8 @@ export interface Result {
   original_name?: string
   first_air_date?: string
   origin_country?: string[]
+  /** Watchmode source IDs the title is available on (stream type, region-filtered). Attached server-side via the inverted lookup index. */
+  source_ids?: number[]
 }
 
 /* details_data */
@@ -122,11 +132,11 @@ export interface DetailsData {
   belongs_to_collection: string
   budget: number
   created_by: Createdby[]
-  episode_run_time: unknown[]
-  facebook_id?: unknown
+  episode_run_time: number[]
+  facebook_id?: string | null
   first_air_date: string
-  freebase_id?: unknown
-  freebase_mid?: unknown
+  freebase_id?: string | null
+  freebase_mid?: string | null
   genres: Genre[]
   homepage: string
   id: number
@@ -140,7 +150,7 @@ export interface DetailsData {
   message: string
   name: string
   networks: Network[]
-  next_episode_to_air?: unknown
+  next_episode_to_air?: Lastepisodetoair | null
   number_of_episodes: number
   number_of_seasons: number
   origin_country: string[]
@@ -161,7 +171,7 @@ export interface DetailsData {
   tagline: string
   title: string
   tvdb_id: number
-  tvrage_id?: unknown
+  tvrage_id?: number | null
   twitter_id: string
   type: string
   video: boolean
@@ -210,7 +220,7 @@ interface Lastepisodetoair {
   vote_count: number
 }
 
-interface Genre {
+export interface Genre {
   id: number
   name: string
 }
@@ -249,11 +259,32 @@ export interface Videos {
 }
 
 /* OTT PLATFORMS */
+export type OTTStreamType = 'sub' | 'rent' | 'buy' | 'free' | 'tve'
+
 export interface OTTPlatform {
   name: string
   url: string
   icon: string
-  type?: string   // "sub", "rent", "buy", "free", "tve"
+  type?: OTTStreamType
+  price?: number
+  region?: string
+}
+
+/* WATCHMODE API SHAPES */
+
+/** Item from the Watchmode GET /sources/ reference endpoint (provider catalogue). */
+export interface WatchmodeSourceInfo {
+  id: number
+  name: string
+  logo_100px: string
+}
+
+/** Item from the Watchmode GET /title/{id}/sources/ endpoint (availability per title). */
+export interface WatchmodeSource {
+  source_id: number
+  name: string
+  web_url: string
+  type: OTTStreamType
   price?: number
   region?: string
 }

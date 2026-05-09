@@ -6,10 +6,11 @@ import { faHeart as faHeartSolid, faBookmark as faBookmarkSolid } from "@fortawe
 import { faHeart as faHeartOutline, faBookmark as faBookmarkOutline } from "@fortawesome/free-regular-svg-icons";
 import { useUserInteractions, useToggleLike, useToggleWatchlist } from "@/app/hooks/queries";
 import AuthDialog from "@/app/components/auth/AuthDialog";
+import type { ContentMediaType } from "@/app/types";
 
 interface DetailActionsProps {
   mediaId: number;
-  mediaType: string;
+  mediaType: ContentMediaType;
   title: string;
   posterPath: string | null;
   voteAverage: number;

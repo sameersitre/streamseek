@@ -17,9 +17,10 @@ import DetailVideos from "@/app/components/details/DetailVideos";
 import DetailRecommends from "@/app/components/details/DetailRecommends";
 import DetailSeasons from "@/app/components/details/DetailSeasons";
 import DetailSkeleton from "@/app/components/details/DetailSkeleton";
+import type { ContentMediaType } from "@/app/types";
 
 interface DetailsClientProps {
-  mediatype: string;
+  mediatype: ContentMediaType;
   id: string;
 }
 

@@ -76,12 +76,14 @@ export const REGION_MAP: Record<RegionCode, string> = {
   AE: "UAE", IL: "Israel", ZA: "South Africa", TR: "Turkey",
 };
 
+export type OTTStreamType = "sub" | "rent" | "buy" | "free" | "tve";
+
 export interface OTTPlatform {
   region: RegionCode;
   name: string;
   url: string;
   icon: string;
-  type?: string; // "sub", "rent", "buy", "free", "tve"
+  type?: OTTStreamType;
   price?: number;
 }
 

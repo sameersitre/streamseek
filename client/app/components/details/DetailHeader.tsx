@@ -2,11 +2,11 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { formatDate } from "@/app/lib/formatDate";
 import DetailActions from "./DetailActions";
-import type { MediaDetails } from "@/app/types";
+import type { MediaDetails, ContentMediaType } from "@/app/types";
 
 interface DetailHeaderProps {
   details: MediaDetails;
-  mediaType: string;
+  mediaType: ContentMediaType;
   mediaId: string;
 }
 

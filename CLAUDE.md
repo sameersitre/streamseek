@@ -319,6 +319,14 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
 - Genre filter via search params (`?genres=28,12,16`)
 - `useSearchParams()` must be wrapped in `<Suspense>` boundary
 - Font Awesome SSR: `config.autoAddCss = false` + explicit CSS import in layout
+- **TypeScript** (bolt conventions applied):
+  - `ContentMediaType = "movie" | "tv"` — use this (not `string`) for all detail/interaction endpoints; `MediaType = "all" | ContentMediaType` for search/trending params
+  - `OTTStreamType = "sub" | "rent" | "buy" | "free" | "tve"` — union for `OTTPlatform.type`
+  - `MediaRef` base interface (`mediaId + mediaType`) extended by `InteractionItem`, `ToggleParams`, `WatchlistItem`
+  - `PaginatedListResponse<T = WatchlistItem>` — generic; reuse for any paginated list
+  - Server `createCachedListHandler<TBody>` — generic factory; infers body type from `urlBuilder`
+  - `axiosFetch<T = any>` — callers can opt in to typed returns; default `any` keeps untyped callers valid
+  - `server/tsconfig.json`: `strict: true` enabled; `@types/compression` installed
 
 ## Migration Status
 
