@@ -26,8 +26,7 @@
     "deploy:init": "./deploy.sh init"
   },
   "devDependencies": {
-    "@flotrace/runtime": "^0.1.0",
+    "@flotrace/runtime": "^2.0.0",
     "concurrently": "^9.1.2"
-  },
-  "dependencies": {}
+  }
 }
