@@ -223,6 +223,13 @@ function createCachedListHandler<TBody extends { region?: string }>(config: {
    * return `undefined` to skip the overwrite.
    */
   injectMediaType?: string | ((body: TBody) => string | undefined)
+  /**
+   * Set true for endpoints whose results can never have source_ids (e.g. people).
+   * Skips the Watchmode index lookup entirely and always caches the response,
+   * avoiding the cold-start penalty where people results bypass the cache until
+   * the Watchmode index finishes warming.
+   */
+  skipSourceIds?: boolean
 }) {
   return async (req: Request, res: Response) => {
     const body = req.body as TBody
@@ -239,8 +246,14 @@ function createCachedListHandler<TBody extends { region?: string }>(config: {
       if (fallbackMediaType) {
         data.results = (data.results as Result[]).map((item) => ({ ...item, media_type: fallbackMediaType }))
       }
-      await attachSourceIds(data.results, body.region, fallbackMediaType)
-      cacheSet(cacheKey, data)
+      if (config.skipSourceIds) {
+        cacheSet(cacheKey, data)
+      } else {
+        const enriched = await attachSourceIds(data.results, body.region, fallbackMediaType)
+        // Skip cache on cold start — storing unenriched data would serve badge-less
+        // responses for the full cache TTL even after the index finishes building.
+        if (enriched) cacheSet(cacheKey, data)
+      }
       res.status(200).json(data)
     } catch (error) {
       logger.error(`Error fetching ${config.name} data:`, error)
@@ -304,6 +317,7 @@ export const trendingPeopleList = createCachedListHandler({
   name: 'trendingPeople',
   urlBuilder: trendingPeopleURL,
   cacheKeyBuilder: (b) => `trendingPeople:${b.page}`,
+  skipSourceIds: true, // people results never have streaming platform data
 })
 
 export const discoverByGenreList = createCachedListHandler({

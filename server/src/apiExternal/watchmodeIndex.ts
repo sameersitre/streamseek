@@ -222,6 +222,10 @@ function lookup(index: RegionIndex, mediaType: string, tmdbId: number): number[]
  * Mutates `results` in place to keep allocations down — callers who need
  * an immutable copy should clone before passing in.
  *
+ * Returns `true` when the index was ready and enrichment was attempted,
+ * `false` on cold start (index not yet built). Callers should skip caching
+ * when this returns false so stale unenriched responses are never stored.
+ *
  * Cold-start strategy: if the region's index isn't built yet, fire the build in
  * the background and return WITHOUT enrichment. The first dashboard load then
  * responds in normal time (without badges); the build completes asynchronously
@@ -232,8 +236,8 @@ export async function attachSourceIds<T extends { id: number; media_type?: strin
   results: T[] | undefined,
   region: string | undefined,
   fallbackMediaType?: string,
-): Promise<void> {
-  if (!results || results.length === 0) return
+): Promise<boolean> {
+  if (!results || results.length === 0) return true
 
   const effectiveRegion = (region || 'US').toUpperCase()
   const existing = indexByRegion.get(effectiveRegion)
@@ -245,7 +249,7 @@ export async function attachSourceIds<T extends { id: number; media_type?: strin
       const message = error instanceof Error ? error.message : String(error)
       logger.warn({ region: effectiveRegion, error: message }, 'Background Watchmode index build failed')
     })
-    return
+    return false
   }
 
   for (const item of results) {
@@ -256,4 +260,20 @@ export async function attachSourceIds<T extends { id: number; media_type?: strin
       ;(item as T & { source_ids?: number[] }).source_ids = sourceIds
     }
   }
+  return true
+}
+
+/**
+ * Trigger a background index build for the given region (defaults to 'US').
+ * Call once at server startup so the first client request doesn't pay the cold-start penalty.
+ * DB-cached data (< 3 months) loads in milliseconds; Watchmode API is only called for missing sources.
+ */
+export function prewarmIndex(region: string = 'US'): void {
+  void getRegionIndex(region.toUpperCase()).catch((error) => {
+    const message = error instanceof Error ? error.message : String(error)
+    logger.warn(
+      { region, error: message },
+      'Watchmode index pre-warm failed — badges will appear after first successful build',
+    )
+  })
 }
