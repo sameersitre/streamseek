@@ -1,4 +1,5 @@
-export type MediaType = "all" | "movie" | "tv";
+export type ContentMediaType = "movie" | "tv";
+export type MediaType = "all" | ContentMediaType;
 
 export interface Genre {
   id: number;

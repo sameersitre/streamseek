@@ -1,9 +1,10 @@
-export type { MediaType, Genre, MediaItem, PersonItem, PaginatedResponse } from "./media";
+export type { ContentMediaType, MediaType, Genre, MediaItem, PersonItem, PaginatedResponse } from "./media";
 export type {
   MediaDetails,
   CastMember,
   Video,
   OTTPlatform,
+  OTTStreamType,
   Season,
   Episode,
 } from "./details";

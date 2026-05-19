@@ -1,4 +1,4 @@
-import type { MediaType } from "./media";
+import type { MediaType, ContentMediaType } from "./media";
 
 export interface TrendingParams {
   media_type: MediaType;
@@ -11,13 +11,13 @@ export interface SearchParams {
 }
 
 export interface FilterParams {
-  media_type: MediaType;
+  media_type: ContentMediaType;
   genres: string;
   page: number;
 }
 
 export interface UpcomingParams {
-  media_type: "movie" | "tv";
+  media_type: ContentMediaType;
   region: string;
   adult: boolean;
   page: number;
@@ -25,28 +25,28 @@ export interface UpcomingParams {
 
 export interface DetailsParams {
   id: string;
-  media_type: string;
+  media_type: ContentMediaType;
   page?: number;
 }
 
 export interface VideosParams {
   id: string;
-  media_type: string;
+  media_type: ContentMediaType;
 }
 
 export interface CastParams {
   id: string;
-  media_type: string;
+  media_type: ContentMediaType;
 }
 
 export interface OTTParams {
   id: string;
-  media_type: string;
+  media_type: ContentMediaType;
 }
 
 export interface RecommendationsParams {
   id: string;
-  media_type: string;
+  media_type: ContentMediaType;
   page?: number;
 }
 
@@ -61,12 +61,12 @@ export interface FeedbackParams {
 }
 
 export interface PopularParams {
-  media_type: "movie" | "tv";
+  media_type: ContentMediaType;
   page: number;
 }
 
 export interface TopRatedParams {
-  media_type: "movie" | "tv";
+  media_type: ContentMediaType;
   page: number;
 }
 

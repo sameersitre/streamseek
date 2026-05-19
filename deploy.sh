@@ -123,6 +123,67 @@ bump_version() {
   ok "Version: ${current} → ${next}"
 }
 
+# ─── Read a key from portfolio's .env.local ──────────────
+portfolio_env_value() {
+  local key=$1
+  local file="${PORTFOLIO_DIR}/.env.local"
+  [[ -f "$file" ]] || return 0
+  grep -E "^${key}=" "$file" | tail -1 | cut -d'=' -f2- | tr -d '"' | tr -d "'"
+}
+
+# ─── Build portfolio with NEXT_PUBLIC_* baked in ─────────
+build_portfolio() {
+  local ga_id
+  ga_id=$(portfolio_env_value "NEXT_PUBLIC_GA_ID")
+  if [[ -n "$ga_id" ]]; then
+    info "Baking NEXT_PUBLIC_GA_ID=${ga_id} into portfolio build"
+    build_image portfolio "${PORTFOLIO_DIR}" "--build-arg NEXT_PUBLIC_GA_ID=${ga_id}"
+  else
+    warn "NEXT_PUBLIC_GA_ID not found in ${PORTFOLIO_DIR}/.env.local — GA will be disabled"
+    build_image portfolio "${PORTFOLIO_DIR}"
+  fi
+}
+
+# ─── Bump portfolio version (prompted: major/minor/patch) ─
+bump_portfolio_version() {
+  local pkg="${PORTFOLIO_DIR}/package.json"
+  if [[ ! -f "$pkg" ]]; then
+    warn "Portfolio package.json not found at ${pkg} — skipping version bump"
+    return
+  fi
+
+  local current
+  current=$(node -p "require('${pkg}').version")
+
+  echo ""
+  info "Current portfolio version: ${current}"
+  echo "  1) patch  (${current} → bug fixes)"
+  echo "  2) minor  (${current} → new features, backwards compatible)"
+  echo "  3) major  (${current} → breaking changes)"
+  read -rp "Choose increment type [1]: " bump_choice
+  bump_choice="${bump_choice:-1}"
+
+  local major minor patch
+  IFS='.' read -r major minor patch <<< "$current"
+
+  case "$bump_choice" in
+    1|patch) patch=$((patch + 1)) ;;
+    2|minor) minor=$((minor + 1)); patch=0 ;;
+    3|major) major=$((major + 1)); minor=0; patch=0 ;;
+    *) err "Invalid choice"; exit 1 ;;
+  esac
+
+  local next="${major}.${minor}.${patch}"
+
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    sed -i '' "s/\"version\": \"${current}\"/\"version\": \"${next}\"/" "$pkg"
+  else
+    sed -i "s/\"version\": \"${current}\"/\"version\": \"${next}\"/" "$pkg"
+  fi
+
+  ok "Portfolio version: ${current} → ${next}"
+}
+
 # ─── Build image locally ────────────────────────────────
 build_image() {
   local name=$1
@@ -183,6 +244,30 @@ sync_env() {
 sync_env_force() {
   log "Syncing environment files..."
   vm_scp .env "${VM_USER}@${VM_HOST}:${VM_DIR}/.env" 2>/dev/null || warn "No .env found"
+
+  # Merge portfolio env (../portfolio-web/.env.local) into VM .env
+  local portfolio_env="${PORTFOLIO_DIR}/.env.local"
+  if [[ -f "$portfolio_env" ]]; then
+    log "Merging portfolio env (${portfolio_env}) into VM .env..."
+    # Filter blank lines + comments, then upload as a temp file and append unique keys
+    local tmp="/tmp/streamseek-portfolio-env.$$"
+    grep -v '^\s*#' "$portfolio_env" | grep -v '^\s*$' > "$tmp"
+    vm_scp "$tmp" "${VM_USER}@${VM_HOST}:/tmp/portfolio.env"
+    rm -f "$tmp"
+    # On VM: for each KEY=VALUE, replace existing or append
+    vm "while IFS='=' read -r key val; do \
+          [ -z \"\$key\" ] && continue; \
+          if grep -q \"^\${key}=\" ${VM_DIR}/.env 2>/dev/null; then \
+            sed -i \"s|^\${key}=.*|\${key}=\${val}|\" ${VM_DIR}/.env; \
+          else \
+            echo \"\${key}=\${val}\" >> ${VM_DIR}/.env; \
+          fi; \
+        done < /tmp/portfolio.env && rm -f /tmp/portfolio.env"
+    ok "Portfolio env merged into VM .env"
+  else
+    warn "No portfolio .env.local found at ${portfolio_env}"
+  fi
+
   ok "Env files synced"
 }
 
@@ -448,8 +533,8 @@ main() {
     case "$1" in
       frontend)  preflight; bump_version; build_image frontend ./client "--build-arg NEXT_PUBLIC_API_URL=https://${DOMAIN}/api/v2"; push_image frontend; sync_configs; restart_services frontend; health_check ;;
       backend)   preflight; build_image backend ./server;  push_image backend; sync_configs; restart_services backend;  health_check ;;
-      portfolio) preflight; build_image portfolio "${PORTFOLIO_DIR}"; push_image portfolio; sync_configs; restart_services portfolio; health_check ;;
-      all)       preflight; bump_version; build_image frontend ./client "--build-arg NEXT_PUBLIC_API_URL=https://${DOMAIN}/api/v2"; build_image backend ./server; build_image portfolio "${PORTFOLIO_DIR}"; push_image frontend; push_image backend; push_image portfolio; sync_configs; restart_services all; health_check ;;
+      portfolio) preflight; bump_portfolio_version; build_portfolio; push_image portfolio; sync_configs; sync_env_force; restart_services portfolio; health_check ;;
+      all)       preflight; bump_version; bump_portfolio_version; build_image frontend ./client "--build-arg NEXT_PUBLIC_API_URL=https://${DOMAIN}/api/v2"; build_image backend ./server; build_portfolio; push_image frontend; push_image backend; push_image portfolio; sync_configs; sync_env_force; restart_services all; health_check ;;
       nginx)     check_vm; sync_configs; restart_services nginx; health_check ;;
       init)      check_vm; init_vm ;;
       *)         err "Usage: $0 [frontend|backend|portfolio|all|nginx|init]"; exit 1 ;;
@@ -469,9 +554,10 @@ main() {
       1)
         check_docker
         bump_version
+        bump_portfolio_version
         build_image frontend ./client "--build-arg NEXT_PUBLIC_API_URL=https://${DOMAIN}/api/v2"
         build_image backend ./server
-        build_image portfolio "${PORTFOLIO_DIR}"
+        build_portfolio
         push_image frontend
         push_image backend
         push_image portfolio
@@ -498,9 +584,11 @@ main() {
         ;;
       p)
         check_docker
-        build_image portfolio "${PORTFOLIO_DIR}"
+        bump_portfolio_version
+        build_portfolio
         push_image portfolio
         sync_configs
+        sync_env_force
         restart_services portfolio
         health_check
         ;;

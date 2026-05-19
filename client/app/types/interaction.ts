@@ -1,6 +1,12 @@
-export interface InteractionItem {
+import type { ContentMediaType } from "./media";
+
+/** Fields shared by any object that references a specific piece of media. */
+interface MediaRef {
   mediaId: number;
-  mediaType: string;
+  mediaType: ContentMediaType;
+}
+
+export interface InteractionItem extends MediaRef {
   liked: boolean;
   watchlisted: boolean;
 }
@@ -10,9 +16,7 @@ export interface InteractionStatus {
   watchlisted: boolean;
 }
 
-export interface ToggleParams {
-  mediaId: number;
-  mediaType: string;
+export interface ToggleParams extends MediaRef {
   title: string;
   posterPath: string | null;
   voteAverage: number;
@@ -22,17 +26,15 @@ export interface AllInteractionsResponse {
   interactions: InteractionItem[];
 }
 
-export interface WatchlistItem {
-  mediaId: number;
-  mediaType: string;
+export interface WatchlistItem extends MediaRef {
   title: string;
   posterPath: string | null;
   voteAverage: number;
   updatedAt: string;
 }
 
-export interface PaginatedListResponse {
-  results: WatchlistItem[];
+export interface PaginatedListResponse<T = WatchlistItem> {
+  results: T[];
   total: number;
   page: number;
   totalPages: number;

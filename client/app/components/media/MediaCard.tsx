@@ -4,14 +4,24 @@ import { useState } from "react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHeart as faHeartSolid, faBookmark as faBookmarkSolid } from "@fortawesome/free-solid-svg-icons";
-import { faHeart as faHeartOutline, faBookmark as faBookmarkOutline } from "@fortawesome/free-regular-svg-icons";
+import {
+  faHeart as faHeartSolid,
+  faBookmark as faBookmarkSolid,
+} from "@fortawesome/free-solid-svg-icons";
+import {
+  faHeart as faHeartOutline,
+  faBookmark as faBookmarkOutline,
+} from "@fortawesome/free-regular-svg-icons";
 import MediaPoster from "./MediaPoster";
 import { GENRE_MAP } from "@/app/constants/genres";
 import { formatYear } from "@/app/lib/formatDate";
-import { useUserInteractions, useToggleLike, useToggleWatchlist } from "@/app/hooks/queries";
+import {
+  useUserInteractions,
+  useToggleLike,
+  useToggleWatchlist,
+} from "@/app/hooks/queries";
 import AuthDialog from "@/app/components/auth/AuthDialog";
-import type { MediaItem } from "@/app/types";
+import type { MediaItem, ContentMediaType } from "@/app/types";
 
 interface MediaCardProps {
   item: MediaItem;
@@ -21,7 +31,7 @@ export default function MediaCard({ item }: MediaCardProps) {
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const title = item.title || item.name || "Untitled";
   const year = formatYear(item.release_date || item.first_air_date);
-  const mediaType = item.media_type || "movie";
+  const mediaType = (item.media_type || "movie") as ContentMediaType;
   const rating = item.vote_average?.toFixed(1);
   const genres = item.genre_ids
     ?.slice(0, 2)
@@ -77,12 +87,18 @@ export default function MediaCard({ item }: MediaCardProps) {
             <div className="absolute top-2 left-2 z-10 flex gap-1.5">
               {liked && (
                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-black/60 backdrop-blur-sm">
-                  <FontAwesomeIcon icon={faHeartSolid} className="h-3 w-3 text-red-400" />
+                  <FontAwesomeIcon
+                    icon={faHeartSolid}
+                    className="h-3 w-3 text-red-400"
+                  />
                 </span>
               )}
               {watchlisted && (
                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-black/60 backdrop-blur-sm">
-                  <FontAwesomeIcon icon={faBookmarkSolid} className="h-3 w-3 text-accent" />
+                  <FontAwesomeIcon
+                    icon={faBookmarkSolid}
+                    className="h-3 w-3 text-accent"
+                  />
                 </span>
               )}
             </div>
@@ -113,7 +129,9 @@ export default function MediaCard({ item }: MediaCardProps) {
                     ? "bg-accent/20 text-accent"
                     : "bg-black/60 text-zinc-400 hover:text-white"
                 }`}
-                aria-label={watchlisted ? "Remove from watchlist" : "Add to watchlist"}
+                aria-label={
+                  watchlisted ? "Remove from watchlist" : "Add to watchlist"
+                }
               >
                 <FontAwesomeIcon
                   icon={watchlisted ? faBookmarkSolid : faBookmarkOutline}
@@ -130,9 +148,7 @@ export default function MediaCard({ item }: MediaCardProps) {
             {/* Rating + Year */}
             <div className="mb-1 flex items-center gap-2 text-xs text-zinc-300">
               {rating && Number(rating) > 0 && (
-                <span className="font-medium text-accent">
-                  ★ {rating}
-                </span>
+                <span className="font-medium text-accent">★ {rating}</span>
               )}
               {year && <span>{year}</span>}
             </div>
@@ -153,8 +169,9 @@ export default function MediaCard({ item }: MediaCardProps) {
           </div>
         </Card>
       </Link>
-
-      <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
+      {authDialogOpen && (
+        <AuthDialog open={authDialogOpen} onOpenChange={setAuthDialogOpen} />
+      )}
     </>
   );
 }

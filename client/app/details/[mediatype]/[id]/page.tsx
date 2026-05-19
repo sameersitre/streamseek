@@ -4,10 +4,15 @@ import { apiClient } from "@/app/services/apiClient";
 import { posterUrl } from "@/app/lib/tmdb";
 import { MediaJsonLd } from "@/app/components/JsonLd";
 import DetailsClient from "./DetailsClient";
+import type { ContentMediaType } from "@/app/types";
 
 type Params = Promise<{ mediatype: string; id: string }>;
 
-const getDetails = cache((id: string, mediatype: string) =>
+// URL params are always strings; the [mediatype] route segment is guaranteed to
+// be "movie" | "tv" — this helper centralises the boundary assertion.
+const parseMediaType = (s: string): ContentMediaType => s as ContentMediaType;
+
+const getDetails = cache((id: string, mediatype: ContentMediaType) =>
   apiClient.details({ id, media_type: mediatype })
 );
 
@@ -16,7 +21,8 @@ export async function generateMetadata({
 }: {
   params: Params;
 }): Promise<Metadata> {
-  const { mediatype, id } = await params;
+  const { mediatype: mediatypeRaw, id } = await params;
+  const mediatype = parseMediaType(mediatypeRaw);
 
   try {
     const details = await getDetails(id, mediatype);
@@ -51,7 +57,8 @@ export async function generateMetadata({
 }
 
 export default async function MediaDetails({ params }: { params: Params }) {
-  const { mediatype, id } = await params;
+  const { mediatype: mediatypeRaw, id } = await params;
+  const mediatype = parseMediaType(mediatypeRaw);
 
   let jsonLd = null;
   try {

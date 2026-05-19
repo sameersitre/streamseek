@@ -4,7 +4,10 @@ import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { signOut } from "next-auth/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircleUser, faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCircleUser,
+  faRightFromBracket,
+} from "@fortawesome/free-solid-svg-icons";
 import { useAppStore } from "@/app/stores/useAppStore";
 import AuthDialog from "@/app/components/auth/AuthDialog";
 
@@ -85,14 +88,17 @@ export default function UserMenu() {
               role="menuitem"
               onClick={handleSignOut}
             >
-              <FontAwesomeIcon icon={faRightFromBracket} className="h-3.5 w-3.5" />
+              <FontAwesomeIcon
+                icon={faRightFromBracket}
+                className="h-3.5 w-3.5"
+              />
               Sign out
             </button>
           </div>
         )}
       </div>
 
-      <AuthDialog open={showAuth} onOpenChange={setShowAuth} />
+      {showAuth && <AuthDialog open={showAuth} onOpenChange={setShowAuth} />}
     </>
   );
 }
