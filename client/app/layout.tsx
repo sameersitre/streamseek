@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import AuthProvider from "./providers/AuthProvider";
 import SessionSync from "./components/auth/SessionSync";
 import QueryProvider from "./providers/QueryProvider";
+import FloTrace from "./providers/FloTrace";
 import Appbar from "./components/Appbar";
 import Footer from "./components/Footer";
 import { WebsiteJsonLd } from "./components/JsonLd";
@@ -82,16 +83,18 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthProvider>
-          <QueryProvider>
-            <TooltipProvider>
-              <SessionSync />
-              <Appbar />
-              <main className="pt-20">{children}</main>
-              <Footer />
-            </TooltipProvider>
-          </QueryProvider>
-        </AuthProvider>
+        <FloTrace>
+          <AuthProvider>
+            <QueryProvider>
+              <TooltipProvider>
+                <SessionSync />
+                <Appbar />
+                <main className="pt-20">{children}</main>
+                <Footer />
+              </TooltipProvider>
+            </QueryProvider>
+          </AuthProvider>
+        </FloTrace>
         <WebsiteJsonLd />
       </body>
     </html>

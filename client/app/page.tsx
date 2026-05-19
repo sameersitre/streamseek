@@ -76,15 +76,24 @@ function DashboardContent() {
   const isCategoryVisible = (category: "movies" | "tv") =>
     activeFilter === "all" || activeFilter === category;
   const showPeople = activeFilter === "all" || activeFilter === "people";
-  const showGenres = !selectedGenre && (activeFilter === "all" || activeFilter === "movies");
+  const showGenres =
+    !selectedGenre && (activeFilter === "all" || activeFilter === "movies");
 
   const genreRows = selectedGenre
-    ? [{ id: selectedGenre, name: GENRE_MAP.get(selectedGenre) ?? "Selected Genre" }]
+    ? [
+        {
+          id: selectedGenre,
+          name: GENRE_MAP.get(selectedGenre) ?? "Selected Genre",
+        },
+      ]
     : DASHBOARD_GENRES;
 
   return (
     <div className="-mt-20">
-      <HeroCarousel items={trending.data?.results} isLoading={trending.isLoading} />
+      <HeroCarousel
+        items={trending.data?.results}
+        isLoading={trending.isLoading}
+      />
 
       <div className="mx-auto max-w-7xl px-6">
         <DashboardFilterBar
@@ -95,7 +104,10 @@ function DashboardContent() {
         />
 
         {!selectedGenre && (
-          <Top10Row items={trending.data?.results} isLoading={trending.isLoading} />
+          <Top10Row
+            items={trending.data?.results}
+            isLoading={trending.isLoading}
+          />
         )}
 
         {/* Content rows — rendered from config, filtered by active tab */}
@@ -110,7 +122,7 @@ function DashboardContent() {
                   isLoading={query.isLoading}
                   isError={query.isError}
                 />
-              )
+              ),
           )}
 
         {showPeople && !selectedGenre && (
