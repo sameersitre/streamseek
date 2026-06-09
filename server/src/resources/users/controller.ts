@@ -1,5 +1,6 @@
 import { Request, Response } from 'express'
 import { axiosFetch } from '../../apiExternal/apiCall'
+import { getSourceLogos } from '../../apiExternal/apiExternal'
 import { attachSourceIds, resolveTitleSources } from '../../apiExternal/titleSources'
 import type { Result } from '../../types'
 import {
@@ -133,6 +134,23 @@ export const getOTTStreams = async (req: Request, res: Response) => {
     const { status, data, message } = extractError(error)
     logger.error({ error: message, status, data }, 'Error fetching or storing OTT streams data')
     res.status(status || 500).json({ message: 'Failed to fetch or store data', error: data || message })
+  }
+}
+
+/**
+ * Watchmode source-id → remote logo URL catalogue. The dashboard OTT badge fetches this
+ * once and uses it as a fallback for sources without a bundled local logo, so badges
+ * never hide a platform the Details screen would show. Backed by the in-memory
+ * `getSourceLogos` cache — no Watchmode credit after the first server-lifetime call.
+ */
+export const getOttSourceLogos = async (_req: Request, res: Response) => {
+  try {
+    const logos = await getSourceLogos()
+    res.status(200).json({ logos })
+  } catch (error) {
+    const { status, data, message } = extractError(error)
+    logger.error({ error: message, status, data }, 'Error fetching source logos')
+    res.status(status || 500).json({ message: 'Failed to fetch source logos', error: data || message })
   }
 }
 

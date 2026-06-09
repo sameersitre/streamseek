@@ -6,7 +6,7 @@ import type { WatchmodeSourceInfo, WatchmodeSource } from '../types'
 // Populated lazily on first call; safe to share across requests since provider logos don't change.
 const sourceLogos: Record<number, string> = {}
 
-const getSourceLogos = async (): Promise<Record<number, string>> => {
+export const getSourceLogos = async (): Promise<Record<number, string>> => {
   if (Object.keys(sourceLogos).length > 0) return sourceLogos
   const res = await axios.get(`${process.env.WATCHMODE_API_URL}/sources/?apiKey=${process.env.WATCHMODE_API_KEY}`)
   for (const s of res.data as WatchmodeSourceInfo[]) {

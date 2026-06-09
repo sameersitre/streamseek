@@ -7,6 +7,7 @@ import {
   getDetails,
   getFeedback,
   getOTTStreams,
+  getOttSourceLogos,
   getRecommends,
   getSeasons,
   getVideos,
@@ -47,6 +48,8 @@ router.route('/getRecommendations').post(getRecommends)
 router.route('/getSeasons').post(getSeasons)
 
 router.route('/getOTTPlatforms').post(getOTTStreams)
+
+router.route('/getSourceLogos').post(getOttSourceLogos)
 
 router.route('/getCastDetails').post(getCastDetails)
 

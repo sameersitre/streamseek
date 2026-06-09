@@ -282,6 +282,7 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
 | `/api/v2/getVideos` | POST | Trailers/videos |
 | `/api/v2/getCastDetails` | POST | Cast members |
 | `/api/v2/getOTTPlatforms` | POST | Streaming platforms (via Watchmode API) |
+| `/api/v2/getSourceLogos` | POST | Watchmode source-id → remote logo URL catalogue (OTT badge fallback) |
 | `/api/v2/getRecommendations` | POST | Related media |
 | `/api/v2/getSeasons` | POST | TV season episodes |
 | `/api/v2/feedback` | POST | User feedback |
@@ -426,7 +427,7 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
 - **API**: Watchmode REST API v1 (`https://api.watchmode.com/v1/`)
 - **Auth**: `apiKey` query parameter (budget: 2,500 requests/month)
 - **Title sources**: `/title/{media_type}-{tmdb_id}/sources/?apiKey=...` — one call (no `regions` param) returns availability across ALL plan-enabled regions in a single response
-- **Source logos**: `/sources/?apiKey=...` — provider reference data with `logo_100px` URLs, cached in-memory on server
+- **Source logos**: `/sources/?apiKey=...` — provider reference data with `logo_100px` URLs, cached in-memory on server; exposed to the app via `POST /api/v2/getSourceLogos` (`{ logos: { [source_id]: url } }`) so the dashboard OTT badge can fall back to a remote logo for any source without a bundled local asset (badge coverage then matches the Details screen). No Watchmode credit after the first server-lifetime call.
 - **Logo CDN**: `cdn.watchmode.com` — requires `referrerPolicy="no-referrer"` on `<img>` tags (blocks Next.js Image optimizer)
 - **Per-title sources cache (`title_sources` collection)** — single source of truth for BOTH the Details "Where to Watch" tab AND the dashboard OTT badges. One doc per `(media_type, tmdb_id)`: `{ tkey, platforms (full, all regions), byRegion (region → badge-relevant source_ids), empty, fetched_at }`. 3-month TTL via a Mongo TTL index on `fetched_at`; `empty:true` negative-caches zero-source / 404 titles so they aren't re-fetched. Resolver: `src/apiExternal/titleSources.ts`; shared TTL + collection-name constants: `titleSourcesConfig.ts` (dependency-free, avoids a `mongo ↔ titleSources` cycle).
   - `resolveTitleSources(media_type, id)` — Details path (`getOTTPlatforms` endpoint); fresh cache hit or on-demand (user-priority) fetch.
