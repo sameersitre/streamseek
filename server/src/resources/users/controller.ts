@@ -1,7 +1,6 @@
 import { Request, Response } from 'express'
 import { axiosFetch } from '../../apiExternal/apiCall'
-import { fetchOTTPlatforms } from '../../apiExternal/apiExternal'
-import { attachSourceIds } from '../../apiExternal/watchmodeIndex'
+import { attachSourceIds, resolveTitleSources } from '../../apiExternal/titleSources'
 import type { Result } from '../../types'
 import {
   airingTodayURL,
@@ -29,6 +28,9 @@ import logger from '../../common/logger'
 interface HttpErrorShape {
   response?: { status?: number; data?: unknown }
 }
+
+/** A paginated TMDB list payload (results + page metadata) as returned by axiosFetch. */
+type ListPayload = { results?: Result[] } & Record<string, unknown>
 
 /** Safely extract HTTP status, response body, and message from an unknown catch value. */
 function extractError(e: unknown) {
@@ -122,24 +124,11 @@ export const getVideos = async (req: Request, res: Response) => {
 
 export const getOTTStreams = async (req: Request, res: Response) => {
   try {
-    const db = await connectMongo()
-    const dataFromDB = await db.collection('ott_streams').findOne({ id: req.body.id })
-    if (!dataFromDB) {
-      const platforms = await fetchOTTPlatforms(req.body.media_type, req.body.id)
-
-      await db.collection('counters').updateOne({ counterName: 'watchmode' }, { $inc: { counts: 1 } }, { upsert: true })
-
-      const newData = {
-        id: req.body.id,
-        media_type: req.body.media_type,
-        platforms,
-      }
-
-      await db.collection('ott_streams').insertOne(newData)
-      res.status(200).json({ result: 'Doc Creation Successful.', ...newData })
-    } else {
-      res.status(200).json({ result: 'Doc Selection Successful.', ...dataFromDB })
-    }
+    const { id, media_type } = req.body
+    // Single source of truth: the per-title cache (3-month TTL, monthly budget guard).
+    // Keyed by (media_type, tmdb_id) — no more {id}-only collision between movie/tv.
+    const doc = await resolveTitleSources(media_type, id)
+    res.status(200).json({ result: 'OK', id, media_type, platforms: doc?.platforms ?? [] })
   } catch (error) {
     const { status, data, message } = extractError(error)
     logger.error({ error: message, status, data }, 'Error fetching or storing OTT streams data')
@@ -205,12 +194,12 @@ export const getDetails = async (req: Request, res: Response) => {
 
 /**
  * Factory for cached TMDB list endpoints. Handles cache lookup, TMDB fetch,
- * optional media_type injection (TMDB omits it on curated endpoints), source_ids
- * enrichment via the Watchmode reverse-source index, and error response.
+ * optional media_type injection (TMDB omits it on curated endpoints), per-title
+ * source_ids attachment (via the title_sources cache), and error response.
  *
- * The cache key is region-scoped so US/GB/IN responses don't collide; each cached
- * payload already has source_ids attached, so cache hits are zero-cost on the
- * Watchmode side.
+ * The 5-min cache holds the RAW TMDB payload; region-specific source_ids are attached
+ * on every response from the per-title cache (a fast indexed Mongo lookup), so the
+ * region-scoped cache key never bakes one region's availability into another's.
  */
 function createCachedListHandler<TBody extends { region?: string }>(config: {
   name: string
@@ -234,31 +223,39 @@ function createCachedListHandler<TBody extends { region?: string }>(config: {
   return async (req: Request, res: Response) => {
     const body = req.body as TBody
     const cacheKey = config.cacheKeyBuilder(body)
-    const cached = cacheGet(cacheKey)
-    if (cached) return res.status(200).json(cached)
+    const fallbackMediaType = config.injectMediaType
+      ? typeof config.injectMediaType === 'function'
+        ? config.injectMediaType(body)
+        : config.injectMediaType
+      : undefined
     try {
-      const data = await axiosFetch(config.urlBuilder(body))
-      const fallbackMediaType = config.injectMediaType
-        ? typeof config.injectMediaType === 'function'
-          ? config.injectMediaType(body)
-          : config.injectMediaType
-        : undefined
-      if (fallbackMediaType) {
-        data.results = (data.results as Result[]).map((item) => ({ ...item, media_type: fallbackMediaType }))
+      // The 5-min in-memory cache holds the RAW TMDB payload (no source_ids). Decoupling
+      // it from the 3-month per-title source cache lets background-filled badges show up on
+      // the very next request instead of being frozen out for the full list-cache TTL.
+      let data = cacheGet<ListPayload>(cacheKey)
+      if (!data) {
+        const fetched = (await axiosFetch(config.urlBuilder(body))) as ListPayload
+        if (fallbackMediaType) {
+          fetched.results = (fetched.results as Result[]).map((item) => ({ ...item, media_type: fallbackMediaType }))
+        }
+        cacheSet(cacheKey, fetched)
+        data = fetched
       }
+
       if (config.skipSourceIds) {
-        cacheSet(cacheKey, data)
-      } else {
-        const enriched = await attachSourceIds(data.results, body.region, fallbackMediaType)
-        // Skip cache on cold start — storing unenriched data would serve badge-less
-        // responses for the full cache TTL even after the index finishes building.
-        if (enriched) cacheSet(cacheKey, data)
+        res.status(200).json(data)
+        return
       }
-      res.status(200).json(data)
+
+      // Attach region-specific source_ids on every response via the fast indexed Mongo
+      // lookup. Clone results so per-region source_ids never leak into the shared cached payload.
+      const response = { ...data, results: (data.results ?? []).map((r) => ({ ...r })) }
+      await attachSourceIds(response.results, body.region, fallbackMediaType)
+      res.status(200).json(response)
     } catch (error) {
       logger.error(`Error fetching ${config.name} data:`, error)
-      const { status, data, message } = extractError(error)
-      res.status(status || 500).json({ message: 'Failed to fetch from external API', error: data || message })
+      const { status, data: errData, message } = extractError(error)
+      res.status(status || 500).json({ message: 'Failed to fetch from external API', error: errData || message })
     }
   }
 }

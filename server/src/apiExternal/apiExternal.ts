@@ -4,13 +4,11 @@ import type { WatchmodeSourceInfo, WatchmodeSource } from '../types'
 
 // Cache source logos from Watchmode /sources/ reference endpoint (provider id → logo URL).
 // Populated lazily on first call; safe to share across requests since provider logos don't change.
-let sourceLogos: Record<number, string> = {}
+const sourceLogos: Record<number, string> = {}
 
 const getSourceLogos = async (): Promise<Record<number, string>> => {
   if (Object.keys(sourceLogos).length > 0) return sourceLogos
-  const res = await axios.get(
-    `${process.env.WATCHMODE_API_URL}/sources/?apiKey=${process.env.WATCHMODE_API_KEY}`
-  )
+  const res = await axios.get(`${process.env.WATCHMODE_API_URL}/sources/?apiKey=${process.env.WATCHMODE_API_KEY}`)
   for (const s of res.data as WatchmodeSourceInfo[]) {
     sourceLogos[s.id] = s.logo_100px
   }
@@ -26,6 +24,7 @@ export const fetchOTTPlatforms = async (mediaType: string, tmdbId: string | numb
   logger.info(`Watchmode API called for ${titleId}, got ${response.data?.length ?? 0} sources`)
 
   return (response.data as WatchmodeSource[]).map((s) => ({
+    source_id: s.source_id,
     name: s.name,
     url: s.web_url,
     icon: logos[s.source_id] ?? '',

@@ -351,6 +351,7 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
 - Phase 19: Privacy Policy Page (Google Play Store compliant, covers StreamSeek web + Trovie mobile, 11-section policy, footer link) ✅COMPLETE
 - Phase 20: Netflix-style Dashboard (hero carousel, filter tabs, horizontal scroll rows, Top 10, trending people, lazy genre rows, in-memory TTL cache, 7 new TMDB endpoints) ✅COMPLETE
 - Phase 21: Dynamic Portfolio Data (MongoDB-backed portfolio content via StreamSeek backend, ISR 5min, `/api/v2/portfolio/content` + `/seed` endpoints, nginx resolver fix) ✅COMPLETE
+- Phase 22: Per-title OTT sources (replace the reverse-source index with a per-title `/title/{id}/sources` resolver + 3-month `title_sources` cache + monthly budget guard; accurate badges for every title; removed `watchmodeIndex.ts` + `ott_streams`) ✅COMPLETE
 
 ## Production Deployment
 
@@ -423,12 +424,17 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
 ## OTT Streaming Platforms (Watchmode API)
 
 - **API**: Watchmode REST API v1 (`https://api.watchmode.com/v1/`)
-- **Auth**: `apiKey` query parameter (free tier: 1,000 calls/month)
-- **Title sources**: `/title/{media_type}-{tmdb_id}/sources/?apiKey=...` — returns streaming availability
-- **Source logos**: `/sources/?apiKey=...` — returns provider reference data with `logo_100px` URLs, cached in-memory on server
+- **Auth**: `apiKey` query parameter (budget: 2,500 requests/month)
+- **Title sources**: `/title/{media_type}-{tmdb_id}/sources/?apiKey=...` — one call (no `regions` param) returns availability across ALL plan-enabled regions in a single response
+- **Source logos**: `/sources/?apiKey=...` — provider reference data with `logo_100px` URLs, cached in-memory on server
 - **Logo CDN**: `cdn.watchmode.com` — requires `referrerPolicy="no-referrer"` on `<img>` tags (blocks Next.js Image optimizer)
-- **MongoDB cache**: `ott_streams` collection caches results per title ID; `counters` collection tracks API usage with upsert
-- **Env vars**: `WATCHMODE_API_URL` (base URL, defaults to `https://api.watchmode.com/v1`), `WATCHMODE_API_KEY` (get free key at https://api.watchmode.com/requestApiKey)
+- **Per-title sources cache (`title_sources` collection)** — single source of truth for BOTH the Details "Where to Watch" tab AND the dashboard OTT badges. One doc per `(media_type, tmdb_id)`: `{ tkey, platforms (full, all regions), byRegion (region → badge-relevant source_ids), empty, fetched_at }`. 3-month TTL via a Mongo TTL index on `fetched_at`; `empty:true` negative-caches zero-source / 404 titles so they aren't re-fetched. Resolver: `src/apiExternal/titleSources.ts`; shared TTL + collection-name constants: `titleSourcesConfig.ts` (dependency-free, avoids a `mongo ↔ titleSources` cycle).
+  - `resolveTitleSources(media_type, id)` — Details path (`getOTTPlatforms` endpoint); fresh cache hit or on-demand (user-priority) fetch.
+  - `attachSourceIds(results, region, fallbackMediaType)` — attaches region-filtered `source_ids` (+ `source_ids_us` US fallback for non-US regions) to TMDB list responses via a bulk indexed `$in` lookup; cache misses are lazily background-filled (concurrency 3) so badges appear on the next load. List handlers (`createCachedListHandler`) cache the RAW TMDB payload (5-min in-memory) and enrich on every response, so background-filled badges aren't frozen out by the list cache.
+  - `OTTPlatform` carries `source_id` so one fetch feeds both the badge (`byRegion`) and Details (`platforms`) views.
+- **Monthly budget guard (`src/services/watchmodeBudget.ts`)** — `counters` docs are per-month (`watchmode:YYYY-MM`). `canSpendWatchmode(purpose)`: background badge fills stop at `BADGE_CAP=2000`, user-triggered Details allowed to `MONTHLY_CAP=2400` (100-credit headroom under 2,500). Reads fail closed (treat unreadable budget as exhausted).
+- **Replaced in Phase 22**: the former reverse-source index (`watchmodeIndex.ts` — top-250 of 15 curated sources per region, missed accurately-streamed titles like One Piece) and the untimed `ott_streams` collection (keyed by `{id}` only → movie/tv collision). Both removed; `prewarmIndex` dropped (nothing to pre-build — per-title is lazy). **Post-deploy ops cleanup**: drop the stale `watchmode_source_index` and `ott_streams` collections.
+- **Env vars**: `WATCHMODE_API_URL` (base URL, defaults to `https://api.watchmode.com/v1`), `WATCHMODE_API_KEY` (get key at https://api.watchmode.com/requestApiKey)
 
 ## Privacy Policy
 

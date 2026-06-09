@@ -121,6 +121,12 @@ export interface Result {
   origin_country?: string[]
   /** Watchmode source IDs the title is available on (stream type, region-filtered). Attached server-side via the inverted lookup index. */
   source_ids?: number[]
+  /**
+   * US-availability fallback. Attached ONLY for non-US regions and ONLY when the
+   * title has no `source_ids` in the user's own region — pure data, no decision.
+   * The client decides whether to render it (as a last resort) and tags it "(US)".
+   */
+  source_ids_us?: number[]
 }
 
 /* details_data */
@@ -262,6 +268,8 @@ export interface Videos {
 export type OTTStreamType = 'sub' | 'rent' | 'buy' | 'free' | 'tve'
 
 export interface OTTPlatform {
+  /** Watchmode source ID — needed to derive badge `source_ids` and map local logos. */
+  source_id: number
   name: string
   url: string
   icon: string
@@ -287,6 +295,27 @@ export interface WatchmodeSource {
   type: OTTStreamType
   price?: number
   region?: string
+}
+
+/**
+ * Cached per-title streaming availability — one doc per (media_type, tmdb_id),
+ * serving BOTH the dashboard badge path (`byRegion` → source_ids) and the Details
+ * "Where to Watch" path (`platforms`). A single Watchmode /title/{id}/sources fetch
+ * (no `regions` param) returns every plan-enabled region, so one doc covers all regions.
+ * Cached 3 months (TTL index on `fetched_at`).
+ */
+export interface TitleSourcesDoc {
+  /** Derived unique key `${media_type}-${tmdb_id}` — fast $in lookup + upsert. */
+  tkey: string
+  media_type: string
+  tmdb_id: number
+  /** Full mapped availability, all regions/types. Drives the Details screen. */
+  platforms: OTTPlatform[]
+  /** region (uppercase) → dedup'd badge-relevant source_ids. Drives the OTT badge. */
+  byRegion: Record<string, number[]>
+  /** Negative cache: true when Watchmode returned no sources (or 404). Prevents re-spend. */
+  empty: boolean
+  fetched_at: Date
 }
 
 export interface Crew {
