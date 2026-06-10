@@ -353,6 +353,7 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
 - Phase 20: Netflix-style Dashboard (hero carousel, filter tabs, horizontal scroll rows, Top 10, trending people, lazy genre rows, in-memory TTL cache, 7 new TMDB endpoints) ✅COMPLETE
 - Phase 21: Dynamic Portfolio Data (MongoDB-backed portfolio content via StreamSeek backend, ISR 5min, `/api/v2/portfolio/content` + `/seed` endpoints, nginx resolver fix) ✅COMPLETE
 - Phase 22: Per-title OTT sources (replace the reverse-source index with a per-title `/title/{id}/sources` resolver + 3-month `title_sources` cache + monthly budget guard; accurate badges for every title; removed `watchmodeIndex.ts` + `ott_streams`) ✅COMPLETE
+- Phase 23: Exact release status — append `release_dates` to the movie `getDetails` call (TMDB `append_to_response`, no extra request; `getDetails` backfills docs cached before this) so the app derives region-exact "in theatres vs coming soon vs already digital"; `/getSourceLogos` catalogue endpoint for OTT badge remote-logo fallback ✅COMPLETE
 
 ## Production Deployment
 

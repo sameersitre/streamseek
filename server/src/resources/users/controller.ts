@@ -200,6 +200,14 @@ export const getDetails = async (req: Request, res: Response) => {
 
       await db.collection(collectionSelect).insertOne(responseData)
       res.status(200).json({ result: 'Doc Creation Successful.', ...responseData })
+    } else if (req.body.media_type === 'movie' && !dbSearch.release_dates) {
+      // Doc cached before `release_dates` was appended — backfill it once (one TMDB call)
+      // so the client gets exact release status. TMDB always returns the block (possibly
+      // empty `results`), so this upgrade runs at most once per movie.
+      const details = await axiosFetch(detailsURL(req.body))
+      const release_dates = details.release_dates ?? { results: [] }
+      await db.collection(collectionSelect).updateOne({ id: req.body.id }, { $set: { release_dates } })
+      res.status(200).json({ result: 'Doc Selection Successful.', ...dbSearch, release_dates })
     } else {
       res.status(200).json({ result: 'Doc Selection Successful.', ...dbSearch })
     }

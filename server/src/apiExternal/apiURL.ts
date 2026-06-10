@@ -36,7 +36,12 @@ export const upcomingURL = (params: UpcomingParams) =>
   }&include_video=false&page=${params.page}&primary_release_date.gte=${new Date().toISOString()}`
 
 export const detailsURL = (params: DetailsParams) =>
-  `${process.env.TMDB_URL}/${params.media_type}/${params.id}?language=en-US`
+  // `release_dates` (movies only) gives per-region, per-type theatrical/digital dates so
+  // the client can derive exact "in theatres vs coming soon vs streaming" instead of a
+  // 60-day heuristic. It's a sub-resource appended to the same call — no extra TMDB request.
+  `${process.env.TMDB_URL}/${params.media_type}/${params.id}?language=en-US${
+    params.media_type === 'movie' ? '&append_to_response=release_dates' : ''
+  }`
 
 export const castDetailsURL = (params: CastDetailsParams) =>
   `${process.env.TMDB_URL}/${params.media_type}/${params.id}/credits?language=en-US`
