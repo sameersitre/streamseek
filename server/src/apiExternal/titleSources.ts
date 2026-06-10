@@ -67,9 +67,21 @@ function buildDoc(mediaType: string, tmdbId: number, platforms: OTTPlatform[]): 
   }
 }
 
+/**
+ * Native MongoDB driver collection for the title cache. We use the driver collection
+ * (`connection.db`) rather than the mongoose `connection.collection()` wrapper: the
+ * wrapper's `.find()` does not expose `.toArray()` in the deployed mongoose build
+ * (cursor ops throw "toArray is not a function"), whereas the native cursor always does.
+ * Matches the native-collection pattern already used for index creation in mongo.ts.
+ */
+async function titleCol() {
+  const conn = await connectMongo()
+  return conn.db!.collection(COLLECTION)
+}
+
 async function upsertDoc(doc: TitleSourcesDoc): Promise<void> {
-  const db = await connectMongo()
-  await db.collection(COLLECTION).updateOne({ tkey: doc.tkey }, { $set: doc }, { upsert: true })
+  const col = await titleCol()
+  await col.updateOne({ tkey: doc.tkey }, { $set: doc }, { upsert: true })
 }
 
 /**
@@ -78,10 +90,10 @@ async function upsertDoc(doc: TitleSourcesDoc): Promise<void> {
  * Never calls Watchmode.
  */
 async function findTitleDoc(mediaType: string, tmdbId: number, requireFresh: boolean): Promise<TitleSourcesDoc | null> {
-  const db = await connectMongo()
+  const col = await titleCol()
   const filter: Record<string, unknown> = { tkey: titleKey(mediaType, tmdbId) }
   if (requireFresh) filter.fetched_at = { $gt: new Date(Date.now() - TITLE_SOURCES_TTL_MS) }
-  const doc = await db.collection(COLLECTION).findOne(filter)
+  const doc = await col.findOne(filter)
   return (doc as TitleSourcesDoc | null) ?? null
 }
 
@@ -198,9 +210,8 @@ export async function attachSourceIds<T extends { id: number; media_type?: strin
   const keys = Array.from(new Set(items.map((x) => titleKey(x.mediaType, x.item.id))))
   const cutoff = new Date(Date.now() - TITLE_SOURCES_TTL_MS)
 
-  const db = await connectMongo()
-  const docs = (await db
-    .collection(COLLECTION)
+  const col = await titleCol()
+  const docs = (await col
     .find({ tkey: { $in: keys }, fetched_at: { $gt: cutoff } })
     .toArray()) as unknown as TitleSourcesDoc[]
 
