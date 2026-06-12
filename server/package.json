@@ -30,6 +30,7 @@
   "author": "Sameer Sitre",
   "license": "ISC",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.104.1",
     "@auth/core": "^0.34.3",
     "axios": "^1.6.8",
     "compression": "^1.7.4",

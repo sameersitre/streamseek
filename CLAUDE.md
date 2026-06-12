@@ -280,7 +280,8 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
 | `/api/v2/upcoming` | POST | Upcoming releases |
 | `/api/v2/getDetails` | POST | Single media details |
 | `/api/v2/getVideos` | POST | Trailers/videos |
-| `/api/v2/getCastDetails` | POST | Cast members |
+| `/api/v2/getCastDetails` | POST | Cast members (TV: full-series `aggregate_credits` with `roles[]` + episode counts; movies: `/credits`) |
+| `/api/v2/getCharacterInfo` | POST | Per-title character bio (Wikipedia/Fandom + Claude Haiku, permanently cached; rate limited 10/min) |
 | `/api/v2/getOTTPlatforms` | POST | Streaming platforms (via Watchmode API) |
 | `/api/v2/getSourceLogos` | POST | Watchmode source-id → remote logo URL catalogue (OTT badge fallback) |
 | `/api/v2/getRecommendations` | POST | Related media |
@@ -437,6 +438,26 @@ All calls use native `fetch` POST with 15s timeout. Base URL: `NEXT_PUBLIC_API_U
 - **Monthly budget guard (`src/services/watchmodeBudget.ts`)** — `counters` docs are per-month (`watchmode:YYYY-MM`). `canSpendWatchmode(purpose)`: background badge fills stop at `BADGE_CAP=2000`, user-triggered Details allowed to `MONTHLY_CAP=2400` (100-credit headroom under 2,500). Reads fail closed (treat unreadable budget as exhausted).
 - **Replaced in Phase 22**: the former reverse-source index (`watchmodeIndex.ts` — top-250 of 15 curated sources per region, missed accurately-streamed titles like One Piece) and the untimed `ott_streams` collection (keyed by `{id}` only → movie/tv collision). Both removed; `prewarmIndex` dropped (nothing to pre-build — per-title is lazy). **Post-deploy ops cleanup**: drop the stale `watchmode_source_index` and `ott_streams` collections.
 - **Env vars**: `WATCHMODE_API_URL` (base URL, defaults to `https://api.watchmode.com/v1`), `WATCHMODE_API_KEY` (get key at https://api.watchmode.com/requestApiKey)
+
+## Character-First Cast & Character Bios
+
+### TV cast via `aggregate_credits` (`getCastDetails`)
+- **TV** titles use TMDB `/tv/{id}/aggregate_credits` (full multi-season cast); **movies** keep `/credits`. URL switch in `apiURL.ts` `castDetailsURL`.
+- Aggregate cast members have NO top-level `character` — only `roles[]: {credit_id, character, episode_count}` + `total_episode_count`. `normalizeCredits()` (controller.ts) **synthesizes `character`** by joining role names (`"Serge / Frenchie"`) so the shipped app keeps rendering, caps cast at **top 50** by `order`, and stamps `cast_source: 'aggregate_credits'`.
+- **Lazy backfill** (mirrors the `release_dates` pattern): TV cache hit lacking the `cast_source` marker → one re-fetch + `$set`, stale doc served if TMDB fails. Marker-based so empty-cast titles don't re-fetch forever.
+- Cache lookup tightened to `{id, media_type}` (movie/tv id collision fix; old docs contain `media_type` because `req.body` was always spread in).
+- Raw shapes typed as `TmdbCastMember` / `AggregateRole` in `types.ts` (the legacy `Cast` interface never matched this endpoint).
+
+### Character bios (`getCharacterInfo`)
+- **Flow** (`services/characterBio.ts` `resolveCharacterBio`): permanent Mongo cache → per-character wiki extract → **title-article fallback** → Claude Haiku summary → store. Body: `{id, media_type, character, title_name, actor?}`. `{bio: null}` is a valid success (app hides the section); `reason: 'budget' | 'config'` explains non-content nulls. `media_id` is normalized to `Number` (app posts strings, tests post numbers — one cache slot per character).
+- **Title-article fallback** (`fetchTitleArticleExtract`): most movie characters have NO standalone wiki page — when both per-character probes miss, fetch the title's own Wikipedia article (full plain text via `w/api.php` TextExtracts, 9k-char cap) and let Haiku write the bio from its Plot/Cast sections (`grounding: 'title_article'` threaded into the prompt + telemetry + doc). Mention-guard: the article must contain the character's name (or a name segment) or it's a confirmed miss. This is what makes secondary/new-movie characters (Warden Norton, brand-new 2026 releases) resolve instead of returning null "most of the time".
+- **Wiki fetcher** (`services/wikiCharacter.ts`): Wikipedia REST `page/summary` (3 title variants) and Fandom (slug-guessed subdomain, MediaWiki search + **raw lead-section wikitext** via `prop=revisions&rvsection=0` + `stripWikitext()` — TextExtracts isn't enabled on all Fandom wikis) probed **in parallel**, 3.5s timeouts (Fandom wildcard DNS makes nonexistent wikis HANG, not 404 — the timeout is the exit). **Wikimedia requires an identifying User-Agent** (403 otherwise). Relevance guards: reject disambiguation pages, pages titled exactly like the show (redirect-to-show false positive), Fandom hits without the character name in the title. Returns `found | not_found | unavailable` — only `not_found` (confirmed miss) may be negative-cached; `unavailable` (outage/timeout) is returned uncached.
+- **LLM** (`services/anthropic.ts`): `claude-haiku-4-5`, `max_tokens: 512`, spoiler-light system prompt (setup/role/personality only; extract is untrusted data; replies `INSUFFICIENT` on bad extract → negative-cached). Any `Anthropic.APIError` (429/5xx/**billing 400**) → uncached `{bio: null, reason: 'config'}` — never an error response, never cached. Missing `ANTHROPIC_API_KEY` → same, logged.
+- **Cache** (`character_bios` collection): one doc per `{media_id, media_type, character_norm}` (unique index; `character_norm` = suffix-stripped + NFC + lowercased). Negative docs `{status:'not_found'}` expire after 90d (partial TTL index) so wiki-coverage growth heals them; real bios live forever. Duplicate-key races from concurrent taps are swallowed. "(voice)/(uncredited)/(archive footage)" suffixes stripped; `Self`-type characters short-circuit to `{bio: null}` with zero spend.
+- **Guards**: `characterBioRateLimiter` 10/min/IP (`rateLimiter.ts`); `services/anthropicBudget.ts` — monthly `counters` doc `anthropic:YYYY-MM`, cap `ANTHROPIC_MONTHLY_CAP` (default 3000 ≈ $10/mo at Haiku prices), fail-closed reads, `$inc` per generation. Telemetry: `logger.info` per generation with source, duration, and token usage.
+- **Batch hook (future)**: `batchGenerateForTitle(mediaId, mediaType, titleName, topN)` in `characterBio.ts` loops the same resolver over a title's cached cast — intentionally unrouted until the product switches to batch-per-title; wire behind `requireInternalAuth` or a cron.
+- **Env**: `ANTHROPIC_API_KEY`, `ANTHROPIC_MONTHLY_CAP` (`.env.example`). Dep: `@anthropic-ai/sdk`.
+- **Attribution**: wiki content is CC BY-SA — the API returns an `attribution` string ("Source: Wikipedia · CC BY-SA") that the app must display with the bio.
 
 ## Privacy Policy
 

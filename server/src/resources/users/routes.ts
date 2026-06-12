@@ -4,6 +4,7 @@ import {
   discoverByGenreList,
   filterList,
   getCastDetails,
+  getCharacterInfo,
   getDetails,
   getFeedback,
   getOTTStreams,
@@ -22,6 +23,7 @@ import {
 } from './controller'
 import { syncProfile } from './profileController'
 import { requireInternalAuth } from '../../middlewares/authMiddleware'
+import { characterBioRateLimiter } from '../../middlewares/rateLimiter'
 
 const router = Router()
 
@@ -52,6 +54,9 @@ router.route('/getOTTPlatforms').post(getOTTStreams)
 router.route('/getSourceLogos').post(getOttSourceLogos)
 
 router.route('/getCastDetails').post(getCastDetails)
+
+// Character bio (wiki + LLM, permanently cached) — rate limited: uncached calls cost money
+router.route('/getCharacterInfo').post(characterBioRateLimiter, getCharacterInfo)
 
 router.route('/feedback').post(getFeedback)
 

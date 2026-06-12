@@ -78,6 +78,9 @@ services:
       - GOOGLE_WEB_CLIENT_ID=${GOOGLE_WEB_CLIENT_ID}
       - GOOGLE_CLIENT_ID_IOS=${GOOGLE_CLIENT_ID_IOS}
       - GOOGLE_CLIENT_ID_ANDROID=${GOOGLE_CLIENT_ID_ANDROID}
+      # Character-bio LLM pipeline (wiki + Claude Haiku, /getCharacterInfo)
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - ANTHROPIC_MONTHLY_CAP=${ANTHROPIC_MONTHLY_CAP}
     depends_on:
       mongodb:
         condition: service_healthy

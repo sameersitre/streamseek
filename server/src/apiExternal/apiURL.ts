@@ -44,7 +44,12 @@ export const detailsURL = (params: DetailsParams) =>
   }`
 
 export const castDetailsURL = (params: CastDetailsParams) =>
-  `${process.env.TMDB_URL}/${params.media_type}/${params.id}/credits?language=en-US`
+  // TV uses `aggregate_credits`: full multi-season cast with per-character `roles[]`
+  // (character + episode_count) instead of `/credits`, which only covers the latest
+  // season and omits episode counts. Movies keep plain `/credits`.
+  params.media_type === 'tv'
+    ? `${process.env.TMDB_URL}/tv/${params.id}/aggregate_credits?language=en-US`
+    : `${process.env.TMDB_URL}/${params.media_type}/${params.id}/credits?language=en-US`
 
 export const seasonsURL = (params: SeasonsParams) =>
   `${process.env.TMDB_URL}/tv/${params.id}/season/${params.seasonNumber}?language=en-US`

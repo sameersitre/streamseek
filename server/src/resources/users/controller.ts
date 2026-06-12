@@ -23,6 +23,8 @@ import {
   videosURL,
 } from '../../apiExternal/apiURL'
 import { cacheGet, cacheSet } from '../../services/cache'
+import { CAST_SOURCE_AGGREGATE, normalizeCredits } from '../../services/castCredits'
+import { resolveCharacterBio } from '../../services/characterBio'
 import { connectMongo } from '../../services/mongo'
 import logger from '../../common/logger'
 
@@ -42,6 +44,17 @@ function extractError(e: unknown) {
   return { status, data, message }
 }
 
+/**
+ * Uniform catch-block tail for every handler: log with the full error object
+ * (pino serializes the stack via `err`) and answer with the upstream status when
+ * there is one. `clientMessage` is the stable, user-safe string the app may show.
+ */
+function respondError(res: Response, error: unknown, logMessage: string, clientMessage: string) {
+  const { status, data, message } = extractError(error)
+  logger.error({ err: error, status, data }, logMessage)
+  res.status(status || 500).json({ message: clientMessage, error: data || message })
+}
+
 export const searchList = async (req: Request, res: Response) => {
   try {
     const data = await axiosFetch(searchURL(req.body))
@@ -50,9 +63,7 @@ export const searchList = async (req: Request, res: Response) => {
     await attachSourceIds(data.results, req.body.region)
     res.status(200).json(data)
   } catch (error) {
-    logger.error('Error fetching search data:', error)
-    const { status, data, message } = extractError(error)
-    res.status(status || 500).json({ message: 'Failed to fetch from external API', error: data || message })
+    respondError(res, error, 'Error fetching search data', 'Failed to fetch from external API')
   }
 }
 
@@ -62,9 +73,7 @@ export const filterList = async (req: Request, res: Response) => {
     await attachSourceIds(data.results, req.body.region, req.body.media_type)
     res.status(200).json(data)
   } catch (error) {
-    logger.error('Error fetching filter data:', error)
-    const { status, data, message } = extractError(error)
-    res.status(status || 500).json({ message: 'Failed to fetch from external API', error: data || message })
+    respondError(res, error, 'Error fetching filter data', 'Failed to fetch from external API')
   }
 }
 
@@ -74,9 +83,7 @@ export const upcomingList = async (req: Request, res: Response) => {
     await attachSourceIds(data.results, req.body.region, req.body.media_type)
     res.status(200).json(data)
   } catch (error) {
-    logger.error('Error fetching upcoming data:', error)
-    const { status, data, message } = extractError(error)
-    res.status(status || 500).json({ message: 'Failed to fetch from external API', error: data || message })
+    respondError(res, error, 'Error fetching upcoming data', 'Failed to fetch from external API')
   }
 }
 
@@ -86,9 +93,7 @@ export const getRecommends = async (req: Request, res: Response) => {
     await attachSourceIds(data.results, req.body.region, req.body.media_type)
     res.status(200).json(data)
   } catch (error) {
-    logger.error('Error fetching recommendations data:', error)
-    const { status, data, message } = extractError(error)
-    res.status(status || 500).json({ message: 'Failed to fetch from external API', error: data || message })
+    respondError(res, error, 'Error fetching recommendations data', 'Failed to fetch from external API')
   }
 }
 
@@ -97,16 +102,18 @@ export const getSeasons = async (req: Request, res: Response) => {
     const data = await axiosFetch(seasonsURL(req.body))
     res.status(200).json(data)
   } catch (error) {
-    logger.error('Error fetching seasons data:', error)
-    const { status, data, message } = extractError(error)
-    res.status(status || 500).json({ message: 'Failed to fetch from external API', error: data || message })
+    respondError(res, error, 'Error fetching seasons data', 'Failed to fetch from external API')
   }
 }
 
 export const getVideos = async (req: Request, res: Response) => {
   try {
     const db = await connectMongo()
-    const media = await db.collection('media').findOne({ id: req.body.id })
+    // media_type in the key: a movie and a TV show can share a TMDB id (same
+    // collision class fixed for details_cast). Old docs carry media_type because
+    // req.body is spread into the stored doc; a wrong-type doc is simply ignored
+    // and a correct one created alongside it.
+    const media = await db.collection('media').findOne({ id: req.body.id, media_type: req.body.media_type })
 
     if (!media) {
       const externalData = await axiosFetch(videosURL(req.body))
@@ -117,9 +124,7 @@ export const getVideos = async (req: Request, res: Response) => {
       res.status(200).json({ result: 'Doc Selection Successful.', ...media })
     }
   } catch (error) {
-    logger.error('Error fetching or storing videos data:', error)
-    const { status, data, message } = extractError(error)
-    res.status(status || 500).json({ message: 'Failed to fetch or store data', error: data || message })
+    respondError(res, error, 'Error fetching or storing videos data', 'Failed to fetch or store data')
   }
 }
 
@@ -131,9 +136,7 @@ export const getOTTStreams = async (req: Request, res: Response) => {
     const doc = await resolveTitleSources(media_type, id)
     res.status(200).json({ result: 'OK', id, media_type, platforms: doc?.platforms ?? [] })
   } catch (error) {
-    const { status, data, message } = extractError(error)
-    logger.error({ error: message, status, data }, 'Error fetching or storing OTT streams data')
-    res.status(status || 500).json({ message: 'Failed to fetch or store data', error: data || message })
+    respondError(res, error, 'Error fetching or storing OTT streams data', 'Failed to fetch or store data')
   }
 }
 
@@ -148,30 +151,65 @@ export const getOttSourceLogos = async (_req: Request, res: Response) => {
     const logos = await getSourceLogos()
     res.status(200).json({ logos })
   } catch (error) {
-    const { status, data, message } = extractError(error)
-    logger.error({ error: message, status, data }, 'Error fetching source logos')
-    res.status(status || 500).json({ message: 'Failed to fetch source logos', error: data || message })
+    respondError(res, error, 'Error fetching source logos', 'Failed to fetch source logos')
   }
 }
 
 export const getCastDetails = async (req: Request, res: Response) => {
   try {
     const db = await connectMongo()
-    const dataFromDB = await db.collection('details_cast').findOne({ id: req.body.id })
+    // media_type in the key: a movie and a TV show can share a TMDB id.
+    // Old docs were keyed by id alone but contain media_type (req.body was spread
+    // in), so they still match; a wrong-type collision doc is simply ignored.
+    const dataFromDB = await db.collection('details_cast').findOne({ id: req.body.id, media_type: req.body.media_type })
     if (!dataFromDB) {
       const externalIDs = await axiosFetch(externalIDURL(req.body))
-      const castDetails = await axiosFetch(castDetailsURL(req.body))
+      const castDetails = normalizeCredits(await axiosFetch(castDetailsURL(req.body)), req.body.media_type)
       const newData = { ...req.body, imdb_id: externalIDs.imdb_id, ...castDetails }
 
       await db.collection('details_cast').insertOne(newData)
       res.status(200).json({ result: 'Doc Creation Successful.', ...newData })
+    } else if (req.body.media_type === 'tv' && dataFromDB.cast_source !== CAST_SOURCE_AGGREGATE) {
+      // TV doc cached from the old `/credits` endpoint — upgrade it once to
+      // aggregate_credits (roles[] + episode counts). Marker-based, not shape-sniffed,
+      // so empty-cast titles don't re-fetch forever. Serve the stale doc if TMDB fails.
+      try {
+        const castDetails = normalizeCredits(await axiosFetch(castDetailsURL(req.body)), req.body.media_type)
+        await db.collection('details_cast').updateOne({ _id: dataFromDB._id }, { $set: { ...castDetails } })
+        res.status(200).json({ result: 'Doc Selection Successful.', ...dataFromDB, ...castDetails })
+      } catch (backfillError) {
+        logger.error({ err: backfillError }, 'aggregate_credits backfill failed, serving stale cast doc')
+        res.status(200).json({ result: 'Doc Selection Successful.', ...dataFromDB })
+      }
     } else {
       res.status(200).json({ result: 'Doc Selection Successful.', ...dataFromDB })
     }
   } catch (error) {
-    logger.error('Error fetching or storing cast details data:', error)
-    const { status, data, message } = extractError(error)
-    res.status(status || 500).json({ message: 'Failed to fetch or store data', error: data || message })
+    respondError(res, error, 'Error fetching or storing cast details data', 'Failed to fetch or store data')
+  }
+}
+
+/**
+ * On-demand character bio: permanent Mongo cache → Wikipedia/Fandom extract →
+ * Haiku spoiler-light summary. `{bio: null}` is a valid success response (no
+ * wiki coverage / budget hit / transient failure) — the app hides the section.
+ */
+export const getCharacterInfo = async (req: Request, res: Response) => {
+  try {
+    const { id, media_type, character, title_name, actor } = req.body
+    if (!id || !character || !title_name || (media_type !== 'movie' && media_type !== 'tv')) {
+      return res.status(400).json({ message: 'id, media_type (movie|tv), character and title_name are required' })
+    }
+    const result = await resolveCharacterBio({
+      mediaId: id,
+      mediaType: media_type,
+      character,
+      titleName: title_name,
+      actorName: actor,
+    })
+    res.status(200).json(result)
+  } catch (error) {
+    respondError(res, error, 'Error resolving character bio', 'Failed to resolve character bio')
   }
 }
 
@@ -212,9 +250,7 @@ export const getDetails = async (req: Request, res: Response) => {
       res.status(200).json({ result: 'Doc Selection Successful.', ...dbSearch })
     }
   } catch (error) {
-    logger.error('Error fetching or storing details data:', error)
-    const { status, data, message } = extractError(error)
-    res.status(status || 500).json({ message: 'Failed to fetch or store data', error: data || message })
+    respondError(res, error, 'Error fetching or storing details data', 'Failed to fetch or store data')
   }
 }
 
@@ -279,9 +315,7 @@ function createCachedListHandler<TBody extends { region?: string }>(config: {
       await attachSourceIds(response.results, body.region, fallbackMediaType)
       res.status(200).json(response)
     } catch (error) {
-      logger.error(`Error fetching ${config.name} data:`, error)
-      const { status, data: errData, message } = extractError(error)
-      res.status(status || 500).json({ message: 'Failed to fetch from external API', error: errData || message })
+      respondError(res, error, `Error fetching ${config.name} data`, 'Failed to fetch from external API')
     }
   }
 }
@@ -356,8 +390,9 @@ export const getFeedback = async (req: Request, res: Response) => {
     await db.collection('feedbacks').insertOne(req.body)
     res.status(200).json(req.body)
   } catch (error) {
-    logger.error('Error storing feedback:', error)
+    // Feedback deliberately answers 500 + message-only (no upstream involved).
     const { message } = extractError(error)
+    logger.error({ err: error }, 'Error storing feedback')
     res.status(500).json({ message: 'Failed to store feedback', error: message })
   }
 }

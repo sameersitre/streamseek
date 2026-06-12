@@ -1,13 +1,7 @@
 import { Router } from 'express'
 import { requireAuth } from '../../middlewares/authMiddleware'
 import { toggleRateLimiter } from '../../middlewares/rateLimiter'
-import {
-  getAllInteractions,
-  toggleLike,
-  toggleWatchlist,
-  getWatchlist,
-  getLikes,
-} from './controller'
+import { getAllInteractions, toggleLike, toggleWatchlist, getWatchlist, getLikes } from './controller'
 
 const router: Router = Router()
 

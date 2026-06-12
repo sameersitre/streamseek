@@ -66,6 +66,25 @@ export interface CastDetailsParams {
   media_type: 'movie' | 'tv'
 }
 
+export interface CharacterInfoParams {
+  id: number | string
+  media_type: 'movie' | 'tv'
+  character: string
+  title_name: string
+  actor?: string
+}
+
+/** Response shape of POST /getCharacterInfo (and resolveCharacterBio). */
+export interface CharacterBioResult {
+  bio: string | null
+  source?: 'wikipedia' | 'fandom'
+  source_url?: string
+  attribution?: string
+  thumbnail?: string
+  /** Why bio is null when it wasn't a content miss: monthly cap hit / API key missing. */
+  reason?: 'budget' | 'config'
+}
+
 export interface SeasonsParams {
   id: number | string
   seasonNumber: number
@@ -86,17 +105,6 @@ export interface RecommendationsParams {
   media_type: 'movie' | 'tv'
   page: number
   region?: string
-}
-
-export interface RootObject {
-  status: number
-  message: string
-  page: number
-  results: Result[]
-  total_pages: number
-  total_results: number
-  platforms: OTTPlatform[]
-  cast: Cast[]
 }
 
 export interface Result {
@@ -240,14 +248,37 @@ interface Createdby {
 }
 
 /* CAST */
-export interface Cast {
-  actor: string
-  avatar: string
-  avatar_hq: string
-  actor_id: string
+
+/** One character played by a cast member — from TMDB TV `aggregate_credits`. */
+export interface AggregateRole {
+  credit_id: string
   character: string
-  profile_path: string
-  job?: string
+  episode_count: number
+}
+
+/**
+ * Raw TMDB cast member as actually stored in `details_cast` and consumed by the app
+ * (the legacy `Cast` interface above does not match what this endpoint returns).
+ * Movie `/credits` members carry `character`; TV `aggregate_credits` members carry
+ * `roles[]` + `total_episode_count`, and we synthesize `character` from `roles[]`
+ * server-side so the shipped app keeps rendering.
+ */
+export interface TmdbCastMember {
+  adult: boolean
+  gender: number
+  id: number
+  known_for_department: string
+  name: string
+  original_name: string
+  popularity: number
+  profile_path: string | null
+  character?: string
+  credit_id?: string
+  order: number
+  /** TV aggregate_credits only */
+  roles?: AggregateRole[]
+  /** TV aggregate_credits only */
+  total_episode_count?: number
 }
 
 /* VIDEOS */
