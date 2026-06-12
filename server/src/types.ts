@@ -279,6 +279,8 @@ export interface TmdbCastMember {
   roles?: AggregateRole[]
   /** TV aggregate_credits only */
   total_episode_count?: number
+  /** In-costume character portrait from TVmaze (TV only), attached server-side. */
+  character_image?: string
 }
 
 /* VIDEOS */

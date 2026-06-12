@@ -24,6 +24,7 @@ import {
 } from '../../apiExternal/apiURL'
 import { cacheGet, cacheSet } from '../../services/cache'
 import { CAST_SOURCE_AGGREGATE, normalizeCredits } from '../../services/castCredits'
+import { enrichCastWithTvmazeImages } from '../../services/tvmazeCharacters'
 import { resolveCharacterBio } from '../../services/characterBio'
 import { connectMongo } from '../../services/mongo'
 import logger from '../../common/logger'
@@ -109,15 +110,15 @@ export const getSeasons = async (req: Request, res: Response) => {
 export const getVideos = async (req: Request, res: Response) => {
   try {
     const db = await connectMongo()
-    // media_type in the key: a movie and a TV show can share a TMDB id (same
-    // collision class fixed for details_cast). Old docs carry media_type because
-    // req.body is spread into the stored doc; a wrong-type doc is simply ignored
-    // and a correct one created alongside it.
-    const media = await db.collection('media').findOne({ id: req.body.id, media_type: req.body.media_type })
+    // Canonical numeric id + media_type key — same fix as details_cast: the TMDB
+    // payload's numeric `id` always overwrote req.body's string id in stored docs,
+    // so string lookups never hit and this cache was write-only.
+    const cacheKey = { id: Number(req.body.id), media_type: req.body.media_type }
+    const media = await db.collection('media').findOne(cacheKey)
 
     if (!media) {
       const externalData = await axiosFetch(videosURL(req.body))
-      const newMedia = { ...req.body, ...externalData }
+      const newMedia = { ...req.body, ...externalData, ...cacheKey }
       await db.collection('media').insertOne(newMedia)
       res.status(200).json({ result: 'Doc Creation Successful.', ...newMedia })
     } else {
@@ -155,35 +156,82 @@ export const getOttSourceLogos = async (_req: Request, res: Response) => {
   }
 }
 
+/**
+ * TVmaze image pass on a normalized TV credits payload. Stamps `tvmaze_checked`
+ * only when TVmaze definitively answered, so a transient failure retries on the
+ * next request instead of freezing the doc imageless forever.
+ */
+async function applyTvmazeImages(
+  castDetails: Record<string, unknown>,
+  imdbId: string | undefined,
+): Promise<Record<string, unknown>> {
+  if (!Array.isArray(castDetails.cast)) return castDetails
+  const { cast, checked } = await enrichCastWithTvmazeImages(castDetails.cast, imdbId)
+  return checked ? { ...castDetails, cast, tvmaze_checked: true } : { ...castDetails, cast }
+}
+
 export const getCastDetails = async (req: Request, res: Response) => {
   try {
     const db = await connectMongo()
-    // media_type in the key: a movie and a TV show can share a TMDB id.
-    // Old docs were keyed by id alone but contain media_type (req.body was spread
-    // in), so they still match; a wrong-type collision doc is simply ignored.
-    const dataFromDB = await db.collection('details_cast').findOne({ id: req.body.id, media_type: req.body.media_type })
+    const isTv = req.body.media_type === 'tv'
+    // CANONICAL NUMERIC id. The app posts ids as strings, but stored docs have
+    // always carried TMDB's own numeric `id` (the TMDB payload is spread last and
+    // overwrites req.body.id) — so string lookups never hit and every request
+    // re-fetched TMDB and inserted a duplicate doc. Number() heals the cache
+    // against all existing prod data. media_type in the key: movie/tv can share an id.
+    const mediaId = Number(req.body.id)
+    const cacheKey = { id: mediaId, media_type: req.body.media_type }
+    const dataFromDB = await db.collection('details_cast').findOne(cacheKey)
+
+    // Fresh title: TMDB external ids + credits, then (TV) TVmaze character images.
     if (!dataFromDB) {
       const externalIDs = await axiosFetch(externalIDURL(req.body))
-      const castDetails = normalizeCredits(await axiosFetch(castDetailsURL(req.body)), req.body.media_type)
-      const newData = { ...req.body, imdb_id: externalIDs.imdb_id, ...castDetails }
+      let castDetails = normalizeCredits(await axiosFetch(castDetailsURL(req.body)), req.body.media_type)
+      if (isTv) castDetails = await applyTvmazeImages(castDetails, externalIDs.imdb_id)
+      // cacheKey spread LAST so the TMDB payload can't overwrite the lookup key.
+      const newData = { ...req.body, imdb_id: externalIDs.imdb_id, ...castDetails, ...cacheKey }
 
       await db.collection('details_cast').insertOne(newData)
-      res.status(200).json({ result: 'Doc Creation Successful.', ...newData })
-    } else if (req.body.media_type === 'tv' && dataFromDB.cast_source !== CAST_SOURCE_AGGREGATE) {
-      // TV doc cached from the old `/credits` endpoint — upgrade it once to
-      // aggregate_credits (roles[] + episode counts). Marker-based, not shape-sniffed,
-      // so empty-cast titles don't re-fetch forever. Serve the stale doc if TMDB fails.
+      return res.status(200).json({ result: 'Doc Creation Successful.', ...newData })
+    }
+
+    // TV doc cached from the old `/credits` endpoint — upgrade it once to
+    // aggregate_credits (roles[] + episode counts) + TVmaze images. Marker-based,
+    // not shape-sniffed, so empty-cast titles don't re-fetch forever. Serve the
+    // stale doc if TMDB fails.
+    if (isTv && dataFromDB.cast_source !== CAST_SOURCE_AGGREGATE) {
       try {
-        const castDetails = normalizeCredits(await axiosFetch(castDetailsURL(req.body)), req.body.media_type)
-        await db.collection('details_cast').updateOne({ _id: dataFromDB._id }, { $set: { ...castDetails } })
-        res.status(200).json({ result: 'Doc Selection Successful.', ...dataFromDB, ...castDetails })
+        // Old docs from the credits era can lack imdb_id (the original backfill
+        // didn't store it) — fetch it here, TVmaze needs it as the join key.
+        const imdbId: string | undefined = dataFromDB.imdb_id ?? (await axiosFetch(externalIDURL(req.body))).imdb_id
+        let castDetails = normalizeCredits(await axiosFetch(castDetailsURL(req.body)), 'tv')
+        castDetails = await applyTvmazeImages(castDetails, imdbId)
+        const update = { ...castDetails, imdb_id: imdbId ?? null }
+        await db.collection('details_cast').updateOne({ _id: dataFromDB._id }, { $set: update })
+        return res.status(200).json({ result: 'Doc Selection Successful.', ...dataFromDB, ...update })
       } catch (backfillError) {
         logger.error({ err: backfillError }, 'aggregate_credits backfill failed, serving stale cast doc')
-        res.status(200).json({ result: 'Doc Selection Successful.', ...dataFromDB })
+        return res.status(200).json({ result: 'Doc Selection Successful.', ...dataFromDB })
       }
-    } else {
-      res.status(200).json({ result: 'Doc Selection Successful.', ...dataFromDB })
     }
+
+    // Aggregate doc that predates TVmaze enrichment — image-only upgrade, no TMDB refetch.
+    if (isTv && !dataFromDB.tvmaze_checked) {
+      try {
+        const imdbId: string | undefined = dataFromDB.imdb_id ?? (await axiosFetch(externalIDURL(req.body))).imdb_id
+        const enriched = await applyTvmazeImages({ cast: dataFromDB.cast }, imdbId)
+        if (enriched.tvmaze_checked) {
+          const update = { ...enriched, imdb_id: imdbId ?? null }
+          await db.collection('details_cast').updateOne({ _id: dataFromDB._id }, { $set: update })
+          return res.status(200).json({ result: 'Doc Selection Successful.', ...dataFromDB, ...update })
+        }
+      } catch (imageError) {
+        logger.warn({ err: imageError }, 'TVmaze image backfill failed, serving doc without images')
+      }
+      return res.status(200).json({ result: 'Doc Selection Successful.', ...dataFromDB })
+    }
+
+    res.status(200).json({ result: 'Doc Selection Successful.', ...dataFromDB })
   } catch (error) {
     respondError(res, error, 'Error fetching or storing cast details data', 'Failed to fetch or store data')
   }
@@ -224,16 +272,20 @@ export const getDetails = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'Invalid media_type — must be movie or tv' })
     }
 
-    const dbSearch = await db.collection(collectionSelect).findOne({ id: req.body.id })
+    // Canonical numeric id — same fix as details_cast: the TMDB details payload's
+    // numeric `id` always overwrote req.body's string id in stored docs, so string
+    // lookups never hit and every request re-fetched + inserted a duplicate.
+    const mediaId = Number(req.body.id)
+    const dbSearch = await db.collection(collectionSelect).findOne({ id: mediaId })
     if (!dbSearch) {
       const details = await axiosFetch(detailsURL(req.body))
       const externalID = await axiosFetch(externalIDURL(req.body))
 
       const responseData = {
-        id: req.body.id,
         media_type: req.body.media_type,
         ...details,
         ...externalID,
+        id: mediaId, // after the spreads so nothing overwrites the lookup key
       }
 
       await db.collection(collectionSelect).insertOne(responseData)
@@ -244,7 +296,7 @@ export const getDetails = async (req: Request, res: Response) => {
       // empty `results`), so this upgrade runs at most once per movie.
       const details = await axiosFetch(detailsURL(req.body))
       const release_dates = details.release_dates ?? { results: [] }
-      await db.collection(collectionSelect).updateOne({ id: req.body.id }, { $set: { release_dates } })
+      await db.collection(collectionSelect).updateOne({ id: mediaId }, { $set: { release_dates } })
       res.status(200).json({ result: 'Doc Selection Successful.', ...dbSearch, release_dates })
     } else {
       res.status(200).json({ result: 'Doc Selection Successful.', ...dbSearch })

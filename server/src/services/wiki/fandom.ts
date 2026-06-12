@@ -50,21 +50,24 @@ export async function fetchFromFandom(params: FetchExtractParams): Promise<Chara
 
     // TextExtracts isn't enabled on every Fandom wiki — fetch the raw wikitext of
     // the LEAD section only (rvsection=0, core MediaWiki) and strip markup ourselves.
+    // `pageimages` rides along in the SAME request (zero extra calls) and yields the
+    // page's main image — usually the character's in-costume photo from the infobox.
     const { data: revisionData } = await axios.get(apiBase, {
       timeout: WIKI_TIMEOUT_MS,
       headers: { 'user-agent': WIKI_USER_AGENT },
       params: {
         action: 'query',
-        prop: 'revisions',
+        prop: 'revisions|pageimages',
         rvprop: 'content',
         rvslots: 'main',
         rvsection: 0,
+        piprop: 'original',
         pageids: hit.pageid,
         format: 'json',
       },
     })
-    const wikitext: string | undefined =
-      revisionData?.query?.pages?.[String(hit.pageid)]?.revisions?.[0]?.slots?.main?.['*']
+    const page = revisionData?.query?.pages?.[String(hit.pageid)]
+    const wikitext: string | undefined = page?.revisions?.[0]?.slots?.main?.['*']
     const extract = wikitext ? stripWikitext(wikitext) : ''
     if (!extract.trim()) return { status: 'not_found' }
 
@@ -74,6 +77,7 @@ export async function fetchFromFandom(params: FetchExtractParams): Promise<Chara
       source: 'fandom',
       sourceUrl: `https://${slug}.fandom.com/wiki/${encodeURIComponent(hit.title.replace(/ /g, '_'))}`,
       attribution: `Source: ${titleName} Fandom wiki · CC BY-SA`,
+      thumbnail: page?.original?.source,
     }
   } catch (error) {
     // Nonexistent subdomain (DNS failure) is the expected miss path for shows
