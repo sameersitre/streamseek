@@ -16,7 +16,7 @@ export interface TopRatedParams {
   region?: string
 }
 
-/** Shared by single-page-param endpoints: nowPlaying, airingToday, onTheAir, trendingPeople */
+/** Shared by single-page-param endpoints: nowPlaying, airingToday, onTheAir */
 export interface PageParams {
   page: number
   region?: string
@@ -26,10 +26,11 @@ export interface PageParams {
 export type NowPlayingParams = PageParams
 export type AiringTodayParams = PageParams
 export type OnTheAirParams = PageParams
-export type TrendingPeopleParams = PageParams
 
 export interface DiscoverByGenreParams {
   genre: number
+  /** Genre rows follow the dashboard filter tab (Movies/TV/Documentaries). */
+  media_type: 'movie' | 'tv'
   page: number
   region?: string
 }

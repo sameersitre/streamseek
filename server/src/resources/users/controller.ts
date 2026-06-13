@@ -19,7 +19,6 @@ import {
   searchURL,
   seasonsURL,
   topRatedURL,
-  trendingPeopleURL,
   trendingURL,
   upcomingURL,
   videosURL,
@@ -424,18 +423,18 @@ export const onTheAirList = createCachedListHandler({
   injectMediaType: 'tv',
 })
 
-export const trendingPeopleList = createCachedListHandler({
-  name: 'trendingPeople',
-  urlBuilder: trendingPeopleURL,
-  cacheKeyBuilder: (b) => `trendingPeople:${b.page}`,
-  skipSourceIds: true, // people results never have streaming platform data
-})
-
-export const discoverByGenreList = createCachedListHandler({
+export const discoverByGenreList = createCachedListHandler<{
+  region?: string
+  media_type: 'movie' | 'tv'
+  genre: number
+  page: number
+}>({
   name: 'discoverByGenre',
   urlBuilder: discoverByGenreURL,
-  cacheKeyBuilder: (b) => `discoverByGenre:${regionPart(b)}:${b.genre}:${b.page}`,
-  injectMediaType: 'movie',
+  cacheKeyBuilder: (b) => `discoverByGenre:${regionPart(b)}:${b.media_type}:${b.genre}:${b.page}`,
+  // /discover/{movie,tv} omits per-item media_type — inject the requested one so
+  // source_ids + Details navigation resolve correctly for both movie and tv genre rows.
+  injectMediaType: (b) => b.media_type,
 })
 
 /**

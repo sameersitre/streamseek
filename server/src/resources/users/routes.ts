@@ -19,7 +19,6 @@ import {
   searchList,
   topRatedList,
   trendingList,
-  trendingPeopleList,
   upcomingList,
 } from './controller'
 import { syncProfile } from './profileController'
@@ -67,7 +66,6 @@ router.route('/topRated').post(topRatedList)
 router.route('/nowPlaying').post(nowPlayingList)
 router.route('/airingToday').post(airingTodayList)
 router.route('/onTheAir').post(onTheAirList)
-router.route('/trendingPeople').post(trendingPeopleList)
 router.route('/discoverByGenre').post(discoverByGenreList)
 // Curated "Acclaimed & Notable" hero list (movie+TV blend, distinct from trending/Top 10)
 router.route('/spotlight').post(getSpotlight)

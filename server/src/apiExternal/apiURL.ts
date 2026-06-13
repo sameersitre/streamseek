@@ -14,7 +14,6 @@ import {
   SpotlightParams,
   TopRatedParams,
   TrendingParams,
-  TrendingPeopleParams,
   UpcomingParams,
   VideosParams,
 } from '../types'
@@ -79,11 +78,8 @@ export const airingTodayURL = (params: AiringTodayParams) =>
 export const onTheAirURL = (params: OnTheAirParams) =>
   `${process.env.TMDB_URL}/tv/on_the_air?language=en-US&page=${params.page}${regionParam(params.region)}`
 
-export const trendingPeopleURL = (params: TrendingPeopleParams) =>
-  `${process.env.TMDB_URL}/trending/person/day?page=${params.page}`
-
 export const discoverByGenreURL = (params: DiscoverByGenreParams) =>
-  `${process.env.TMDB_URL}/discover/movie?language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=${params.page}&with_genres=${params.genre}${regionParam(params.region)}`
+  `${process.env.TMDB_URL}/discover/${params.media_type}?language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=${params.page}&with_genres=${params.genre}${regionParam(params.region)}`
 
 /** Tunables for the curated "Acclaimed & Notable" hero list (see getSpotlight). */
 export const SPOTLIGHT_VOTE_AVG_GTE = 6.5
