@@ -52,9 +52,14 @@ function extractError(e: unknown) {
  * there is one. `clientMessage` is the stable, user-safe string the app may show.
  */
 function respondError(res: Response, error: unknown, logMessage: string, clientMessage: string) {
-  const { status, data, message } = extractError(error)
+  const { status, data } = extractError(error)
   logger.error({ err: error, status, data }, logMessage)
-  res.status(status || 500).json({ message: clientMessage, error: data || message })
+  // Surface the UPSTREAM error body only when there genuinely was an upstream HTTP
+  // failure; never leak our own internal exception text (stack/`.map of undefined`
+  // etc.) to clients. Full detail is in the server log above.
+  const body: Record<string, unknown> = { message: clientMessage }
+  if (status && data !== undefined) body.error = data
+  res.status(status || 500).json(body)
 }
 
 export const searchList = async (req: Request, res: Response) => {
@@ -350,7 +355,12 @@ function createCachedListHandler<TBody extends { region?: string }>(config: {
       let data = cacheGet<ListPayload>(cacheKey)
       if (!data) {
         const fetched = (await axiosFetch(config.urlBuilder(body))) as ListPayload
-        if (fallbackMediaType) {
+        // Defensive: a non-list TMDB response (shouldn't happen now media_type is
+        // path-sanitized, but guards against a future builder/endpoint mismatch)
+        // would otherwise crash on .map and 500. Normalize to an empty list.
+        if (!Array.isArray(fetched.results)) {
+          fetched.results = []
+        } else if (fallbackMediaType) {
           fetched.results = (fetched.results as Result[]).map((item) => ({ ...item, media_type: fallbackMediaType }))
         }
         cacheSet(cacheKey, fetched)
