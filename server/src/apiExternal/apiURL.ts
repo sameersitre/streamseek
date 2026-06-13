@@ -173,27 +173,54 @@ export const SPOTLIGHT_MOVIE_VOTES = 300
 export const SPOTLIGHT_TV_VOTES = 100
 export const SPOTLIGHT_WINDOW_DAYS = 180
 export const SPOTLIGHT_MAX = 12
+// Genre-scoped hero (Categories / Documentaries) uses lower vote floors so low-volume
+// genres (e.g. Documentary) still fill the carousel. See curatedDiscoverURL.
+export const SPOTLIGHT_GENRE_MOVIE_VOTES = 150
+export const SPOTLIGHT_GENRE_TV_VOTES = 50
 
 /**
- * Curated discover query for the hero: popular AND well-rated AND released in the
- * recency window — distinct from raw trending. The date FIELD differs by media
- * type (movie: primary_release_date, tv: first_air_date); TV uses a lower
- * vote-count floor since shows accrue fewer votes than films.
+ * Curated discover query for the hero. Two modes:
+ *  - No genre (default + Movies/TV media_scope): popular AND well-rated AND released in
+ *    the recency window — "Acclaimed & Notable", distinct from raw trending.
+ *  - Genre-scoped (Categories / Documentaries): "best in <genre>" — sorted by
+ *    vote_average.desc with a modest vote floor and NO recency window. This (a) fills
+ *    the hero for low-volume genres like Documentary, and (b) keeps the genre hero
+ *    DISTINCT from the genre Top 10 (which sorts by popularity.desc) so the two rails
+ *    never show the same titles.
+ * The date FIELD differs by media type (movie: primary_release_date, tv: first_air_date);
+ * TV uses a lower vote-count floor since shows accrue fewer votes than films.
  */
 export const curatedDiscoverURL = (mediaType: 'movie' | 'tv', params: SpotlightParams) => {
-  const now = new Date()
-  const from = new Date(now.getTime() - SPOTLIGHT_WINDOW_DAYS * 24 * 60 * 60 * 1000)
-  const iso = (d: Date) => d.toISOString().slice(0, 10) // YYYY-MM-DD
   const dateField = mediaType === 'movie' ? 'primary_release_date' : 'first_air_date'
-  const votes = mediaType === 'movie' ? SPOTLIGHT_MOVIE_VOTES : SPOTLIGHT_TV_VOTES
-  // Optional genre scope (Categories filter). safeId guards the path/query.
+  // Optional genre scope (Categories / Documentaries filter). safeId guards the path/query.
   const genre = mediaType === 'movie' ? params.movie_genre : params.tv_genre
-  const genreFilter = genre != null && safeId(genre) > 0 ? `&with_genres=${safeId(genre)}` : ''
+  const hasGenre = genre != null && safeId(genre) > 0
+  const genreFilter = hasGenre ? `&with_genres=${safeId(genre)}` : ''
+
+  const sortBy = hasGenre ? 'vote_average.desc' : 'popularity.desc'
+  const votes = hasGenre
+    ? mediaType === 'movie'
+      ? SPOTLIGHT_GENRE_MOVIE_VOTES
+      : SPOTLIGHT_GENRE_TV_VOTES
+    : mediaType === 'movie'
+      ? SPOTLIGHT_MOVIE_VOTES
+      : SPOTLIGHT_TV_VOTES
+
+  // Recency window only applies to the non-genre "recent & notable" hero; a genre hero
+  // is "best in genre" (all-time), so the date window would needlessly starve it.
+  let dateWindow = ''
+  if (!hasGenre) {
+    const now = new Date()
+    const from = new Date(now.getTime() - SPOTLIGHT_WINDOW_DAYS * 24 * 60 * 60 * 1000)
+    const iso = (d: Date) => d.toISOString().slice(0, 10) // YYYY-MM-DD
+    dateWindow = `&${dateField}.gte=${iso(from)}&${dateField}.lte=${iso(now)}`
+  }
+
   return (
-    `${process.env.TMDB_URL}/discover/${mediaType}?language=en-US&sort_by=popularity.desc` +
+    `${process.env.TMDB_URL}/discover/${mediaType}?language=en-US&sort_by=${sortBy}` +
     `&include_video=false&include_adult=${adultFlag(params.adult)}&page=1` +
     `&vote_average.gte=${SPOTLIGHT_VOTE_AVG_GTE}&vote_count.gte=${votes}` +
-    `&${dateField}.gte=${iso(from)}&${dateField}.lte=${iso(now)}${genreFilter}` +
+    `${dateWindow}${genreFilter}` +
     regionParam(params.region)
   )
 }

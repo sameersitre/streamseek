@@ -472,7 +472,12 @@ export const getSpotlight = async (req: Request, res: Response) => {
     // (movie-only hero, no off-genre TV bleed).
     const movieGenre = req.body.movie_genre != null ? Number(req.body.movie_genre) : undefined
     const tvGenre = req.body.tv_genre != null ? Number(req.body.tv_genre) : undefined
-    const cacheKey = `spotlight:${region}:${adult}:${movieGenre ?? ''}:${tvGenre ?? ''}`
+    // Optional media-type scope (Movies / TV Shows tabs): restrict the blend to one
+    // half WITHOUT a genre. Validated to the literal union (anything else → undefined).
+    const rawScope = req.body.media_scope
+    const mediaScope: 'movie' | 'tv' | undefined =
+      rawScope === 'movie' || rawScope === 'tv' ? rawScope : undefined
+    const cacheKey = `spotlight:${region}:${adult}:${movieGenre ?? ''}:${tvGenre ?? ''}:${mediaScope ?? ''}`
 
     const cached = cacheGet<Record<string, unknown>>(cacheKey)
     if (cached) {
@@ -480,8 +485,14 @@ export const getSpotlight = async (req: Request, res: Response) => {
       return
     }
 
-    const wantMovies = movieGenre !== undefined || (movieGenre === undefined && tvGenre === undefined)
-    const wantTv = tvGenre !== undefined || (movieGenre === undefined && tvGenre === undefined)
+    // media_scope, when present, dictates which halves run; otherwise fall back to the
+    // genre-presence rule (a movie-only genre omits tv_genre → skip the TV half).
+    const wantMovies = mediaScope
+      ? mediaScope === 'movie'
+      : movieGenre !== undefined || (movieGenre === undefined && tvGenre === undefined)
+    const wantTv = mediaScope
+      ? mediaScope === 'tv'
+      : tvGenre !== undefined || (movieGenre === undefined && tvGenre === undefined)
     const [movies, tv] = await Promise.all([
       wantMovies ? axiosFetch(curatedDiscoverURL('movie', { region, adult, movie_genre: movieGenre })) : null,
       wantTv ? axiosFetch(curatedDiscoverURL('tv', { region, adult, tv_genre: tvGenre })) : null,

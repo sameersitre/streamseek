@@ -74,6 +74,11 @@ export interface SpotlightParams {
   /** Optional genre scope (Categories filter) — movie/tv genre ids differ on TMDB. */
   movie_genre?: number
   tv_genre?: number
+  /**
+   * Optional media-type scope (Movies / TV Shows filter tabs): restricts the blend
+   * to one half. Omitted = both halves (the default mixed hero).
+   */
+  media_scope?: 'movie' | 'tv'
 }
 
 export interface DetailsParams {
