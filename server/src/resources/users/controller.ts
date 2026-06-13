@@ -467,7 +467,12 @@ export const getSpotlight = async (req: Request, res: Response) => {
   try {
     const region = (req.body.region || 'US').toUpperCase()
     const adult = !!req.body.adult
-    const cacheKey = `spotlight:${region}:${adult}`
+    // Optional genre scope (Categories filter). TMDB movie/tv genre ids differ, so
+    // the client sends each. A movie-only genre omits tv_genre → tv half is skipped
+    // (movie-only hero, no off-genre TV bleed).
+    const movieGenre = req.body.movie_genre != null ? Number(req.body.movie_genre) : undefined
+    const tvGenre = req.body.tv_genre != null ? Number(req.body.tv_genre) : undefined
+    const cacheKey = `spotlight:${region}:${adult}:${movieGenre ?? ''}:${tvGenre ?? ''}`
 
     const cached = cacheGet<Record<string, unknown>>(cacheKey)
     if (cached) {
@@ -475,12 +480,14 @@ export const getSpotlight = async (req: Request, res: Response) => {
       return
     }
 
+    const wantMovies = movieGenre !== undefined || (movieGenre === undefined && tvGenre === undefined)
+    const wantTv = tvGenre !== undefined || (movieGenre === undefined && tvGenre === undefined)
     const [movies, tv] = await Promise.all([
-      axiosFetch(curatedDiscoverURL('movie', { region, adult })),
-      axiosFetch(curatedDiscoverURL('tv', { region, adult })),
+      wantMovies ? axiosFetch(curatedDiscoverURL('movie', { region, adult, movie_genre: movieGenre })) : null,
+      wantTv ? axiosFetch(curatedDiscoverURL('tv', { region, adult, tv_genre: tvGenre })) : null,
     ])
-    const movieResults: Result[] = (movies.results ?? []).map((r: Result) => ({ ...r, media_type: 'movie' }))
-    const tvResults: Result[] = (tv.results ?? []).map((r: Result) => ({ ...r, media_type: 'tv' }))
+    const movieResults: Result[] = (movies?.results ?? []).map((r: Result) => ({ ...r, media_type: 'movie' }))
+    const tvResults: Result[] = (tv?.results ?? []).map((r: Result) => ({ ...r, media_type: 'tv' }))
 
     // Interleave [m0, t0, m1, t1, …] for a mixed hero, dedupe by media_type-id, cap.
     const merged: Result[] = []

@@ -71,6 +71,9 @@ export interface UpcomingParams {
 export interface SpotlightParams {
   region?: string
   adult?: boolean
+  /** Optional genre scope (Categories filter) — movie/tv genre ids differ on TMDB. */
+  movie_genre?: number
+  tv_genre?: number
 }
 
 export interface DetailsParams {

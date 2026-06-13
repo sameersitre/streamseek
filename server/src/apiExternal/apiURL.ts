@@ -186,11 +186,14 @@ export const curatedDiscoverURL = (mediaType: 'movie' | 'tv', params: SpotlightP
   const iso = (d: Date) => d.toISOString().slice(0, 10) // YYYY-MM-DD
   const dateField = mediaType === 'movie' ? 'primary_release_date' : 'first_air_date'
   const votes = mediaType === 'movie' ? SPOTLIGHT_MOVIE_VOTES : SPOTLIGHT_TV_VOTES
+  // Optional genre scope (Categories filter). safeId guards the path/query.
+  const genre = mediaType === 'movie' ? params.movie_genre : params.tv_genre
+  const genreFilter = genre != null && safeId(genre) > 0 ? `&with_genres=${safeId(genre)}` : ''
   return (
     `${process.env.TMDB_URL}/discover/${mediaType}?language=en-US&sort_by=popularity.desc` +
     `&include_video=false&include_adult=${adultFlag(params.adult)}&page=1` +
     `&vote_average.gte=${SPOTLIGHT_VOTE_AVG_GTE}&vote_count.gte=${votes}` +
-    `&${dateField}.gte=${iso(from)}&${dateField}.lte=${iso(now)}` +
+    `&${dateField}.gte=${iso(from)}&${dateField}.lte=${iso(now)}${genreFilter}` +
     regionParam(params.region)
   )
 }
