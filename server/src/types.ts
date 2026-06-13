@@ -33,6 +33,16 @@ export interface DiscoverByGenreParams {
   media_type: 'movie' | 'tv'
   page: number
   region?: string
+  /** Optional second genre AND'd with the primary (e.g. 99 Documentary + 10402 Music). */
+  genre2?: number
+  /** Optional `with_keywords` (digits, `,` for AND, `|` for OR) — e.g. Sports docs. */
+  with_keywords?: string
+  /** Whitelisted sort (see discoverByGenreURL); defaults to popularity.desc. */
+  sort_by?: string
+  /** vote_count.gte floor — required by rating/recency sorts. */
+  vote_count_gte?: number
+  /** include_adult — driven by the user's mature-content setting. */
+  adult?: boolean
 }
 
 export interface SearchParams {

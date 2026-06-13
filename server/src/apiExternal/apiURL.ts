@@ -78,8 +78,62 @@ export const airingTodayURL = (params: AiringTodayParams) =>
 export const onTheAirURL = (params: OnTheAirParams) =>
   `${process.env.TMDB_URL}/tv/on_the_air?language=en-US&page=${params.page}${regionParam(params.region)}`
 
-export const discoverByGenreURL = (params: DiscoverByGenreParams) =>
-  `${process.env.TMDB_URL}/discover/${params.media_type}?language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=${params.page}&with_genres=${params.genre}${regionParam(params.region)}`
+/** Sorts the discover endpoint may request — whitelisted to block arbitrary passthrough. */
+const ALLOWED_DISCOVER_SORTS = [
+  'popularity.desc',
+  'vote_average.desc',
+  'primary_release_date.desc',
+  'first_air_date.desc',
+  'revenue.desc',
+] as const
+
+/**
+ * Generalized discover URL (drives genre rows AND the varied Documentaries tab).
+ * Everything beyond the primary genre is optional + validated to prevent param
+ * injection (raw values are interpolated into the TMDB query string):
+ *  - genre2     → AND'd with the primary genre (with_genres=99,10402)
+ *  - withKeywords → with_keywords; restricted to digits/`,`(AND)/`|`(OR)
+ *  - sortBy     → whitelisted; date-sorts auto-clamp `.lte` to today and use the
+ *                 media-type-correct date field (primary_release_date vs first_air_date)
+ *  - voteCountGte → vote_count.gte floor (keeps vote-count-0 junk out of rating/date sorts)
+ */
+export const discoverByGenreURL = (params: DiscoverByGenreParams) => {
+  const isTv = params.media_type === 'tv'
+  const dateField = isTv ? 'first_air_date' : 'primary_release_date'
+
+  // with_genres: primary, optionally AND a second genre. Numbers only (coerced).
+  const genres = [Number(params.genre), params.genre2 != null ? Number(params.genre2) : null]
+    .filter((g): g is number => Number.isFinite(g))
+    .join(',')
+
+  // sort_by: whitelist; normalize a release-date sort to this media type's field.
+  let sortBy: string = ALLOWED_DISCOVER_SORTS.includes(params.sort_by as never)
+    ? (params.sort_by as string)
+    : 'popularity.desc'
+  if (sortBy === 'primary_release_date.desc' || sortBy === 'first_air_date.desc') {
+    sortBy = `${dateField}.desc`
+  }
+
+  let url =
+    `${process.env.TMDB_URL}/discover/${params.media_type}?language=en-US` +
+    `&sort_by=${sortBy}&include_adult=${params.adult ?? false}&include_video=false&page=${params.page}` +
+    `&with_genres=${genres}${regionParam(params.region)}`
+
+  // vote_count floor — required by rating/date sorts so obscure vc=0 titles don't lead.
+  if (params.vote_count_gte != null && Number.isFinite(Number(params.vote_count_gte))) {
+    url += `&vote_count.gte=${Number(params.vote_count_gte)}`
+  }
+  // Recency sort: clamp upper bound to today so unreleased / stale-metadata titles are excluded.
+  if (sortBy === `${dateField}.desc`) {
+    url += `&${dateField}.lte=${new Date().toISOString().slice(0, 10)}`
+  }
+  // with_keywords: digits + separators only (`,`=AND, `|`=OR). Reject anything else
+  // (prevents injecting extra query params via a crafted keyword string).
+  if (params.with_keywords && /^[0-9|,]+$/.test(params.with_keywords)) {
+    url += `&with_keywords=${params.with_keywords}`
+  }
+  return url
+}
 
 /** Tunables for the curated "Acclaimed & Notable" hero list (see getSpotlight). */
 export const SPOTLIGHT_VOTE_AVG_GTE = 6.5

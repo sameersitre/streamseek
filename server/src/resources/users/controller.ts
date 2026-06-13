@@ -428,10 +428,20 @@ export const discoverByGenreList = createCachedListHandler<{
   media_type: 'movie' | 'tv'
   genre: number
   page: number
+  genre2?: number
+  with_keywords?: string
+  sort_by?: string
+  vote_count_gte?: number
+  adult?: boolean
 }>({
   name: 'discoverByGenre',
   urlBuilder: discoverByGenreURL,
-  cacheKeyBuilder: (b) => `discoverByGenre:${regionPart(b)}:${b.media_type}:${b.genre}:${b.page}`,
+  // Cache key spans every param that changes the query, so the varied Documentaries
+  // rows (different sort/genre2/keywords) and the mature-content toggle don't collide.
+  cacheKeyBuilder: (b) =>
+    `discoverByGenre:${regionPart(b)}:${b.media_type}:${b.genre}:${b.genre2 ?? ''}:${
+      b.with_keywords ?? ''
+    }:${b.sort_by ?? ''}:${b.vote_count_gte ?? ''}:${b.adult ? 'a' : ''}:${b.page}`,
   // /discover/{movie,tv} omits per-item media_type — inject the requested one so
   // source_ids + Details navigation resolve correctly for both movie and tv genre rows.
   injectMediaType: (b) => b.media_type,
