@@ -11,6 +11,7 @@ import {
   RecommendationsParams,
   SearchParams,
   SeasonsParams,
+  SpotlightParams,
   TopRatedParams,
   TrendingParams,
   TrendingPeopleParams,
@@ -83,3 +84,31 @@ export const trendingPeopleURL = (params: TrendingPeopleParams) =>
 
 export const discoverByGenreURL = (params: DiscoverByGenreParams) =>
   `${process.env.TMDB_URL}/discover/movie?language=en-US&sort_by=popularity.desc&include_adult=false&include_video=false&page=${params.page}&with_genres=${params.genre}${regionParam(params.region)}`
+
+/** Tunables for the curated "Acclaimed & Notable" hero list (see getSpotlight). */
+export const SPOTLIGHT_VOTE_AVG_GTE = 6.5
+export const SPOTLIGHT_MOVIE_VOTES = 300
+export const SPOTLIGHT_TV_VOTES = 100
+export const SPOTLIGHT_WINDOW_DAYS = 180
+export const SPOTLIGHT_MAX = 12
+
+/**
+ * Curated discover query for the hero: popular AND well-rated AND released in the
+ * recency window — distinct from raw trending. The date FIELD differs by media
+ * type (movie: primary_release_date, tv: first_air_date); TV uses a lower
+ * vote-count floor since shows accrue fewer votes than films.
+ */
+export const curatedDiscoverURL = (mediaType: 'movie' | 'tv', params: SpotlightParams) => {
+  const now = new Date()
+  const from = new Date(now.getTime() - SPOTLIGHT_WINDOW_DAYS * 24 * 60 * 60 * 1000)
+  const iso = (d: Date) => d.toISOString().slice(0, 10) // YYYY-MM-DD
+  const dateField = mediaType === 'movie' ? 'primary_release_date' : 'first_air_date'
+  const votes = mediaType === 'movie' ? SPOTLIGHT_MOVIE_VOTES : SPOTLIGHT_TV_VOTES
+  return (
+    `${process.env.TMDB_URL}/discover/${mediaType}?language=en-US&sort_by=popularity.desc` +
+    `&include_video=false&include_adult=${params.adult ?? false}&page=1` +
+    `&vote_average.gte=${SPOTLIGHT_VOTE_AVG_GTE}&vote_count.gte=${votes}` +
+    `&${dateField}.gte=${iso(from)}&${dateField}.lte=${iso(now)}` +
+    regionParam(params.region)
+  )
+}

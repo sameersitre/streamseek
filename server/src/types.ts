@@ -56,6 +56,12 @@ export interface UpcomingParams {
   page: number
 }
 
+/** Curated "Acclaimed & Notable" hero list — well-rated + recent, movie+TV blend. */
+export interface SpotlightParams {
+  region?: string
+  adult?: boolean
+}
+
 export interface DetailsParams {
   id: number | string
   media_type: 'movie' | 'tv'

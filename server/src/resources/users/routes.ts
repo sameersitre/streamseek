@@ -14,6 +14,7 @@ import {
   getVideos,
   nowPlayingList,
   onTheAirList,
+  getSpotlight,
   popularList,
   searchList,
   topRatedList,
@@ -68,6 +69,8 @@ router.route('/airingToday').post(airingTodayList)
 router.route('/onTheAir').post(onTheAirList)
 router.route('/trendingPeople').post(trendingPeopleList)
 router.route('/discoverByGenre').post(discoverByGenreList)
+// Curated "Acclaimed & Notable" hero list (movie+TV blend, distinct from trending/Top 10)
+router.route('/spotlight').post(getSpotlight)
 
 // User profile sync — internal server-to-server only (from Next.js events.signIn)
 router.route('/users/sync-profile').post(requireInternalAuth, syncProfile)

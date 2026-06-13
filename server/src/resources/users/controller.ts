@@ -14,6 +14,8 @@ import {
   onTheAirURL,
   popularURL,
   recommendationsURL,
+  curatedDiscoverURL,
+  SPOTLIGHT_MAX,
   searchURL,
   seasonsURL,
   topRatedURL,
@@ -435,6 +437,57 @@ export const discoverByGenreList = createCachedListHandler({
   cacheKeyBuilder: (b) => `discoverByGenre:${regionPart(b)}:${b.genre}:${b.page}`,
   injectMediaType: 'movie',
 })
+
+/**
+ * Curated "Acclaimed & Notable" hero list — popular AND well-rated AND recent,
+ * blending movie + TV so the hero has its own identity (the dashboard already
+ * shows every prebuilt TMDB list as a row, including trending as "Top 10"). Two
+ * /discover calls, interleaved + deduped + capped, with region source_ids.
+ */
+export const getSpotlight = async (req: Request, res: Response) => {
+  try {
+    const region = (req.body.region || 'US').toUpperCase()
+    const adult = !!req.body.adult
+    const cacheKey = `spotlight:${region}:${adult}`
+
+    const cached = cacheGet<Record<string, unknown>>(cacheKey)
+    if (cached) {
+      res.status(200).json(cached)
+      return
+    }
+
+    const [movies, tv] = await Promise.all([
+      axiosFetch(curatedDiscoverURL('movie', { region, adult })),
+      axiosFetch(curatedDiscoverURL('tv', { region, adult })),
+    ])
+    const movieResults: Result[] = (movies.results ?? []).map((r: Result) => ({ ...r, media_type: 'movie' }))
+    const tvResults: Result[] = (tv.results ?? []).map((r: Result) => ({ ...r, media_type: 'tv' }))
+
+    // Interleave [m0, t0, m1, t1, …] for a mixed hero, dedupe by media_type-id, cap.
+    const merged: Result[] = []
+    const seen = new Set<string>()
+    for (let i = 0; i < Math.max(movieResults.length, tvResults.length); i++) {
+      for (const r of [movieResults[i], tvResults[i]]) {
+        if (!r) continue
+        const key = `${r.media_type}-${r.id}`
+        if (seen.has(key)) continue
+        seen.add(key)
+        merged.push(r)
+        if (merged.length >= SPOTLIGHT_MAX) break
+      }
+      if (merged.length >= SPOTLIGHT_MAX) break
+    }
+
+    // Items carry their own media_type → no fallback (same as the mixed trending/search paths).
+    await attachSourceIds(merged, region)
+
+    const payload = { page: 1, results: merged, total_pages: 1, total_results: merged.length }
+    cacheSet(cacheKey, payload)
+    res.status(200).json(payload)
+  } catch (error) {
+    respondError(res, error, 'Error fetching spotlight data', 'Failed to fetch from external API')
+  }
+}
 
 export const getFeedback = async (req: Request, res: Response) => {
   try {
