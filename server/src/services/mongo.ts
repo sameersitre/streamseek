@@ -7,6 +7,11 @@
 import mongoose from 'mongoose'
 import { DB_URI } from './db'
 import { TITLE_SOURCES_COLLECTION, TITLE_SOURCES_TTL_SECONDS } from '../apiExternal/titleSourcesConfig'
+import {
+  IMDB_RATINGS_COLLECTION,
+  IMDB_RATINGS_NEGATIVE_TTL_SECONDS,
+  TMDB_IMDB_COLLECTION,
+} from '../apiExternal/imdbRatingsConfig'
 import logger from '../common/logger'
 
 let isConnected = false
@@ -62,6 +67,24 @@ const INDEX_DECLS: IndexDecl[] = [
     // Monthly budget counters (`watchmode:YYYY-MM`, `anthropic:YYYY-MM`).
     collection: 'counters',
     indexes: [{ spec: { counterName: 1 }, options: { unique: true } }],
+  },
+  {
+    // IMDb ratings (OMDb), PERMANENT cache — fetched once per title, served forever.
+    // Partial TTL on negative-cache docs only: a title with no IMDb rating today may get
+    // one later, so `empty:true` docs self-heal after 90 days while real ratings stay.
+    collection: IMDB_RATINGS_COLLECTION,
+    indexes: [
+      { spec: { imdb_id: 1 }, options: { unique: true } },
+      {
+        spec: { fetched_at: 1 },
+        options: { expireAfterSeconds: IMDB_RATINGS_NEGATIVE_TTL_SECONDS, partialFilterExpression: { empty: true } },
+      },
+    ],
+  },
+  {
+    // tmdb→imdb id map (TMDB external_ids), permanent — imdb_id is immutable.
+    collection: TMDB_IMDB_COLLECTION,
+    indexes: [{ spec: { tkey: 1 }, options: { unique: true } }],
   },
   {
     // Character bios (wiki + LLM, permanent cache) — one doc per character per title.

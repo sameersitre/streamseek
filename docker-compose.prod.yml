@@ -75,6 +75,9 @@ services:
       - TMDB_API_KEY=${TMDB_API_KEY}
       - WATCHMODE_API_URL=${WATCHMODE_API_URL}
       - WATCHMODE_API_KEY=${WATCHMODE_API_KEY}
+      # IMDb ratings (OMDb) — permanent Mongo cache
+      - OMDB_API_URL=${OMDB_API_URL}
+      - OMDB_API_KEY=${OMDB_API_KEY}
       - AUTH_SECRET=${AUTH_SECRET}
       - CLIENT_URL=http://frontend:3000
       - GOOGLE_WEB_CLIENT_ID=${GOOGLE_WEB_CLIENT_ID}

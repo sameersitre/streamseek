@@ -160,6 +160,26 @@ export interface Result {
    * The client decides whether to render it (as a last resort) and tags it "(US)".
    */
   source_ids_us?: number[]
+  /** TMDB external id, resolved + attached server-side for hero items (lists omit it). */
+  imdb_id?: string
+  /** IMDb rating (0-10) from OMDb, attached server-side. Absent → client shows TMDB rating. */
+  imdb_rating?: number
+  /** IMDb vote count from OMDb. */
+  imdb_votes?: number
+}
+
+/** IMDb rating pair resolved from OMDb (cached permanently in Mongo). */
+export interface ImdbRating {
+  imdb_rating: number
+  imdb_votes: number
+}
+
+/** Raw OMDb `?i={imdbId}` response (only the fields we read). */
+export interface OmdbResponse {
+  Response: 'True' | 'False'
+  imdbRating?: string
+  imdbVotes?: string
+  Error?: string
 }
 
 /* details_data */
@@ -217,6 +237,10 @@ export interface DetailsData {
   vote_average: number
   vote_count: number
   wikidata_id: string
+  /** IMDb rating (0-10) from OMDb, attached server-side on the getDetails response. */
+  imdb_rating?: number
+  /** IMDb vote count from OMDb. */
+  imdb_votes?: number
 }
 
 interface Spokenlanguage {

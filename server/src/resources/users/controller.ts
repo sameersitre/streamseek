@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 import { axiosFetch } from '../../apiExternal/apiCall'
 import { getSourceLogos } from '../../apiExternal/apiExternal'
 import { attachSourceIds, resolveTitleSources } from '../../apiExternal/titleSources'
+import { attachImdbRatings, getImdbRating } from '../../apiExternal/imdbRatings'
 import type { Result } from '../../types'
 import {
   airingTodayURL,
@@ -283,6 +284,11 @@ export const getDetails = async (req: Request, res: Response) => {
     // lookups never hit and every request re-fetched + inserted a duplicate.
     const mediaId = Number(req.body.id)
     const dbSearch = await db.collection(collectionSelect).findOne({ id: mediaId })
+
+    // Build the response payload in each branch; the IMDb rating is attached to the
+    // RESPONSE only (below), never baked into the permanent details doc — its own
+    // `imdb_ratings` cache owns the rating's lifecycle.
+    let payload: { imdb_id?: string; imdb_rating?: number; imdb_votes?: number; [k: string]: unknown }
     if (!dbSearch) {
       const details = await axiosFetch(detailsURL(req.body))
       const externalID = await axiosFetch(externalIDURL(req.body))
@@ -295,7 +301,7 @@ export const getDetails = async (req: Request, res: Response) => {
       }
 
       await db.collection(collectionSelect).insertOne(responseData)
-      res.status(200).json({ result: 'Doc Creation Successful.', ...responseData })
+      payload = { result: 'Doc Creation Successful.', ...responseData }
     } else if (req.body.media_type === 'movie' && !dbSearch.release_dates) {
       // Doc cached before `release_dates` was appended — backfill it once (one TMDB call)
       // so the client gets exact release status. TMDB always returns the block (possibly
@@ -303,10 +309,20 @@ export const getDetails = async (req: Request, res: Response) => {
       const details = await axiosFetch(detailsURL(req.body))
       const release_dates = details.release_dates ?? { results: [] }
       await db.collection(collectionSelect).updateOne({ id: mediaId }, { $set: { release_dates } })
-      res.status(200).json({ result: 'Doc Selection Successful.', ...dbSearch, release_dates })
+      payload = { result: 'Doc Selection Successful.', ...dbSearch, release_dates }
     } else {
-      res.status(200).json({ result: 'Doc Selection Successful.', ...dbSearch })
+      payload = { result: 'Doc Selection Successful.', ...dbSearch }
     }
+
+    // Attach the IMDb rating (permanent OMDb cache) for display alongside TMDB's vote_average.
+    if (typeof payload.imdb_id === 'string' && payload.imdb_id) {
+      const rating = await getImdbRating(payload.imdb_id)
+      if (rating) {
+        payload.imdb_rating = rating.imdb_rating
+        payload.imdb_votes = rating.imdb_votes
+      }
+    }
+    res.status(200).json(payload)
   } catch (error) {
     respondError(res, error, 'Error fetching or storing details data', 'Failed to fetch or store data')
   }
@@ -517,6 +533,10 @@ export const getSpotlight = async (req: Request, res: Response) => {
 
     // Items carry their own media_type → no fallback (same as the mixed trending/search paths).
     await attachSourceIds(merged, region)
+    // TMDB list results lack imdb_id; resolve it + the IMDb rating for the hero (≤8 items,
+    // permanently cached so only the first time per title hits TMDB/OMDb). Baked into the
+    // 5-min spotlight cache below, so cache hits serve ratings instantly.
+    await attachImdbRatings(merged)
 
     const payload = { page: 1, results: merged, total_pages: 1, total_results: merged.length }
     cacheSet(cacheKey, payload)
