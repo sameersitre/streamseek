@@ -14,6 +14,7 @@
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "build": "tsc -p .",
+    "sources:snapshot": "ts-node scripts/fetch-source-logos.ts",
     "prebuild": "rimraf dist && mkdir -p dist && cp .env dist/.env",
     "watch": "tsc -p . --watch",
     "prettier:fix": "prettier --write src/**/*.ts",
