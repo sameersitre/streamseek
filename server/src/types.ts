@@ -16,7 +16,7 @@ export interface TopRatedParams {
   region?: string
 }
 
-/** Shared by single-page-param endpoints: nowPlaying, airingToday, onTheAir, trendingPeople */
+/** Shared by single-page-param endpoints: nowPlaying, airingToday, onTheAir */
 export interface PageParams {
   page: number
   region?: string
@@ -26,12 +26,23 @@ export interface PageParams {
 export type NowPlayingParams = PageParams
 export type AiringTodayParams = PageParams
 export type OnTheAirParams = PageParams
-export type TrendingPeopleParams = PageParams
 
 export interface DiscoverByGenreParams {
   genre: number
+  /** Genre rows follow the dashboard filter tab (Movies/TV/Documentaries). */
+  media_type: 'movie' | 'tv'
   page: number
   region?: string
+  /** Optional second genre AND'd with the primary (e.g. 99 Documentary + 10402 Music). */
+  genre2?: number
+  /** Optional `with_keywords` (digits, `,` for AND, `|` for OR) — e.g. Sports docs. */
+  with_keywords?: string
+  /** Whitelisted sort (see discoverByGenreURL); defaults to popularity.desc. */
+  sort_by?: string
+  /** vote_count.gte floor — required by rating/recency sorts. */
+  vote_count_gte?: number
+  /** include_adult — driven by the user's mature-content setting. */
+  adult?: boolean
 }
 
 export interface SearchParams {
@@ -56,6 +67,20 @@ export interface UpcomingParams {
   page: number
 }
 
+/** Curated "Acclaimed & Notable" hero list — well-rated + recent, movie+TV blend. */
+export interface SpotlightParams {
+  region?: string
+  adult?: boolean
+  /** Optional genre scope (Categories filter) — movie/tv genre ids differ on TMDB. */
+  movie_genre?: number
+  tv_genre?: number
+  /**
+   * Optional media-type scope (Movies / TV Shows filter tabs): restricts the blend
+   * to one half. Omitted = both halves (the default mixed hero).
+   */
+  media_scope?: 'movie' | 'tv'
+}
+
 export interface DetailsParams {
   id: number | string
   media_type: 'movie' | 'tv'
@@ -64,6 +89,25 @@ export interface DetailsParams {
 export interface CastDetailsParams {
   id: number | string
   media_type: 'movie' | 'tv'
+}
+
+export interface CharacterInfoParams {
+  id: number | string
+  media_type: 'movie' | 'tv'
+  character: string
+  title_name: string
+  actor?: string
+}
+
+/** Response shape of POST /getCharacterInfo (and resolveCharacterBio). */
+export interface CharacterBioResult {
+  bio: string | null
+  source?: 'wikipedia' | 'fandom'
+  source_url?: string
+  attribution?: string
+  thumbnail?: string
+  /** Why bio is null when it wasn't a content miss: monthly cap hit / API key missing. */
+  reason?: 'budget' | 'config'
 }
 
 export interface SeasonsParams {
@@ -88,17 +132,6 @@ export interface RecommendationsParams {
   region?: string
 }
 
-export interface RootObject {
-  status: number
-  message: string
-  page: number
-  results: Result[]
-  total_pages: number
-  total_results: number
-  platforms: OTTPlatform[]
-  cast: Cast[]
-}
-
 export interface Result {
   adult: boolean
   backdrop_path: string
@@ -121,6 +154,32 @@ export interface Result {
   origin_country?: string[]
   /** Watchmode source IDs the title is available on (stream type, region-filtered). Attached server-side via the inverted lookup index. */
   source_ids?: number[]
+  /**
+   * US-availability fallback. Attached ONLY for non-US regions and ONLY when the
+   * title has no `source_ids` in the user's own region — pure data, no decision.
+   * The client decides whether to render it (as a last resort) and tags it "(US)".
+   */
+  source_ids_us?: number[]
+  /** TMDB external id, resolved + attached server-side for hero items (lists omit it). */
+  imdb_id?: string
+  /** IMDb rating (0-10) from OMDb, attached server-side. Absent → client shows TMDB rating. */
+  imdb_rating?: number
+  /** IMDb vote count from OMDb. */
+  imdb_votes?: number
+}
+
+/** IMDb rating pair resolved from OMDb (cached permanently in Mongo). */
+export interface ImdbRating {
+  imdb_rating: number
+  imdb_votes: number
+}
+
+/** Raw OMDb `?i={imdbId}` response (only the fields we read). */
+export interface OmdbResponse {
+  Response: 'True' | 'False'
+  imdbRating?: string
+  imdbVotes?: string
+  Error?: string
 }
 
 /* details_data */
@@ -178,6 +237,10 @@ export interface DetailsData {
   vote_average: number
   vote_count: number
   wikidata_id: string
+  /** IMDb rating (0-10) from OMDb, attached server-side on the getDetails response. */
+  imdb_rating?: number
+  /** IMDb vote count from OMDb. */
+  imdb_votes?: number
 }
 
 interface Spokenlanguage {
@@ -234,14 +297,39 @@ interface Createdby {
 }
 
 /* CAST */
-export interface Cast {
-  actor: string
-  avatar: string
-  avatar_hq: string
-  actor_id: string
+
+/** One character played by a cast member — from TMDB TV `aggregate_credits`. */
+export interface AggregateRole {
+  credit_id: string
   character: string
-  profile_path: string
-  job?: string
+  episode_count: number
+}
+
+/**
+ * Raw TMDB cast member as actually stored in `details_cast` and consumed by the app
+ * (the legacy `Cast` interface above does not match what this endpoint returns).
+ * Movie `/credits` members carry `character`; TV `aggregate_credits` members carry
+ * `roles[]` + `total_episode_count`, and we synthesize `character` from `roles[]`
+ * server-side so the shipped app keeps rendering.
+ */
+export interface TmdbCastMember {
+  adult: boolean
+  gender: number
+  id: number
+  known_for_department: string
+  name: string
+  original_name: string
+  popularity: number
+  profile_path: string | null
+  character?: string
+  credit_id?: string
+  order: number
+  /** TV aggregate_credits only */
+  roles?: AggregateRole[]
+  /** TV aggregate_credits only */
+  total_episode_count?: number
+  /** In-costume character portrait from TVmaze (TV only), attached server-side. */
+  character_image?: string
 }
 
 /* VIDEOS */
@@ -262,6 +350,8 @@ export interface Videos {
 export type OTTStreamType = 'sub' | 'rent' | 'buy' | 'free' | 'tve'
 
 export interface OTTPlatform {
+  /** Watchmode source ID — needed to derive badge `source_ids` and map local logos. */
+  source_id: number
   name: string
   url: string
   icon: string
@@ -287,6 +377,27 @@ export interface WatchmodeSource {
   type: OTTStreamType
   price?: number
   region?: string
+}
+
+/**
+ * Cached per-title streaming availability — one doc per (media_type, tmdb_id),
+ * serving BOTH the dashboard badge path (`byRegion` → source_ids) and the Details
+ * "Where to Watch" path (`platforms`). A single Watchmode /title/{id}/sources fetch
+ * (no `regions` param) returns every plan-enabled region, so one doc covers all regions.
+ * Cached 3 months (TTL index on `fetched_at`).
+ */
+export interface TitleSourcesDoc {
+  /** Derived unique key `${media_type}-${tmdb_id}` — fast $in lookup + upsert. */
+  tkey: string
+  media_type: string
+  tmdb_id: number
+  /** Full mapped availability, all regions/types. Drives the Details screen. */
+  platforms: OTTPlatform[]
+  /** region (uppercase) → dedup'd badge-relevant source_ids. Drives the OTT badge. */
+  byRegion: Record<string, number[]>
+  /** Negative cache: true when Watchmode returned no sources (or 404). Prevents re-spend. */
+  empty: boolean
+  fetched_at: Date
 }
 
 export interface Crew {

@@ -1,22 +1,20 @@
+/** MongoDB connection URI + connection-lifecycle logging (connection itself is lazy — see mongo.ts). */
 import mongoose from 'mongoose'
 import logger from '../common/logger'
 
 // to use env variables
 import '../common/env'
 
-// MongoDB connection URI
-export const DB_URI = process.env.MONGO_URI ||
+export const DB_URI =
+  process.env.MONGO_URI ||
   `mongodb+srv://${process.env.USERNAME}:${process.env.PASSWORD}@${process.env.CLUSTER_URL}/?authSource=${process.env.AUTH_SOURCE}&authMechanism=${process.env.AUTH_MECHANISM}`
-logger.info(`DB_URI: ${DB_URI}`)
 
-// Get current connected Database (connection established lazily via connectMongo)
+// Never log the full URI — it embeds credentials in production (mongodb+srv://user:pass@…).
+const redactedUri = DB_URI.replace(/\/\/[^@/]+@/, '//<redacted>@')
+logger.info(`DB_URI: ${redactedUri}`)
+
+// Connection-lifecycle notifications (connection established lazily via connectMongo)
 const db = mongoose.connection
-
-// Notify on error or success
-db.on('error', (err) => logger.error(`Connection with db error; DB URI: \n ${DB_URI}`, err))
-db.on('close', () => logger.info(`Connection closed to db; DB URI: \n ${DB_URI}`))
-db.once('open', () => logger.info(`Connected to the database instance on \n ${DB_URI}`))
-
-export default {
-  Connection: db,
-}
+db.on('error', (err) => logger.error({ err }, `MongoDB connection error (${redactedUri})`))
+db.on('close', () => logger.info(`MongoDB connection closed (${redactedUri})`))
+db.once('open', () => logger.info(`MongoDB connection open (${redactedUri})`))

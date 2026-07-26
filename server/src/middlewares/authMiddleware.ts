@@ -2,8 +2,10 @@ import { Request, Response, NextFunction } from 'express'
 import { decode } from '@auth/core/jwt'
 import logger from '../common/logger'
 
-// Extend Express Request with userId
+// Extend Express Request with userId — global namespace augmentation is the
+// canonical way to extend Express types; the no-namespace rule doesn't apply.
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
       userId?: string
@@ -35,14 +37,12 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
   if (authHeader?.startsWith('Bearer ')) {
     const idToken = authHeader.slice(7)
     try {
-      const googleRes = await fetch(
-        `https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`
-      )
+      const googleRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`)
       if (!googleRes.ok) {
         res.status(401).json({ error: 'Invalid Google token' })
         return
       }
-      const payload = await googleRes.json() as { sub?: string; aud?: string }
+      const payload = (await googleRes.json()) as { sub?: string; aud?: string }
 
       const validAudiences = [
         process.env.GOOGLE_WEB_CLIENT_ID,
@@ -67,10 +67,7 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
 
   try {
     // Auth.js v5 cookie names differ by environment
-    const cookieName =
-      process.env.NODE_ENV === 'production'
-        ? '__Secure-authjs.session-token'
-        : 'authjs.session-token'
+    const cookieName = process.env.NODE_ENV === 'production' ? '__Secure-authjs.session-token' : 'authjs.session-token'
 
     const token = req.cookies?.[cookieName]
 
@@ -92,7 +89,7 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
     }
 
     // Extract userId from token (Auth.js stores it as uid or sub)
-    const userId = (decoded as Record<string, unknown>).uid as string || decoded.sub
+    const userId = ((decoded as Record<string, unknown>).uid as string) || decoded.sub
     if (!userId) {
       res.status(401).json({ error: 'Invalid session: no user ID' })
       return

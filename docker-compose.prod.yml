@@ -75,11 +75,17 @@ services:
       - TMDB_API_KEY=${TMDB_API_KEY}
       - WATCHMODE_API_URL=${WATCHMODE_API_URL}
       - WATCHMODE_API_KEY=${WATCHMODE_API_KEY}
+      # IMDb ratings (OMDb) — permanent Mongo cache
+      - OMDB_API_URL=${OMDB_API_URL}
+      - OMDB_API_KEY=${OMDB_API_KEY}
       - AUTH_SECRET=${AUTH_SECRET}
       - CLIENT_URL=http://frontend:3000
       - GOOGLE_WEB_CLIENT_ID=${GOOGLE_WEB_CLIENT_ID}
       - GOOGLE_CLIENT_ID_IOS=${GOOGLE_CLIENT_ID_IOS}
       - GOOGLE_CLIENT_ID_ANDROID=${GOOGLE_CLIENT_ID_ANDROID}
+      # Character-bio LLM pipeline (wiki + Claude Haiku, /getCharacterInfo)
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - ANTHROPIC_MONTHLY_CAP=${ANTHROPIC_MONTHLY_CAP}
     depends_on:
       mongodb:
         condition: service_healthy

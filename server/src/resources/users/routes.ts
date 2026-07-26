@@ -4,23 +4,26 @@ import {
   discoverByGenreList,
   filterList,
   getCastDetails,
+  getCharacterInfo,
   getDetails,
   getFeedback,
   getOTTStreams,
+  getOttSourceLogos,
   getRecommends,
   getSeasons,
   getVideos,
   nowPlayingList,
   onTheAirList,
+  getSpotlight,
   popularList,
   searchList,
   topRatedList,
   trendingList,
-  trendingPeopleList,
   upcomingList,
 } from './controller'
 import { syncProfile } from './profileController'
 import { requireInternalAuth } from '../../middlewares/authMiddleware'
+import { characterBioRateLimiter } from '../../middlewares/rateLimiter'
 
 const router = Router()
 
@@ -48,7 +51,12 @@ router.route('/getSeasons').post(getSeasons)
 
 router.route('/getOTTPlatforms').post(getOTTStreams)
 
+router.route('/getSourceLogos').post(getOttSourceLogos)
+
 router.route('/getCastDetails').post(getCastDetails)
+
+// Character bio (wiki + LLM, permanently cached) — rate limited: uncached calls cost money
+router.route('/getCharacterInfo').post(characterBioRateLimiter, getCharacterInfo)
 
 router.route('/feedback').post(getFeedback)
 
@@ -58,8 +66,9 @@ router.route('/topRated').post(topRatedList)
 router.route('/nowPlaying').post(nowPlayingList)
 router.route('/airingToday').post(airingTodayList)
 router.route('/onTheAir').post(onTheAirList)
-router.route('/trendingPeople').post(trendingPeopleList)
 router.route('/discoverByGenre').post(discoverByGenreList)
+// Curated "Acclaimed & Notable" hero list (movie+TV blend, distinct from trending/Top 10)
+router.route('/spotlight').post(getSpotlight)
 
 // User profile sync — internal server-to-server only (from Next.js events.signIn)
 router.route('/users/sync-profile').post(requireInternalAuth, syncProfile)

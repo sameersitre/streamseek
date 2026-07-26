@@ -14,6 +14,7 @@
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "build": "tsc -p .",
+    "sources:snapshot": "ts-node scripts/fetch-source-logos.ts",
     "prebuild": "rimraf dist && mkdir -p dist && cp .env dist/.env",
     "watch": "tsc -p . --watch",
     "prettier:fix": "prettier --write src/**/*.ts",
@@ -30,6 +31,7 @@
   "author": "Sameer Sitre",
   "license": "ISC",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.104.1",
     "@auth/core": "^0.34.3",
     "axios": "^1.6.8",
     "compression": "^1.7.4",

@@ -13,10 +13,12 @@ const app: Application = express()
 
 // middleware
 app.disable('x-powered-by')
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
-  credentials: true,
-}))
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || 'http://localhost:3000',
+    credentials: true,
+  }),
+)
 app.use(helmet())
 app.use(compression())
 app.use(

@@ -1,6 +1,6 @@
 {
   "name": "streamseek",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -28,6 +28,7 @@
     "zustand": "^5.0.11"
   },
   "devDependencies": {
+    "@flotrace/runtime": "^2.4.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
